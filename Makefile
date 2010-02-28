@@ -51,7 +51,7 @@ PACKAGE = vdr-$(ARCHIVE)
 
 ### Includes and Defines (add further entries here):
 
-INCLUDES += -I$(VDRDIR)/include -I$(INSTALLPREFIX)/include
+INCLUDES += -I./graphlcd-base/-I$(VDRDIR)/include -I$(INSTALLPREFIX)/include
 
 DEFINES += -D_GNU_SOURCE -DPLUGIN_NAME_I18N='"$(PLUGIN)"'
 
