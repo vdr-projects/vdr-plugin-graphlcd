@@ -31,15 +31,15 @@
 cGraphLCDMenuSetup::cGraphLCDMenuSetup()
 {
     static const char * showDateTimeValues[3];
-    showDateTimeValues[0] = tr("no");
-    showDateTimeValues[1] = tr("yes");
+    showDateTimeValues[0] = trVDR("no");
+    showDateTimeValues[1] = trVDR("yes");
     showDateTimeValues[2] = tr("not in menu");
     static const char * showSymbolsValues[3];
-    showSymbolsValues[0] = tr("no");
-    showSymbolsValues[1] = tr("yes");
+    showSymbolsValues[0] = trVDR("no");
+    showSymbolsValues[1] = trVDR("yes");
     showSymbolsValues[2] = tr("compressed");
     static const char * showLogoValues[4];
-    showLogoValues[0] = tr("no");
+    showLogoValues[0] = trVDR("no");
     showLogoValues[1] = tr("auto");
     showLogoValues[2] = tr("medium");
     showLogoValues[3] = tr("large");

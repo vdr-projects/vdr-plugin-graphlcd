@@ -17,7 +17,6 @@
 
 #include "display.h"
 #include "global.h"
-#include "i18n.h"
 #include "menu.h"
 
 #include <vdr/plugin.h>
@@ -61,6 +60,7 @@ cPluginGraphLCD::cPluginGraphLCD()
     mDisplayName("")
 {
     mLcd = NULL;
+    mDisplay = NULL;
 }
 
 cPluginGraphLCD::~cPluginGraphLCD()
@@ -112,8 +112,6 @@ bool cPluginGraphLCD::Initialize()
 {
     unsigned int displayNumber = 0;
     const char * cfgDir;
-
-    RegisterI18n(Phrases);
 
     if (mConfigName.length() == 0)
     {

@@ -65,7 +65,11 @@ bool cFontElement::Load(const std::string & url)
             file += "/fonts/";
             file += url.substr(4, pos - 4);
         }
+#if APIVERSNUM >= 10503
+		return font.LoadFT2(file, cCharSetConv::SystemCharacterTable(), size);
+#else
         return font.LoadFT2(file, I18nCharSets()[Setup.OSDLanguage], size);
+#endif
     }
     else
     {

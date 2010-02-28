@@ -22,7 +22,6 @@
 
 #include "display.h"
 #include "global.h"
-#include "i18n.h"
 #include "setup.h"
 #include "state.h"
 #include "strfct.h"
@@ -723,7 +722,7 @@ void cGraphLCDDisplay::Update()
 void cGraphLCDDisplay::DisplayTime()
 {
     static char buffer[32];
-    static char month[5];
+    static char month[16];
     int FrameWidth, TextLen, yPos;
     struct tm tm_r;
 
@@ -758,8 +757,9 @@ void cGraphLCDDisplay::DisplayTime()
             time(&CurrTime);
         tm * tm = localtime_r(&CurrTime, &tm_r);
 
-        strncpy(month, (char *)(tr("JanFebMarAprMayJunJulAugSepOctNovDec") + 3 * tm->tm_mon), 3);
-        month[3] = 0;
+        const char *amonth = tr("JanFebMarAprMayJunJulAugSepOctNovDec");
+        amonth += Utf8SymChars(amonth, tm->tm_mon * 3);
+        strn0cpy(month, amonth, min(Utf8SymChars(amonth, 3) + 1, int(sizeof(month))));
         snprintf(buffer, sizeof(buffer), "%s %2d.%s  %d:%02d", (const char *) WeekDayName(tm->tm_wday), tm->tm_mday, month, tm->tm_hour, tm->tm_min);
         TextLen = normalFont->Width(buffer);
 
