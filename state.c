@@ -40,7 +40,11 @@ cGraphLCDState::cGraphLCDState(cGraphLCDDisplay * Display)
     replay.control = NULL;
     replay.mode = eReplayNormal;
     replay.current = 0;
+#if VDRVERSNUM >= 10701
+    replay.currentLast = DEFAULTFRAMESPERSECOND;
+#else
     replay.currentLast = FRAMESPERSEC;
+#endif
     replay.total = 0;
     replay.totalLast = 1;
 
@@ -303,7 +307,11 @@ void cGraphLCDState::Replaying(const cControl * Control, const char * Name, cons
                     replay.name = Name;
                 }
             }
+#if VDRVERSNUM >= 10701
+            replay.currentLast = DEFAULTFRAMESPERSECOND;
+#else
             replay.currentLast = FRAMESPERSEC;
+#endif
             replay.totalLast = 1;
             mutex.Unlock();
         }

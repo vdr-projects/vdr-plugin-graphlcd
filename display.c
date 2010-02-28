@@ -382,10 +382,17 @@ void cGraphLCDDisplay::Action(void)
                         if (CurrTime != LastTime || update)
                         {
                             // but only, if something has changed
+#if VDRVERSNUM >= 10701
+                            if (replay.total / DEFAULTFRAMESPERSECOND != replay.totalLast / DEFAULTFRAMESPERSECOND ||
+                                replay.current / DEFAULTFRAMESPERSECOND != replay.currentLast / DEFAULTFRAMESPERSECOND ||
+                                CurrTime/60 != LastTime/60 ||
+                                update)
+#else
                             if (replay.total / FRAMESPERSEC != replay.totalLast / FRAMESPERSEC ||
                                 replay.current / FRAMESPERSEC != replay.currentLast / FRAMESPERSEC ||
                                 CurrTime/60 != LastTime/60 ||
                                 update)
+#endif
                             {
                                 timerclear(&UpdateAt);
                                 update = false;
@@ -1330,14 +1337,22 @@ void cGraphLCDDisplay::DisplayProgramme()
 
 bool cGraphLCDDisplay::IndexIsGreaterAsOneHour(int Index) const
 {
+#if VDRVERSNUM >= 10701
+    int h = (Index / DEFAULTFRAMESPERSECOND) / 3600;
+#else
     int h = (Index / FRAMESPERSEC) / 3600;
+#endif
     return h > 0;
 }
 
 const char * cGraphLCDDisplay::IndexToMS(int Index) const
 {
     static char buffer[16];
+#if VDRVERSNUM >= 10701
+    int s = (Index / DEFAULTFRAMESPERSECOND);
+#else
     int s = (Index / FRAMESPERSEC);
+#endif
     int m = s / 60;
     s %= 60;
     snprintf(buffer, sizeof(buffer), "%02d:%02d", m, s);
