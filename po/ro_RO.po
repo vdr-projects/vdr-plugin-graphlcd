@@ -1,0 +1,131 @@
+# VDR plugin language source file.
+# Copyright (C) 2007 Klaus Schmidinger <kls@cadsoft.de>
+# This file is distributed under the same license as the VDR package.
+# Paul Lacatus <paul@campina.iiruc.ro>, 2002
+# Lucian Muresan <lucianm@users.sourceforge.net>, 2004
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: VDR 1.5.7\n"
+"Report-Msgid-Bugs-To: <nobody@domain.com>\n"
+"POT-Creation-Date: 2008-07-09 13:15+0200\n"
+"PO-Revision-Date: 2008-07-09 13:14+0200\n"
+"Last-Translator: Lucian Muresan <lucianm@users.sourceforge.net>\n"
+"Language-Team: <vdr@linuxtv.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-2\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "JanFebMarAprMayJunJulAugSepOctNovDec"
+msgstr "IanFebMarAprMaiIunIulAugSepOctNoiDec"
+
+msgid "DVD"
+msgstr "DVD"
+
+msgid "Music"
+msgstr "Muzicã"
+
+msgid "File"
+msgstr "Fiºier"
+
+msgid "Image"
+msgstr "Imagine"
+
+msgid "CD"
+msgstr "CD"
+
+msgid "Replay"
+msgstr "Redare"
+
+msgid "not in menu"
+msgstr "nu în meniu"
+
+msgid "compressed"
+msgstr "comprimat"
+
+msgid "auto"
+msgstr "auto"
+
+msgid "medium"
+msgstr "mediu"
+
+msgid "large"
+msgstr "mare"
+
+msgid "never"
+msgstr "niciodatã"
+
+msgid "once"
+msgstr "odatã"
+
+msgid "always"
+msgstr "întotdeauna"
+
+msgid "Plugin active"
+msgstr "Plugin activat"
+
+msgid "Show Date/Time"
+msgstr "Aratã Data/Ora"
+
+msgid "Show Channel"
+msgstr "Aratã canalul"
+
+msgid "Show Logo"
+msgstr "Aratã logo"
+
+msgid "Show Symbols"
+msgstr "Aratã simboluri"
+
+msgid "Show ET Symbols"
+msgstr "Aratã simboluri externe"
+
+msgid "Show Program"
+msgstr "Aratã programul"
+
+msgid "Show Timebar"
+msgstr "Aratã linia timp"
+
+msgid "Show Menu"
+msgstr "Aratã meniuri"
+
+msgid "Show Messages"
+msgstr "Aratã mesaje"
+
+msgid "Show Color Buttons"
+msgstr "Aratã butoanele colorate"
+
+msgid "Show Volume"
+msgstr "Aratã volumul"
+
+msgid "Show free Cards"
+msgstr "Aratã receptoare libere"
+
+msgid "Identify replay type"
+msgstr "Identificarea tipului redãrii"
+
+msgid "Modify replay string"
+msgstr "Modifica textul redãrii"
+
+msgid "Show Logo on Replay"
+msgstr "Aratã logo în timpul redãrii"
+
+msgid "Scroll text lines"
+msgstr "Deruleazã liniile text"
+
+msgid "Scroll speed"
+msgstr "Viteza derulãrii"
+
+msgid "Scroll time interval"
+msgstr "Interval derulare"
+
+msgid "Brightness on user activity"
+msgstr "Luminozitate la utilizare"
+
+msgid "Brightness on user inactivity"
+msgstr "Luminozitate la inactivitate"
+
+msgid "Brightness delay [s]"
+msgstr "Limita luminozitate"
+
+msgid "Unknown title"
+msgstr "Titlu necunoscut"

@@ -1,0 +1,133 @@
+# VDR plugin language source file.
+# Copyright (C) 2007 Klaus Schmidinger <kls@cadsoft.de>
+# This file is distributed under the same license as the VDR package.
+# Hannu Savolainen <hannu@opensound.com>, 2002
+# Jaakko Hyv‰tti <jaakko@hyvatti.iki.fi>, 2002
+# Niko Tarnanen <niko.tarnanen@hut.fi>, 2003
+# Rolf Ahrenberg <rahrenbe@cc.hut.fi>, 2003
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: VDR 1.5.7\n"
+"Report-Msgid-Bugs-To: <nobody@domain.com>\n"
+"POT-Creation-Date: 2008-07-09 13:15+0200\n"
+"PO-Revision-Date: 2008-07-09 13:14+0200\n"
+"Last-Translator: Rolf Ahrenberg <rahrenbe@cc.hut.fi>\n"
+"Language-Team: <vdr@linuxtv.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-15\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "JanFebMarAprMayJunJulAugSepOctNovDec"
+msgstr "TamHelMaaHuhTouKesHeiEloSyyLokMarJou"
+
+msgid "DVD"
+msgstr "DVD"
+
+msgid "Music"
+msgstr "Musiikki"
+
+msgid "File"
+msgstr "Tiedostot"
+
+msgid "Image"
+msgstr "Kuvat"
+
+msgid "CD"
+msgstr "CD"
+
+msgid "Replay"
+msgstr "Toistotila"
+
+msgid "not in menu"
+msgstr "ei valikossa"
+
+msgid "compressed"
+msgstr "pakattu"
+
+msgid "auto"
+msgstr "automaattinen"
+
+msgid "medium"
+msgstr "keskikokoinen"
+
+msgid "large"
+msgstr "suuri"
+
+msgid "never"
+msgstr "ei koskaan"
+
+msgid "once"
+msgstr "kerran"
+
+msgid "always"
+msgstr "aina"
+
+msgid "Plugin active"
+msgstr "Laajennos aktiivinen"
+
+msgid "Show Date/Time"
+msgstr "N‰yt‰ p‰iv‰m‰‰r‰/kello"
+
+msgid "Show Channel"
+msgstr "N‰yt‰ kanava"
+
+msgid "Show Logo"
+msgstr "N‰yt‰ logo"
+
+msgid "Show Symbols"
+msgstr "N‰yt‰ symbolit"
+
+msgid "Show ET Symbols"
+msgstr "N‰yt‰ ET-symbolit"
+
+msgid "Show Program"
+msgstr "N‰yt‰ ohjelma"
+
+msgid "Show Timebar"
+msgstr "N‰yt‰ aikajana"
+
+msgid "Show Menu"
+msgstr "N‰yt‰ valikko"
+
+msgid "Show Messages"
+msgstr "N‰yt‰ viestit"
+
+msgid "Show Color Buttons"
+msgstr "N‰yt‰ v‰ripainikkeet"
+
+msgid "Show Volume"
+msgstr "N‰yt‰ ‰‰nenvoimakkuus"
+
+msgid "Show free Cards"
+msgstr "N‰yt‰ vapaat vastaanottimet"
+
+msgid "Identify replay type"
+msgstr "Tunnista toistotilan tyyppi"
+
+msgid "Modify replay string"
+msgstr "Muokkaa toistotilan merkkijonoa"
+
+msgid "Show Logo on Replay"
+msgstr "N‰yt‰ logo toistotilassa"
+
+msgid "Scroll text lines"
+msgstr "Vierit‰ tekstirivej‰"
+
+msgid "Scroll speed"
+msgstr "Vieritysnopeus"
+
+msgid "Scroll time interval"
+msgstr "Vierityksen p‰ivitysv‰li"
+
+msgid "Brightness on user activity"
+msgstr ""
+
+msgid "Brightness on user inactivity"
+msgstr ""
+
+msgid "Brightness delay [s]"
+msgstr ""
+
+msgid "Unknown title"
+msgstr "Tuntematon nimi"
