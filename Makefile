@@ -119,7 +119,7 @@ i18n: $(I18Nmo)
 ### Targets:
 
 libvdr-$(PLUGIN).so: $(OBJS)
-	$(CXX) $(CXXFLAGS) -L$(INSTALLPREFIX)/lib -shared $(OBJS) -lglcddrivers -lglcdgraphics -lstdc++ -o $@
+	$(CXX) $(CXXFLAGS) -L$(INSTALLPREFIX)/lib -L./graphlcd-base/glcddrivers/ -L./graphlcd-base/glcdgraphics/ -shared $(OBJS) -lglcddrivers -lglcdgraphics -lstdc++ -o $@
 	@cp $@ $(LIBDIR)/$@.$(APIVERSION)
 
 dist: clean
