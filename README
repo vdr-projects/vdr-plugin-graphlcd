@@ -2,9 +2,11 @@ This is a "plugin" for the Video Disk Recorder (VDR).
 
 Written by Carsten Siebholz (c.siebholz AT t-online.de>
 From 0.0.8 on maintained by Andreas 'powARman' Regel (andreas.regel AT powarman.de)
+from 0.1.5 on maintained by Wolfgang Astleitner (mrwastl AT users.sourceforge.net) & Andreas 'randy' Weinberger (vdr AT smue.org)
 
 Project's homepage: http://graphlcd.berlios.de/
       before 0.0.8: http://c.siebholz.bei.t-online.de/
+GIT repo: http://projects.vdr-developer.org/projects/show/graphlcd
 
 See the file COPYING for license information.
 
