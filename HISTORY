@@ -1,6 +1,13 @@
 VDR Plugin 'graphlcd' Revision History
 -------------------------------------
 
+2010-03-01: Version 0.1.6 
+- added UTF8 support (vdr-graphlcd-0.1.5-utf8_i18n.diff)
+- added include path graphlcd-base/ in Makefile
+- added -L./graphlcd-base/glcddrivers/ & glcdgraphics/ in Makefile if graphlcd-base is not installed system-wide
+- changed FRAMESPERSEC to DEFAULTFRAMESPERSECOND (vdr-1.7.x)
+- modified Makefile for vdr-1.7.13
+
 2007-02-25: Version 0.1.5
 - added some missing includes
 - do LCD initialisation in display thread instead of during plugin initialisation to fix some issues with direct port accesses (thanks to TomJoad from vdr-portal.de)
