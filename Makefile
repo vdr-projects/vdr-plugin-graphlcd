@@ -19,7 +19,7 @@ VERSION = $(shell grep 'static const char \*VERSION *=' plugin.c | awk '{ print 
 ### The C++ compiler and options:
 
 CXX      ?= g++
-CXXFLAGS ?= -g -Wall -Woverloaded-virtual
+CXXFLAGS ?= -g -O2 -Wall -Woverloaded-virtual -Wno-parentheses 
 
 ### The directory environment:
 
@@ -29,6 +29,10 @@ TMPDIR = /tmp
 
 export INSTALLPREFIX = /usr
 export INSTALLDOCDIR = $(INSTALLPREFIX)/share/doc
+
+### Make sure that necessary options are included:
+
+include $(VDRDIR)/Make.global
 
 ### Allow user defined options to overwrite defaults:
 
