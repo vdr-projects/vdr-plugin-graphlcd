@@ -359,13 +359,25 @@ GLCD::cType cGraphLCDSkinConfig::GetToken(const GLCD::tSkinToken & Token)
             case tokPresentEndDateTime:
                 return TimeType(event.startTime + event.duration, Token.Attrib.Text);
             case tokPresentDuration:
+#if VDRVERSNUM >= 10701
+                return DurationType(event.duration * DEFAULTFRAMESPERSECOND, Token.Attrib.Text);
+#else
                 return DurationType(event.duration * FRAMESPERSEC, Token.Attrib.Text);
+#endif
             case tokPresentProgress:
+#if VDRVERSNUM >= 10701
+                return DurationType((time(NULL) - event.startTime) * DEFAULTFRAMESPERSECOND, Token.Attrib.Text);
+#else
                 return DurationType((time(NULL) - event.startTime) * FRAMESPERSEC, Token.Attrib.Text);
+#endif
             case tokPresentRemaining:
                 if ((time(NULL) - event.startTime) < event.duration)
                 {
+#if VDRVERSNUM >= 10701
+                    return DurationType((event.duration - (time(NULL) - event.startTime)) * DEFAULTFRAMESPERSECOND, Token.Attrib.Text);
+#else
                     return DurationType((event.duration - (time(NULL) - event.startTime)) * FRAMESPERSEC, Token.Attrib.Text);
+#endif
                 }
                 return false;
             case tokPresentTitle:
@@ -392,7 +404,11 @@ GLCD::cType cGraphLCDSkinConfig::GetToken(const GLCD::tSkinToken & Token)
             case tokFollowingEndDateTime:
                 return TimeType(event.startTime + event.duration, Token.Attrib.Text);
             case tokFollowingDuration:
+#if VDRVERSNUM >= 10701
+                return DurationType(event.duration * DEFAULTFRAMESPERSECOND, Token.Attrib.Text);
+#else
                 return DurationType(event.duration * FRAMESPERSEC, Token.Attrib.Text);
+#endif
             case tokFollowingTitle:
                 return event.title;
             case tokFollowingShortText:
