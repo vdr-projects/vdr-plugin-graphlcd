@@ -34,58 +34,58 @@
 
 char * strncopy(char * dest , const char * src , size_t n)
 {
-    strncpy(dest, src, n);
-    if (strlen(src) >= n)
-    {
-        *(dest + n - 1) = 0;
-    }
-    return dest;
+  strncpy(dest, src, n);
+  if (strlen(src) >= n)
+  {
+    *(dest + n - 1) = 0;
+  }
+  return dest;
 }
 
 
 std::string trim(const std::string & s)
 {
-    std::string::size_type start, end;
+	std::string::size_type start, end;
 
-    start = 0;
-    while (start < s.length())
-    {
-        if (!isspace(s[start]))
-            break;
-        start++;
-    }
-    end = s.length() - 1;
-    while (end >= 0)
-    {
-        if (!isspace(s[end]))
-            break;
-        end--;
-    }
-    return s.substr(start, end - start + 1);
+	start = 0;
+	while (start < s.length())
+	{
+		if (!isspace(s[start]))
+			break;
+		start++;
+	}
+	end = s.length() - 1;
+	while (end >= 0)
+	{
+		if (!isspace(s[end]))
+			break;
+		end--;
+	}
+	return s.substr(start, end - start + 1);
 }
 
 std::string compactspace(const std::string & s)
 {
-    std::string str = "";
-    std::string tmp;
-    unsigned int pos = 0;
-    unsigned int cnt = 0;
-    tmp = trim(s);
-    while (pos < tmp.length())
+  std::string str = "";
+  std::string tmp;
+  unsigned int pos = 0;
+  unsigned int cnt = 0;
+  tmp = trim(s);
+  while (pos < tmp.length())
+  {
+    if (!isspace(tmp[pos]))
     {
-        if (!isspace(tmp[pos]))
-        {
-            str += tmp[pos];
-            cnt = 0;
-        }
-        else if (cnt == 0)
-        {
-            str += tmp[pos];
-            cnt++;
-        }
-        else
-            cnt++;
-        pos++;
+      str += tmp[pos];
+      cnt = 0;
     }
-    return str;
+    else if (cnt == 0)
+    {
+      str += tmp[pos];
+      cnt++;
+    }
+    else
+      cnt++;
+    pos++;
+  }
+  return str;
 }

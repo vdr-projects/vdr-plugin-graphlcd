@@ -32,7 +32,7 @@ export INSTALLDOCDIR = $(INSTALLPREFIX)/share/doc
 
 ### Make sure that necessary options are included:
 
-include $(VDRDIR)/Make.global
+-include $(VDRDIR)/Make.global
 
 ### Allow user defined options to overwrite defaults:
 
@@ -66,7 +66,7 @@ endif
 
 ### The object files (add further files here):
 
-OBJS = display.o layout.o logo.o logolist.o menu.o plugin.o setup.o state.o strfct.o widgets.o
+OBJS = alias.o common.o display.o i18n.o menu.o plugin.o setup.o skinconfig.o state.o strfct.o
 
 ### The main target:
 TARGETS = libvdr-$(PLUGIN).so
@@ -123,7 +123,7 @@ i18n: $(I18Nmo)
 ### Targets:
 
 libvdr-$(PLUGIN).so: $(OBJS)
-	$(CXX) $(CXXFLAGS) -L$(INSTALLPREFIX)/lib -L./graphlcd-base/glcddrivers/ -L./graphlcd-base/glcdgraphics/ -shared $(OBJS) -lglcddrivers -lglcdgraphics -lstdc++ -o $@
+	$(CXX) $(CXXFLAGS) -L$(INSTALLPREFIX)/lib -L./graphlcd-base/glcddrivers/ -L./graphlcd-base/glcdgraphics/ -L./graphlcd-base/glcdskin/ -shared $(OBJS) -lglcddrivers -lglcdgraphics -lglcdskin -lstdc++ -o $@
 	@cp $@ $(LIBDIR)/$@.$(APIVERSION)
 
 dist: clean

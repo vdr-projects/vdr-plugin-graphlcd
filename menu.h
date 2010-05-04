@@ -1,5 +1,5 @@
 /**
- *  GraphLCD plugin for the Video Disk Recorder
+ *  GraphLCD plugin for the Video Disk Recorder 
  *
  *  menu.h  -  setup menu class
  *
@@ -36,11 +36,11 @@
 class cGraphLCDMenuSetup : public cMenuSetupPage
 {
 private:
-    cGraphLCDSetup newGraphLCDSetup;
+  cGraphLCDSetup newGraphLCDSetup;
 protected:
-    virtual void Store();
+  virtual void Store();
 public:
-    cGraphLCDMenuSetup();
+  cGraphLCDMenuSetup();
 };
 
 #endif

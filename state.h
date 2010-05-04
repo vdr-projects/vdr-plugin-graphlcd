@@ -9,28 +9,37 @@
 #ifndef _GRAPHLCD_STATE_H_
 #define _GRAPHLCD_STATE_H_
 
-#include <stdint.h>
-#include <string.h>
+#include <map>
+#include <string>
 
 #include <vdr/status.h>
 
 
-struct tChannelState
+struct tChannel
 {
     tChannelID id;
     int number;
-    std::string str;
-    std::string strTmp;
+    std::string name;
+    std::string shortName;
+    std::string provider;
+    std::string portal;
+    std::string source;
+    bool hasTeletext;
+    bool hasMultiLanguage;
+    bool hasDolby;
+    bool isEncrypted;
+    bool isRadio;
 };
 
-struct tEventState
+struct tEvent
 {
-    time_t presentTime;
-    std::string presentTitle;
-    std::string presentSubtitle;
-    time_t followingTime;
-    std::string followingTitle;
-    std::string followingSubtitle;
+    bool valid;
+    time_t startTime;
+    time_t vpsTime;
+    int duration;
+    std::string title;
+    std::string shortText;
+    std::string description;
 };
 
 enum eReplayMode
@@ -50,15 +59,17 @@ struct tReplayState
     cControl * control;
     eReplayMode mode;
     int current;
-    int currentLast;
     int total;
-    int totalLast;
+    bool play;
+    bool forward;
+    int speed;
 };
 
-struct tCardState
+struct tRecording
 {
-    int recordingCount;
-    std::string recordingName;
+    int deviceNumber;
+    std::string name;
+    std::string fileName;
 };
 
 struct tOsdState
@@ -66,7 +77,10 @@ struct tOsdState
     std::string currentItem;
     std::vector <std::string> items;
     std::string title;
-    std::string colorButton[4];
+    std::string redButton;
+    std::string greenButton;
+    std::string yellowButton;
+    std::string blueButton;
     std::string textItem;
     std::string message;
     int currentItemIndex;
@@ -89,24 +103,22 @@ private:
 
     cMutex mutex;
 
-    tChannelState channel;
-    tEventState event;
-    tReplayState replay;
-    tCardState card[MAXDEVICES];
-    tOsdState osd;
-    tVolumeState volume;
+    tChannel mChannel;
+    tEvent mPresent;
+    tEvent mFollowing;
+    tReplayState mReplay;
+    std::vector <tRecording> mRecordings;
+    tOsdState mOsd;
+    tVolumeState mVolume;
 
     void SetChannel(int ChannelNumber);
-    void GetProgramme();
+    void UpdateChannelInfo(void);
+    void UpdateEventInfo(void);
+    void UpdateReplayInfo(void);
 protected:
     virtual void ChannelSwitch(const cDevice *Device, int ChannelNumber);
-#if VDRVERSNUM < 10338
-    virtual void Recording(const cDevice *Device, const char *Name);
-    virtual void Replaying(const cControl *Control, const char *Name);
-#else
     virtual void Recording(const cDevice *Device, const char *Name, const char *FileName, bool On);
     virtual void Replaying(const cControl *Control, const char *Name, const char *FileName, bool On);
-#endif
     virtual void SetVolume(int Volume, bool Absolute);
     virtual void OsdClear();
     virtual void OsdTitle(const char *Title);
@@ -122,13 +134,17 @@ public:
     cGraphLCDState(cGraphLCDDisplay * Display);
     virtual ~cGraphLCDState();
 
+    void Update();
     void Tick();
-    tChannelState GetChannelState();
-    tEventState GetEventState();
+    tChannel GetChannelInfo();
+    tEvent GetPresentEvent();
+    tEvent GetFollowingEvent();
     tReplayState GetReplayState();
-    tCardState GetCardState(int number);
+    bool IsRecording(int CardNumber);
+    std::string Recordings(int CardNumber);
     tOsdState GetOsdState();
     tVolumeState GetVolumeState();
+    bool ShowMessage();
 };
 
 #endif

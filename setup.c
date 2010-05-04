@@ -31,28 +31,27 @@
 cGraphLCDSetup GraphLCDSetup;
 
 cGraphLCDSetup::cGraphLCDSetup(void)
-:   PluginActive(1),
-    ShowDateTime(1),
-    ShowChannel(1),
-    ShowLogo(1),
-    ShowSymbols(1),
-    ShowETSymbols(0),
-    ShowProgram(1),
-    ShowTimebar(1),
-    ShowMenu(1),
-    ShowMessages(1),
-    ShowColorButtons(1),
-    ShowVolume(1),
-    ShowNotRecording(0),
-    IdentifyReplayType(1),
-    ModifyReplayString(1),
-    ReplayLogo(1),
-    ScrollMode(0),
-    ScrollSpeed(2),
-    ScrollTime(500),
-    BrightnessActive(100),
-    BrightnessIdle(100),
-    BrightnessDelay(30)
+:	PluginActive(1),
+	ShowDateTime(1),
+	ShowChannel(1),
+	ShowChannelLogo(1),
+	ShowSymbols(1),
+	ShowProgram(1),
+	ShowTimebar(1),
+	ShowMenu(1),
+	ShowMessages(1),
+	ShowColorButtons(1),
+	ShowVolume(1),
+	ShowNotRecording(0),
+	IdentifyReplayType(1),
+	ModifyReplayString(1),
+	ShowReplayLogo(1),
+	ScrollMode(0),
+	ScrollSpeed(2),
+	ScrollTime(500),
+	BrightnessActive(100),
+	BrightnessIdle(100),
+	BrightnessDelay(30)
 {
 }
 
@@ -62,32 +61,31 @@ cGraphLCDSetup::~cGraphLCDSetup(void)
 
 cGraphLCDSetup & cGraphLCDSetup::operator=(const cGraphLCDSetup & setup)
 {
-    CopyFrom(&setup);
-    return *this;
+	CopyFrom(&setup);
+	return *this;
 }
 
 void cGraphLCDSetup::CopyFrom(const cGraphLCDSetup * source)
 {
-    PluginActive = source->PluginActive;
-    ShowDateTime = source->ShowDateTime;
-    ShowChannel = source->ShowChannel;
-    ShowLogo = source->ShowLogo;
-    ShowSymbols = source->ShowSymbols;
-    ShowETSymbols = source->ShowETSymbols;
-    ShowProgram = source->ShowProgram;
-    ShowTimebar = source->ShowTimebar;
-    ShowMenu = source->ShowMenu;
-    ShowMessages = source->ShowMessages;
-    ShowColorButtons = source->ShowColorButtons;
-    ShowVolume = source->ShowVolume;
-    ShowNotRecording = source->ShowNotRecording;
-    IdentifyReplayType = source->IdentifyReplayType;
-    ModifyReplayString = source->ModifyReplayString;
-    ReplayLogo = source->ReplayLogo;
-    ScrollMode = source->ScrollMode;
-    ScrollSpeed = source->ScrollSpeed;
-    ScrollTime = source->ScrollTime;
-    BrightnessActive = source->BrightnessActive;
-    BrightnessIdle = source->BrightnessIdle;
-    BrightnessDelay = source->BrightnessDelay;
+	PluginActive = source->PluginActive;
+	ShowDateTime = source->ShowDateTime;
+	ShowChannel = source->ShowChannel;
+	ShowChannelLogo = source->ShowChannelLogo;
+	ShowSymbols = source->ShowSymbols;
+	ShowProgram = source->ShowProgram;
+	ShowTimebar = source->ShowTimebar;
+	ShowMenu = source->ShowMenu;
+	ShowMessages = source->ShowMessages;
+	ShowColorButtons = source->ShowColorButtons;
+	ShowVolume = source->ShowVolume;
+	ShowNotRecording = source->ShowNotRecording;
+	IdentifyReplayType = source->IdentifyReplayType;
+	ModifyReplayString = source->ModifyReplayString;
+	ShowReplayLogo = source->ShowReplayLogo;
+	ScrollMode = source->ScrollMode;
+	ScrollSpeed = source->ScrollSpeed;
+	ScrollTime = source->ScrollTime;
+	BrightnessActive = source->BrightnessActive;
+	BrightnessIdle = source->BrightnessIdle;
+	BrightnessDelay = source->BrightnessDelay;
 }

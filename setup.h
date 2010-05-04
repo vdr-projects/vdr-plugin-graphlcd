@@ -32,34 +32,33 @@
 class cGraphLCDSetup
 {
 public:
-    int PluginActive;
-    int ShowDateTime;
-    int ShowChannel;
-    int ShowLogo;
-    int ShowSymbols;
-    int ShowETSymbols;
-    int ShowProgram;
-    int ShowTimebar;
-    int ShowMenu;
-    int ShowMessages;
-    int ShowColorButtons;
-    int ShowVolume;
-    int ShowNotRecording; // Empty frame around not recording card's empty icons?
-    int IdentifyReplayType;
-    int ModifyReplayString;
-    int ReplayLogo;
-    int ScrollMode;
-    int ScrollSpeed;
-    int ScrollTime;
-    int BrightnessActive;
-    int BrightnessIdle;
-    int BrightnessDelay;
+	int PluginActive;
+	int ShowDateTime;
+	int ShowChannel;
+	int ShowChannelLogo;
+	int ShowSymbols;
+	int ShowProgram;
+	int ShowTimebar;
+	int ShowMenu;
+	int ShowMessages;
+	int ShowColorButtons;
+	int ShowVolume;
+	int ShowNotRecording; // Empty frame around not recording card's empty icons?
+	int IdentifyReplayType;
+	int ModifyReplayString;
+	int ShowReplayLogo;
+	int ScrollMode;
+	int ScrollSpeed;
+	int ScrollTime;
+	int BrightnessActive;
+	int BrightnessIdle;
+	int BrightnessDelay;
 
 public:
-    cGraphLCDSetup(void);
-    virtual ~cGraphLCDSetup(void);
-    cGraphLCDSetup & operator= (const cGraphLCDSetup & setup);
-    void CopyFrom(const cGraphLCDSetup * source);
+	cGraphLCDSetup(void);
+	virtual ~cGraphLCDSetup(void);
+	cGraphLCDSetup & operator= (const cGraphLCDSetup & setup);
+	void CopyFrom(const cGraphLCDSetup * source);
 };
 
 extern cGraphLCDSetup GraphLCDSetup;

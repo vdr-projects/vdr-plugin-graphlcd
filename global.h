@@ -13,16 +13,7 @@
 #ifndef _GRAPHLCD_GLOBAL_H_
 #define _GRAPHLCD_GLOBAL_H_
 
-
 #include <stdlib.h>
-
-#include <glcddrivers/driver.h>
-
-
-#define PLUGIN_NAME "graphlcd"
-#define SPACEWIDTH  2
-
-#define FREENULL(p) (free (p), p = NULL)
 
 template<class T> inline void clip(T & value, T min, T max)
 {

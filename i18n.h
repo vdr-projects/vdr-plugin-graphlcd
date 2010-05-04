@@ -1,7 +1,7 @@
 /*
- *  GraphLCD plugin for the Video Disk Recorder
+ * GraphLCD plugin for the Video Disk Recorder
  *
- *  i18n.h  -  Internationalization
+ * i18n.h - Internationalization
  *
  * This file is released under the GNU General Public License. Refer
  * to the COPYING file distributed with this package.

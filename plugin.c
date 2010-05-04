@@ -17,12 +17,14 @@
 
 #include "display.h"
 #include "global.h"
+#include "i18n.h"
 #include "menu.h"
 
 #include <vdr/plugin.h>
 
 
-static const char *VERSION        = "0.1.6";
+static const char * kPluginName = "graphlcd";
+static const char *VERSION        = "0.2.0-pre2";
 static const char *DESCRIPTION    = "Output to graphic LCD";
 static const char *MAINMENUENTRY  = NULL;
 
@@ -35,6 +37,8 @@ private:
     // Add any member variables or functions you may need here.
     std::string mConfigName;
     std::string mDisplayName;
+    std::string mSkinsPath;
+    std::string mSkinName;
     GLCD::cDriver * mLcd;
     cGraphLCDDisplay * mDisplay;
 
@@ -57,10 +61,12 @@ public:
 
 cPluginGraphLCD::cPluginGraphLCD()
 :   mConfigName(""),
-    mDisplayName("")
+    mDisplayName(""),
+    mSkinsPath(""),
+    mSkinName(""),
+    mLcd(NULL),
+    mDisplay(NULL)
 {
-    mLcd = NULL;
-    mDisplay = NULL;
 }
 
 cPluginGraphLCD::~cPluginGraphLCD()
@@ -74,21 +80,24 @@ cPluginGraphLCD::~cPluginGraphLCD()
 const char * cPluginGraphLCD::CommandLineHelp()
 {
     return "  -c CFG,   --config=CFG   use CFG as driver config file\n"
-           "  -d DISP,  --display=DISP use display DISP for output\n";
+           "  -d DISP,  --display=DISP use display DISP for output\n"
+           "  -s SKIN,  --skin=SKIN    use skin SKIN (default is \"default\")\n";
 }
 
 bool cPluginGraphLCD::ProcessArgs(int argc, char * argv[])
 {
     static struct option long_options[] =
     {
-        {"config",  required_argument, NULL, 'c'},
-        {"display", required_argument, NULL, 'd'},
+        {"config",    required_argument, NULL, 'c'},
+        {"display",   required_argument, NULL, 'd'},
+        {"skinspath", required_argument, NULL, 'p'},
+        {"skin",      required_argument, NULL, 's'},
         {NULL}
     };
 
     int c;
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "c:d:", long_options, &option_index)) != -1)
+    while ((c = getopt_long(argc, argv, "c:d:p:s:", long_options, &option_index)) != -1)
     {
         switch (c)
         {
@@ -98,6 +107,14 @@ bool cPluginGraphLCD::ProcessArgs(int argc, char * argv[])
 
             case 'd':
                 mDisplayName = optarg;
+                break;
+
+            case 'p':
+                mSkinsPath = optarg;
+                break;
+
+            case 's':
+                mSkinName = optarg;
                 break;
 
             default:
@@ -112,6 +129,8 @@ bool cPluginGraphLCD::Initialize()
 {
     unsigned int displayNumber = 0;
     const char * cfgDir;
+
+    RegisterI18n(Phrases);
 
     if (mConfigName.length() == 0)
     {
@@ -158,14 +177,16 @@ bool cPluginGraphLCD::Initialize()
         return false;
     }
 
-    cfgDir = ConfigDirectory(PLUGIN_NAME);
+    cfgDir = ConfigDirectory(kPluginName);
     if (!cfgDir)
         return false;
 
     mDisplay = new cGraphLCDDisplay();
     if (!mDisplay)
         return false;
-    if (mDisplay->Init(mLcd, cfgDir) != 0)
+    if (mSkinName == "")
+        mSkinName = "default";
+    if (!mDisplay->Initialise(mLcd, cfgDir, mSkinsPath, mSkinName))
         return false;
 
     return true;
@@ -183,11 +204,7 @@ bool cPluginGraphLCD::Start()
             dsyslog ("graphlcd plugin: display thread ready");
             return true;
         }
-#if VDRVERSNUM < 10314
-        usleep(100000);
-#else
         cCondWait::SleepMs(100);
-#endif
     }
     dsyslog ("graphlcd plugin: timeout while waiting for display thread");
     return false;
@@ -218,9 +235,8 @@ bool cPluginGraphLCD::SetupParse(const char * Name, const char * Value)
     if      (!strcasecmp(Name, "PluginActive")) GraphLCDSetup.PluginActive = atoi(Value);
     else if (!strcasecmp(Name, "ShowDateTime")) GraphLCDSetup.ShowDateTime = atoi(Value);
     else if (!strcasecmp(Name, "ShowChannel")) GraphLCDSetup.ShowChannel = atoi(Value);
-    else if (!strcasecmp(Name, "ShowLogo")) GraphLCDSetup.ShowLogo = atoi(Value);
+    else if (!strcasecmp(Name, "ShowChannelLogo")) GraphLCDSetup.ShowChannelLogo = atoi(Value);
     else if (!strcasecmp(Name, "ShowSymbols")) GraphLCDSetup.ShowSymbols = atoi(Value);
-    else if (!strcasecmp(Name, "ShowETSymbols")) GraphLCDSetup.ShowETSymbols = atoi(Value);
     else if (!strcasecmp(Name, "ShowProgram")) GraphLCDSetup.ShowProgram = atoi(Value);
     else if (!strcasecmp(Name, "ShowTimebar")) GraphLCDSetup.ShowTimebar = atoi(Value);
     else if (!strcasecmp(Name, "ShowMenu")) GraphLCDSetup.ShowMenu = atoi(Value);
@@ -230,7 +246,7 @@ bool cPluginGraphLCD::SetupParse(const char * Name, const char * Value)
     else if (!strcasecmp(Name, "ShowNotRecording")) GraphLCDSetup.ShowNotRecording = atoi(Value);
     else if (!strcasecmp(Name, "IdentifyReplayType")) GraphLCDSetup.IdentifyReplayType = atoi(Value);
     else if (!strcasecmp(Name, "ModifyReplayString")) GraphLCDSetup.ModifyReplayString = atoi(Value);
-    else if (!strcasecmp(Name, "ReplayLogo")) GraphLCDSetup.ReplayLogo = atoi(Value);
+    else if (!strcasecmp(Name, "ShowReplayLogo")) GraphLCDSetup.ShowReplayLogo = atoi(Value);
     else if (!strcasecmp(Name, "ScrollMode")) GraphLCDSetup.ScrollMode = atoi(Value);
     else if (!strcasecmp(Name, "ScrollSpeed")) GraphLCDSetup.ScrollSpeed = atoi(Value);
     else if (!strcasecmp(Name, "ScrollTime")) GraphLCDSetup.ScrollTime = atoi(Value);

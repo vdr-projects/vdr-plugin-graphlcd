@@ -17,53 +17,60 @@
 #include <vdr/eitscan.h>
 #include <vdr/i18n.h>
 
-#include "compat.h"
 
 cGraphLCDState::cGraphLCDState(cGraphLCDDisplay * Display)
 :   mDisplay(Display),
     first(true),
     tickUsed(false)
 {
-    channel.number = 0;
-    channel.str = "";
-    channel.strTmp = "";
+    mChannel.id = tChannelID::InvalidID;
+    mChannel.number = 0;
+    mChannel.name = "";
+    mChannel.shortName = "";
+    mChannel.provider = "";
+    mChannel.portal = "";
+    mChannel.source = "";
+    mChannel.hasTeletext = false;
+    mChannel.hasMultiLanguage = false;
+    mChannel.hasDolby = false;
+    mChannel.isEncrypted = false;
+    mChannel.isRadio = false;
 
-    event.presentTime = 0;
-    event.presentTitle = "";
-    event.presentSubtitle = "";
-    event.followingTime = 0;
-    event.followingTitle = "";
-    event.followingSubtitle = "";
+    mPresent.valid = false;
+    mPresent.startTime = 0;
+    mPresent.vpsTime = 0;
+    mPresent.duration = 0;
+    mPresent.title = "";
+    mPresent.shortText = "";
+    mPresent.description = "";
 
-    replay.name = "";
-    replay.loopmode = "";
-    replay.control = NULL;
-    replay.mode = eReplayNormal;
-    replay.current = 0;
-#if VDRVERSNUM >= 10701
-    replay.currentLast = DEFAULTFRAMESPERSECOND;
-#else
-    replay.currentLast = FRAMESPERSEC;
-#endif
-    replay.total = 0;
-    replay.totalLast = 1;
+    mFollowing.valid = false;
+    mFollowing.startTime = 0;
+    mFollowing.vpsTime = 0;
+    mFollowing.duration = 0;
+    mFollowing.title = "";
+    mFollowing.shortText = "";
+    mFollowing.description = "";
 
-    for (int i = 0; i < MAXDEVICES; i++)
-    {
-        card[i].recordingCount = 0;
-        card[i].recordingName = "";
-    }
+    mReplay.name = "";
+    mReplay.loopmode = "";
+    mReplay.control = NULL;
+    mReplay.mode = eReplayNormal;
+    mReplay.current = 0;
+    mReplay.total = 0;
 
-    osd.currentItem = "";
-    osd.title = "";
-    for (int i = 0; i < 4; i++)
-        osd.colorButton[i] = "";
-    osd.message = "";
-    osd.textItem = "";
-    osd.currentItemIndex = 0;
+    mOsd.currentItem = "";
+    mOsd.title = "";
+    mOsd.redButton = "";
+    mOsd.greenButton = "";
+    mOsd.yellowButton = "";
+    mOsd.blueButton = "";
+    mOsd.message = "";
+    mOsd.textItem = "";
+    mOsd.currentItemIndex = -1;
 
-    volume.value = -1;
-    volume.lastChange = 0;
+    mVolume.value = -1;
+    mVolume.lastChange = 0;
 
     SetChannel(cDevice::CurrentChannel());
 }
@@ -87,34 +94,41 @@ void cGraphLCDState::ChannelSwitch(const cDevice * Device, int ChannelNumber)
     }
 }
 
-#if VDRVERSNUM < 10338
-void cGraphLCDState::Recording(const cDevice * Device, const char * Name)
-#else
 void cGraphLCDState::Recording(const cDevice * Device, const char * Name, const char *FileName, bool On)
-#endif
 {
     //printf("graphlcd plugin: cGraphLCDState::Recording %d %s\n", Device->CardIndex(), Name);
     if (GraphLCDSetup.PluginActive)
     {
+        std::vector <tRecording>::iterator it;
+
         mutex.Lock();
-#if VDRVERSNUM < 10338
-        if (Name)
-#else
-        if (On)
-#endif
+        it = mRecordings.begin();
+        while (it != mRecordings.end())
         {
-            card[Device->DeviceNumber()].recordingCount++;
-#if VDRVERSNUM < 10338
-            card[Device->DeviceNumber()].recordingName = Name;
-#else
-            card[Device->DeviceNumber()].recordingName = Name ? Name : "";
-#endif
+            if (it->deviceNumber == Device->DeviceNumber()
+                && it->fileName == FileName)
+            {
+                break;
+            }
+            it++;
+        }
+
+        if (On)
+        {
+            if (it == mRecordings.end())
+            {
+                tRecording rec;
+
+                rec.deviceNumber = Device->DeviceNumber();
+                rec.name = Name;
+                rec.fileName = FileName;
+                mRecordings.push_back(rec);
+            }
         }
         else
         {
-            if (card[Device->DeviceNumber()].recordingCount > 0)
-                card[Device->DeviceNumber()].recordingCount--;
-            card[Device->DeviceNumber()].recordingName = "";
+            if (it != mRecordings.end())
+                mRecordings.erase(it);
         }
         mutex.Unlock();
 
@@ -122,31 +136,19 @@ void cGraphLCDState::Recording(const cDevice * Device, const char * Name, const 
     }
 }
 
-#if VDRVERSNUM < 10338
-void cGraphLCDState::Replaying(const cControl * Control, const char * Name)
-#else
 void cGraphLCDState::Replaying(const cControl * Control, const char * Name, const char *FileName, bool On)
-#endif
 {
     //printf("graphlcd plugin: cGraphLCDState::Replaying %s\n", Name);
     if (GraphLCDSetup.PluginActive)
     {
-#if VDRVERSNUM < 10338
-        if (Name)
-#else
         if (On)
-#endif
         {
             mutex.Lock();
-            replay.control = (cControl *) Control;
-            replay.mode = eReplayNormal;
-            replay.name = "";
-            replay.loopmode = "";
-#if VDRVERSNUM < 10338
-            if (!isempty(Name))
-#else
+            mReplay.control = (cControl *) Control;
+            mReplay.mode = eReplayNormal;
+            mReplay.name = "";
+            mReplay.loopmode = "";
             if (Name && !isempty(Name))
-#endif
             {
                 if (GraphLCDSetup.IdentifyReplayType)
                 {
@@ -173,15 +175,15 @@ void cGraphLCDState::Replaying(const cControl * Control, const char * Name, cons
                         {
                             unsigned int j;
                             // get loopmode
-                            replay.loopmode = Name;
-                            replay.loopmode = replay.loopmode.substr (0, 5);
-                            if (replay.loopmode[2] == '.')
-                                replay.loopmode.erase (2, 1);
-                            if (replay.loopmode[1] == '.')
-                                replay.loopmode.erase (1, 1);
-                            if (replay.loopmode[1] == ']')
-                                replay.loopmode = "";
-                            //printf ("loopmode=<%s>\n", replay.loopmode.c_str ());
+                            mReplay.loopmode = Name;
+                            mReplay.loopmode = mReplay.loopmode.substr (0, 5);
+                            if (mReplay.loopmode[2] == '.')
+                                mReplay.loopmode.erase (2, 1);
+                            if (mReplay.loopmode[1] == '.')
+                                mReplay.loopmode.erase (1, 1);
+                            if (mReplay.loopmode[1] == ']')
+                                mReplay.loopmode = "";
+                            //printf ("loopmode=<%s>\n", mReplay.loopmode.c_str ());
                             for (j=0;*(Name+i+j) != '\0';++j) //trim name
                             {
                                 if (*(Name+i+j)!=' ')
@@ -190,13 +192,13 @@ void cGraphLCDState::Replaying(const cControl * Control, const char * Name, cons
 
                             if (strlen(Name+i+j) > 0)
                             { //if name isn't empty, then copy
-                                replay.name = Name + i + j;
+                                mReplay.name = Name + i + j;
                             }
                             else
                             { //if Name empty, set fallback title
-                                replay.name = tr("Unknown title");
+                                mReplay.name = tr("Unknown title");
                             }
-                            replay.mode = eReplayMusic;
+                            mReplay.mode = eReplayMusic;
                         }
                     }
                     ///////////////////////////////////////////////////////////////////////
@@ -230,24 +232,24 @@ void cGraphLCDState::Replaying(const cControl * Control, const char * Name, cons
 
                                 if (strlen(Name+i+j) > 0)
                                 { // if name isn't empty, then copy
-                                    replay.name = Name + i + j;
+                                    mReplay.name = Name + i + j;
                                     // replace all '_' with ' '
-                                    replace(replay.name.begin(), replay.name.end(), '_', ' ');
-                                    for (j = 0, b = true; j < replay.name.length(); ++j)
+                                    replace(mReplay.name.begin(), mReplay.name.end(), '_', ' ');
+                                    for (j = 0, b = true; j < mReplay.name.length(); ++j)
                                     {
                                         // KAPITALIZE -> Kaptialize
-                                        if (replay.name[j] == ' ')
+                                        if (mReplay.name[j] == ' ')
                                             b = true;
                                         else if (b)
                                             b = false;
-                                        else replay.name[j] = tolower(replay.name[j]);
+                                        else mReplay.name[j] = tolower(mReplay.name[j]);
                                     }
                                 }
                                 else
                                 { //if Name empty, set fallback title
-                                    replay.name = tr("Unknown title");
+                                    mReplay.name = tr("Unknown title");
                                 }
-                                replay.mode = eReplayDVD;
+                                mReplay.mode = eReplayDVD;
                             }
                         }
                     }
@@ -265,7 +267,7 @@ void cGraphLCDState::Replaying(const cControl * Control, const char * Name, cons
                                     // look for file extentsion like .xxx or .xxxx
                                     if (slen>5 && ((*(Name+slen-4) == '.') || (*(Name+slen-5) == '.')))
                                     {
-                                        replay.mode = eReplayFile;
+                                        mReplay.mode = eReplayFile;
                                     }
                                     else
                                     {
@@ -274,7 +276,7 @@ void cGraphLCDState::Replaying(const cControl * Control, const char * Name, cons
                                 }
                                 case '~':
                                 {
-                                    replay.name = Name + i + 1;
+                                    mReplay.name = Name + i + 1;
                                     bFound = true;
                                     i = 0;
                                 }
@@ -286,47 +288,37 @@ void cGraphLCDState::Replaying(const cControl * Control, const char * Name, cons
 
                     if (0 == strncmp(Name,"[image] ",8))
                     {
-                        if (replay.mode != eReplayFile) //if'nt already Name stripped-down as filename
-                            replay.name = Name + 8;
-                        replay.mode = eReplayImage;
+                        if (mReplay.mode != eReplayFile) //if'nt already Name stripped-down as filename
+                            mReplay.name = Name + 8;
+                        mReplay.mode = eReplayImage;
                         bFound = true;
                     }
                     else if (0 == strncmp(Name,"[audiocd] ",10))
                     {
-                        replay.name = Name + 10;
-                        replay.mode = eReplayAudioCD;
+                        mReplay.name = Name + 10;
+                        mReplay.mode = eReplayAudioCD;
                         bFound = true;
                     }
                     if (!bFound || !GraphLCDSetup.ModifyReplayString)
                     {
-                        replay.name = Name;
+                        mReplay.name = Name;
                     }
                 }
                 else
                 {
-                    replay.name = Name;
+                    mReplay.name = Name;
                 }
             }
-#if VDRVERSNUM >= 10701
-            replay.currentLast = DEFAULTFRAMESPERSECOND;
-#else
-            replay.currentLast = FRAMESPERSEC;
-#endif
-            replay.totalLast = 1;
             mutex.Unlock();
         }
         else
         {
             mutex.Lock();
-            replay.control = NULL;
+            mReplay.control = NULL;
             mutex.Unlock();
-            SetChannel(channel.number);
+            SetChannel(mChannel.number);
         }
-#if VDRVERSNUM < 10338
-        mDisplay->Replaying(Name ? true : false, replay.mode);
-#else
-        mDisplay->Replaying(On, replay.mode);
-#endif
+        mDisplay->Replaying(On);
     }
 }
 
@@ -337,21 +329,17 @@ void cGraphLCDState::SetVolume(int Volume, bool Absolute)
     {
         mutex.Lock();
 
-#if VDRVERSNUM < 10402
-        volume.value = Volume;
-#else
         if (!Absolute)
         {
-            volume.value += Volume;
+            mVolume.value += Volume;
         }
         else
         {
-            volume.value = Volume;
+            mVolume.value = Volume;
         }
-#endif
         if (!first)
         {
-            volume.lastChange = cTimeMs::Now();
+            mVolume.lastChange = cTimeMs::Now();
             mutex.Unlock();
             mDisplay->Update();
         }
@@ -373,15 +361,16 @@ void cGraphLCDState::Tick()
 
         tickUsed = true;
 
-        if (replay.control)
+        if (mReplay.control)
         {
-            if (replay.control->GetIndex(replay.current, replay.total, false))
+            mReplay.control->GetReplayMode(mReplay.play, mReplay.forward, mReplay.speed);
+            if (mReplay.control->GetIndex(mReplay.current, mReplay.total, false))
             {
-                replay.total = (replay.total == 0) ? 1 : replay.total;
+                mReplay.total = (mReplay.total == 0) ? 1 : mReplay.total;
             }
             else
             {
-                replay.control = NULL;
+                mReplay.control = NULL;
             }
         }
 
@@ -391,52 +380,54 @@ void cGraphLCDState::Tick()
 
 void cGraphLCDState::OsdClear()
 {
-    //printf("graphlcd plugin: cGraphLCDState::OsdClear\n");
+    //esyslog("graphlcd plugin: cGraphLCDState::OsdClear\n");
     if (GraphLCDSetup.PluginActive)
     {
         mutex.Lock();
 
-        channel.strTmp = "";
-
-        osd.title = "";
-        osd.items.clear();
-        for (int i = 0; i < 4; i++)
-            osd.colorButton[i] = "";
-        osd.message = "";
-        osd.textItem = "";
+        mOsd.title = "";
+        mOsd.items.clear();
+        mOsd.currentItem = "";
+        mOsd.currentItemIndex = -1;
+        mOsd.redButton = "";
+        mOsd.greenButton = "";
+        mOsd.yellowButton = "";
+        mOsd.blueButton = "";
+        mOsd.message = "";
+        mOsd.textItem = "";
 
         mutex.Unlock();
-        mDisplay->SetClear();
+        mDisplay->SetMenuClear();
     }
 }
 
 void cGraphLCDState::OsdTitle(const char * Title)
 {
-    //printf("graphlcd plugin: cGraphLCDState::OsdTitle '%s'\n", Title);
+    //esyslog("graphlcd plugin: cGraphLCDState::OsdTitle '%s'\n", Title);
     if (GraphLCDSetup.PluginActive)
     {
         mutex.Lock();
 
-        osd.message = "";
-        osd.title = "";
+        mOsd.message = "";
+        mOsd.title = "";
         if (Title)
         {
-            osd.title = Title;
+            mOsd.title = Title;
             // remove the time
-            std::string::size_type pos = osd.title.find('\t');
+            std::string::size_type pos = mOsd.title.find('\t');
             if (pos != std::string::npos)
-                osd.title.resize(pos);
-            osd.title = compactspace(osd.title);
+                mOsd.title.resize(pos);
+            mOsd.title = compactspace(mOsd.title);
         }
 
         mutex.Unlock();
-        mDisplay->SetOsdTitle();
+        mDisplay->SetMenuTitle();
     }
 }
 
 void cGraphLCDState::OsdStatusMessage(const char * Message)
 {
-    //printf("graphlcd plugin: cGraphLCDState::OsdStatusMessage '%s'\n", Message);
+    //esyslog("graphlcd plugin: cGraphLCDState::OsdStatusMessage '%s'\n", Message);
     if (GraphLCDSetup.PluginActive)
     {
         if (GraphLCDSetup.ShowMessages)
@@ -444,9 +435,9 @@ void cGraphLCDState::OsdStatusMessage(const char * Message)
             mutex.Lock();
 
             if (Message)
-                osd.message = compactspace(Message);
+                mOsd.message = compactspace(Message);
             else
-                osd.message = "";
+                mOsd.message = "";
 
             mutex.Unlock();
             mDisplay->Update();
@@ -456,24 +447,26 @@ void cGraphLCDState::OsdStatusMessage(const char * Message)
 
 void cGraphLCDState::OsdHelpKeys(const char * Red, const char * Green, const char * Yellow, const char * Blue)
 {
-    //printf("graphlcd plugin: cGraphLCDState::OsdHelpKeys %s - %s - %s - %s\n", Red, Green, Yellow, Blue);
+    //esyslog("graphlcd plugin: cGraphLCDState::OsdHelpKeys %s - %s - %s - %s\n", Red, Green, Yellow, Blue);
     if (GraphLCDSetup.PluginActive)
     {
         if (GraphLCDSetup.ShowColorButtons)
         {
             mutex.Lock();
 
-            for (int i = 0; i < 4; i++)
-                osd.colorButton[i] = "";
+            mOsd.redButton = "";
+            mOsd.greenButton = "";
+            mOsd.yellowButton = "";
+            mOsd.blueButton = "";
 
             if (Red)
-                osd.colorButton[0] = compactspace(Red);
+                mOsd.redButton = compactspace(Red);
             if (Green)
-                osd.colorButton[1] = compactspace(Green);
+                mOsd.greenButton = compactspace(Green);
             if (Yellow)
-                osd.colorButton[2] = compactspace(Yellow);
+                mOsd.yellowButton = compactspace(Yellow);
             if (Blue)
-                osd.colorButton[3] = compactspace(Blue);
+                mOsd.blueButton = compactspace(Blue);
 
             mutex.Unlock();
         }
@@ -482,106 +475,88 @@ void cGraphLCDState::OsdHelpKeys(const char * Red, const char * Green, const cha
 
 void cGraphLCDState::OsdItem(const char * Text, int Index)
 {
-    //printf("graphlcd plugin: cGraphLCDState::OsdItem %s, %d\n", Text, Index);
+    //esyslog("graphlcd plugin: cGraphLCDState::OsdItem %s, %d\n", Text, Index);
     if (GraphLCDSetup.PluginActive)
     {
         if (GraphLCDSetup.ShowMenu)
         {
             mutex.Lock();
 
-            osd.message = "";
+            mOsd.message = "";
 
             if (Text)
-                osd.items.push_back(Text);
+                mOsd.items.push_back(Text);
 
             mutex.Unlock();
-            if (Text)
-                mDisplay->SetOsdItem(Text);
+            //if (Text)
+            //    mDisplay->SetOsdItem(Text);
         }
     }
 }
 
 void cGraphLCDState::OsdCurrentItem(const char * Text)
 {
-    //printf("graphlcd plugin: cGraphLCDState::OsdCurrentItem %s\n", Text);
+    //esyslog("graphlcd plugin: cGraphLCDState::OsdCurrentItem %s\n", Text);
     if (GraphLCDSetup.PluginActive)
     {
         if (GraphLCDSetup.ShowMenu)
         {
-            int tabs;
-            std::string::size_type pos;
-
             mutex.Lock();
 
-            osd.message = "";
-            osd.currentItem = "";
+            mOsd.message = "";
+            mOsd.currentItem = "";
             if (Text)
             {
-                osd.currentItem = Text;
+                uint32_t i;
 
-                // count nr of tabs in text
-                tabs = 0;
-                for (unsigned int i = 0; i < osd.currentItem.length(); i++)
+                mOsd.currentItem = Text;
+                mOsd.currentItemIndex = -1;
+                for (i = 0; i < mOsd.items.size(); i++)
                 {
-                    if (osd.currentItem[i] == '\t')
-                        tabs++;
-                }
-                if (tabs == 1)
-                {
-                    // only one tab => prob. Setup Menu
-                    pos = osd.currentItem.find('\t');
-                    osd.currentItemIndex = 0;
-                    if (pos != std::string::npos)
+                    if (mOsd.items[i].compare(mOsd.currentItem) == 0)
                     {
-                        for (unsigned int i = 0; i < osd.items.size(); i++)
-                        {
-                            if (osd.items[i].find(osd.currentItem.c_str(), 0, pos) == 0)
-                            {
-                                osd.currentItemIndex = i;
-                                osd.items[i] = osd.currentItem;
-                                break;
-                            }
-                        }
+                        mOsd.currentItemIndex = i;
+                        break;
                     }
                 }
-                else
+                if (i == mOsd.items.size())
                 {
-                    osd.currentItemIndex = 0;
-                    for (unsigned int i = 0; i < osd.items.size(); i++)
+                    // maybe this is a settings menu with edit items, so
+                    // just one tab
+                    std::string::size_type pos = mOsd.currentItem.find('\t');
+                    if (pos != std::string::npos && pos == mOsd.currentItem.rfind('\t'))
                     {
-                        if (osd.items[i].compare(osd.currentItem) == 0)
+                        for (i = 0; i < mOsd.items.size(); i++)
                         {
-                            osd.currentItemIndex = i;
-                            break;
+                            if (mOsd.items[i].compare(0, pos, mOsd.currentItem, 0, pos) == 0)
+                            {
+                                mOsd.items[i] = mOsd.currentItem;
+                                mOsd.currentItemIndex = i;
+                                break;
+                            }
                         }
                     }
                 }
             }
             mutex.Unlock();
             if (Text)
-                mDisplay->SetOsdCurrentItem();
+                mDisplay->SetMenuCurrent();
         }
     }
 }
 
 void cGraphLCDState::OsdTextItem(const char * Text, bool Scroll)
 {
-    //printf("graphlcd plugin: cGraphLCDState::OsdTextItem %s %d\n", Text, Scroll);
+    //esyslog("graphlcd plugin: cGraphLCDState::OsdTextItem %s %d\n", Text, Scroll);
     if (GraphLCDSetup.PluginActive)
     {
         mutex.Lock();
         if (Text)
         {
-            osd.textItem = trim(Text);
-#if 0
-            // replace '\n' with ' '
-            for (unsigned int i = 0; i < osd.textItem.length(); i++)
-                if (osd.textItem[i] == '\n' && (i + 1) < osd.textItem.length() && osd.textItem[i + 1] != '\n')
-                    osd.textItem[i] = ' ';
-#endif
+            mOsd.textItem = trim(Text);
         }
         mutex.Unlock();
-        mDisplay->SetOsdTextItem(Text, Scroll);
+        //mDisplay->SetOsdTextItem(Text, Scroll);
     }
 }
 
@@ -591,18 +566,6 @@ void cGraphLCDState::OsdChannel(const char * Text)
     //printf("graphlcd plugin: cGraphLCDState::OsdChannel %s\n", Text);
     if (GraphLCDSetup.PluginActive)
     {
-        mutex.Lock();
-        if (Text)
-        {
-            channel.strTmp = Text;
-            channel.strTmp = compactspace(channel.strTmp);
-        }
-        else
-        {
-            channel.strTmp = "";
-        }
-        mutex.Unlock();
-
         if (Text)
             mDisplay->Update();
     }
@@ -616,143 +579,191 @@ void cGraphLCDState::OsdProgramme(time_t PresentTime, const char * PresentTitle,
     //printf("graphlcd plugin: cGraphLCDState::OsdProgramme FST: %s\n", FollowingSubtitle);
     if (GraphLCDSetup.PluginActive)
     {
-        mutex.Lock();
-        event.presentTime = PresentTime;
-        event.presentTitle = "";
-        if (!isempty(PresentTitle))
-            event.presentTitle = PresentTitle;
-        event.presentSubtitle = "";
-        if (!isempty(PresentSubtitle))
-            event.presentSubtitle = PresentSubtitle;
-
-        event.followingTime = FollowingTime;
-        event.followingTitle = "";
-        if (!isempty(FollowingTitle))
-            event.followingTitle = FollowingTitle;
-        event.followingSubtitle = "";
-        if (!isempty(FollowingSubtitle))
-            event.followingSubtitle = FollowingSubtitle;
-        mutex.Unlock();
         mDisplay->Update();
     }
 }
 
 void cGraphLCDState::SetChannel(int ChannelNumber)
 {
-    char tmp[16];
-
     if (ChannelNumber == 0)
         return;
 
     mutex.Lock();
 
-    channel.number = ChannelNumber;
-    cChannel * ch = Channels.GetByNumber(channel.number);
-    channel.id = ch->GetChannelID();
-    sprintf(tmp, "%d ", channel.number);
-    channel.str = tmp;
-    channel.str += ch->Name();
-    event.presentTime = 0;
-    event.followingTime = 0;
+    mChannel.number = ChannelNumber;
+    mPresent.startTime = 0;
+    mFollowing.startTime = 0;
 
     mutex.Unlock();
 
-    mDisplay->SetChannel(ChannelNumber);
+    mDisplay->Update();
 }
 
-void cGraphLCDState::GetProgramme()
+void cGraphLCDState::UpdateChannelInfo(void)
+{
+    if (mChannel.number == 0)
+        return;
+
+    mutex.Lock();
+
+    cChannel * ch = Channels.GetByNumber(mChannel.number);
+    if (ch)
+    {
+        mChannel.id = ch->GetChannelID();
+        mChannel.name = ch->Name();
+        mChannel.shortName = ch->ShortName(true);
+        mChannel.provider = ch->Provider();
+        mChannel.portal = ch->PortalName();
+        mChannel.source = Sources.Get(ch->Source())->Description();
+        mChannel.hasTeletext = ch->Tpid() != 0;
+        mChannel.hasMultiLanguage = ch->Apid(1) != 0;
+        mChannel.hasDolby = ch->Dpid(0) != 0;
+        mChannel.isEncrypted = ch->Ca() != 0;
+        mChannel.isRadio = (ch->Vpid() == 0) || (ch->Vpid() == 1) || (ch->Vpid() == 0x1FFF);
+    }
+    else
+    {
+        mChannel.id = tChannelID::InvalidID;
+        mChannel.name = tr("*** Invalid Channel ***");
+        mChannel.shortName = tr("*** Invalid Channel ***");
+        mChannel.provider = "";
+        mChannel.portal = "";
+        mChannel.source = "";
+        mChannel.hasTeletext = false;
+        mChannel.hasMultiLanguage = false;
+        mChannel.hasDolby = false;
+        mChannel.isEncrypted = false;
+        mChannel.isRadio = false;
+    }
+
+    mutex.Unlock();
+}
+
+void cGraphLCDState::UpdateEventInfo(void)
 {
     mutex.Lock();
-#if VDRVERSNUM < 10300
-    const cEventInfo * present = NULL, * following = NULL;
-    cMutexLock mutexLock;
-    const cSchedules * schedules = cSIProcessor::Schedules(mutexLock);
-    if (channel.id.Valid())
-    {
-        if (schedules)
-        {
-            const cSchedule * schedule = schedules->GetSchedule(channel.id);
-            if (schedule)
-            {
-                if ((present = schedule->GetPresentEvent()) != NULL)
-                {
-                    event.presentTime = present->GetTime();
-                    event.presentTitle = "";
-                    if (!isempty(present->GetTitle()))
-                        event.presentTitle = present->GetTitle();
-                    event.presentSubtitle = "";
-                    if (!isempty(present->GetSubtitle()))
-                        event.presentSubtitle = present->GetSubtitle();
-                }
-                if ((following = schedule->GetFollowingEvent()) != NULL)
-                {
-                    event.followingTime = following->GetTime();
-                    event.followingTitle = "";
-                    if (!isempty(following->GetTitle()))
-                        event.followingTitle = following->GetTitle();
-                    event.followingSubtitle = "";
-                    if (!isempty(following->GetSubtitle()))
-                        event.followingSubtitle = following->GetSubtitle();
-                }
-            }
-        }
-    }
-#else
     const cEvent * present = NULL, * following = NULL;
     cSchedulesLock schedulesLock;
+
+    // reset event data to empty values
+    mPresent.valid = false;
+    mPresent.startTime = 0;
+    mPresent.vpsTime = 0;
+    mPresent.duration = 0;
+    mPresent.title = "";
+    mPresent.shortText = "";
+    mPresent.description = "";
+
+    mFollowing.valid = false;
+    mFollowing.startTime = 0;
+    mFollowing.vpsTime = 0;
+    mFollowing.duration = 0;
+    mFollowing.title = "";
+    mFollowing.shortText = "";
+    mFollowing.description = "";
+
     const cSchedules * schedules = cSchedules::Schedules(schedulesLock);
-    if (channel.id.Valid())
+    if (mChannel.id.Valid())
     {
         if (schedules)
         {
-            const cSchedule * schedule = schedules->GetSchedule(channel.id);
+            const cSchedule * schedule = schedules->GetSchedule(mChannel.id);
             if (schedule)
             {
                 if ((present = schedule->GetPresentEvent()) != NULL)
                 {
-                    event.presentTime = present->StartTime();
-                    event.presentTitle = "";
-                    if (!isempty(present->Title()))
-                        event.presentTitle = present->Title();
-                    event.presentSubtitle = "";
-                    if (!isempty(present->ShortText()))
-                        event.presentSubtitle = present->ShortText();
+                    mPresent.valid = true;
+                    mPresent.startTime = present->StartTime();
+                    mPresent.vpsTime = present->Vps();
+                    mPresent.duration = present->Duration();
+                    mPresent.title = "";
+                    if (present->Title())
+                        mPresent.title = present->Title();
+                    mPresent.shortText = "";
+                    if (present->ShortText())
+                        mPresent.shortText = present->ShortText();
+                    mPresent.description = "";
+                    if (present->Description())
+                        mPresent.description = present->Description();
                 }
                 if ((following = schedule->GetFollowingEvent()) != NULL)
                 {
-                    event.followingTime = following->StartTime();
-                    event.followingTitle = "";
-                    if (!isempty(following->Title()))
-                        event.followingTitle = following->Title();
-                    event.followingSubtitle = "";
-                    if (!isempty(following->ShortText()))
-                        event.followingSubtitle = following->ShortText();
+                    mFollowing.valid = true;
+                    mFollowing.startTime = following->StartTime();
+                    mFollowing.vpsTime = following->Vps();
+                    mFollowing.duration = following->Duration();
+                    mFollowing.title = "";
+                    if (following->Title())
+                        mFollowing.title = following->Title();
+                    mFollowing.shortText = "";
+                    if (following->ShortText())
+                        mFollowing.shortText = following->ShortText();
+                    mFollowing.description = "";
+                    if (following->Description())
+                        mFollowing.description = following->Description();
                 }
             }
         }
     }
-#endif
     mutex.Unlock();
 }
 
-tChannelState cGraphLCDState::GetChannelState()
+void cGraphLCDState::UpdateReplayInfo(void)
 {
-    tChannelState ret;
+    mutex.Lock();
+    if (!tickUsed)
+    {
+        if (mReplay.control)
+        {
+            mReplay.control->GetReplayMode(mReplay.play, mReplay.forward, mReplay.speed);
+            if (mReplay.control->GetIndex(mReplay.current, mReplay.total, false))
+            {
+                mReplay.total = (mReplay.total == 0) ? 1 : mReplay.total;
+            }
+            else
+            {
+                mReplay.control = NULL;
+            }
+        }
+    }
+    mutex.Unlock();
+}
+
+void cGraphLCDState::Update()
+{
+    UpdateChannelInfo();
+    UpdateEventInfo();
+    UpdateReplayInfo();
+}
+
+tChannel cGraphLCDState::GetChannelInfo()
+{
+    tChannel ret;
 
     mutex.Lock();
-    ret = channel;
+    ret = mChannel;
     mutex.Unlock();
 
     return ret;
 }
 
-tEventState cGraphLCDState::GetEventState()
+tEvent cGraphLCDState::GetPresentEvent()
 {
-    tEventState ret;
+    tEvent ret;
 
-    GetProgramme();
     mutex.Lock();
-    ret = event;
+    ret = mPresent;
+    mutex.Unlock();
+
+    return ret;
+}
+
+tEvent cGraphLCDState::GetFollowingEvent()
+{
+    tEvent ret;
+
+    mutex.Lock();
+    ret = mFollowing;
     mutex.Unlock();
 
     return ret;
@@ -763,40 +774,33 @@ tReplayState cGraphLCDState::GetReplayState()
     tReplayState ret;
 
     mutex.Lock();
+    ret = mReplay;
+    mutex.Unlock();
 
-    if (tickUsed)
+    return ret;
+}
+
+bool cGraphLCDState::IsRecording(int CardNumber)
+{
+    bool ret = false;
+    std::vector <tRecording>::iterator it;
+
+    mutex.Lock();
+    if (CardNumber == -1 && mRecordings.size() > 0)
     {
-        if (replay.control)
-        {
-            ret = replay;
-            replay.currentLast = replay.current;
-            replay.totalLast = replay.total;
-        }
-        else
-        {
-            ret = replay;
-        }
+        ret = true;
     }
     else
     {
-        if (replay.control)
+        it = mRecordings.begin();
+        while (it != mRecordings.end())
         {
-            if (replay.control->GetIndex(replay.current, replay.total, false))
+            if (it->deviceNumber == CardNumber)
             {
-                replay.total = (replay.total == 0) ? 1 : replay.total;
-                ret = replay;
-                replay.currentLast = replay.current;
-                replay.totalLast = replay.total;
+                ret = true;
+                break;
             }
-            else
-            {
-                replay.control = NULL;
-                ret = replay;
-            }
-        }
-        else
-        {
-            ret = replay;
+            it++;
         }
     }
     mutex.Unlock();
@@ -804,12 +808,23 @@ tReplayState cGraphLCDState::GetReplayState()
     return ret;
 }
 
-tCardState cGraphLCDState::GetCardState(int number)
+std::string cGraphLCDState::Recordings(int CardNumber)
 {
-    tCardState ret;
+    std::string ret = "";
+    std::vector <tRecording>::iterator it;
 
     mutex.Lock();
-    ret = card[number];
+    it = mRecordings.begin();
+    while (it != mRecordings.end())
+    {
+        if (CardNumber == -1 || it->deviceNumber == CardNumber)
+        {
+            if (ret.length() > 0)
+                ret += "\n";
+            ret += it->name;
+        }
+        it++;
+    }
     mutex.Unlock();
 
     return ret;
@@ -820,7 +835,7 @@ tOsdState cGraphLCDState::GetOsdState()
     tOsdState ret;
 
     mutex.Lock();
-    ret = osd;
+    ret = mOsd;
     mutex.Unlock();
 
     return ret;
@@ -831,8 +846,18 @@ tVolumeState cGraphLCDState::GetVolumeState()
     tVolumeState ret;
 
     mutex.Lock();
-    ret = volume;
+    ret = mVolume;
     mutex.Unlock();
 
+    return ret;
+}
+
+bool cGraphLCDState::ShowMessage()
+{
+    bool ret;
+
+    mutex.Lock();
+    ret = mOsd.message.length() > 0;
+    mutex.Unlock();
     return ret;
 }
