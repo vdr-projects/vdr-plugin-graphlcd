@@ -8,6 +8,7 @@
  *
  * (c) 2001-2004 Carsten Siebholz <c.siebholz AT t-online.de>
  * (c) 2004 Andreas Regel <andreas.regel AT powarman.de>
+ * (c) 2010 Wolfgang Astleitner <mrwastl AT users sourceforge net>
  */
 
 #include <getopt.h>
@@ -24,7 +25,7 @@
 
 
 static const char * kPluginName = "graphlcd";
-static const char *VERSION        = "0.2.0-pre2";
+static const char *VERSION        = "0.2.0-git";
 static const char *DESCRIPTION    = "Output to graphic LCD";
 static const char *MAINMENUENTRY  = NULL;
 

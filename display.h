@@ -8,6 +8,7 @@
  *
  * (c) 2001-2004 Carsten Siebholz <c.siebholz AT t-online.de>
  * (c) 2004 Andreas Regel <andreas.regel AT powarman.de>
+ * (c) 2010 Wolfgang Astleitner <mrwastl AT users sourceforge net>
  */
 
 #ifndef _GRAPHLCD_DISPLAY_H_
@@ -53,6 +54,8 @@ public:
     void SetMenuCurrent();
     const GLCD::cBitmap * GetScreen() const { return mScreen; }
 
+    void ForceUpdateBrightness();
+
 protected:
     virtual void Action();
 
@@ -75,6 +78,12 @@ private:
     bool mShowVolume;
 
     void UpdateIn(uint64_t msec);
+
+    /** set brightness depending on user activity */
+    void SetBrightness();
+    uint64_t LastTimeBrightness;
+    int nCurrentBrightness;
+    bool bBrightnessActive;
 };
 
 #endif

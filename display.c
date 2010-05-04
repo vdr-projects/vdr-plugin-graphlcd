@@ -8,6 +8,7 @@
  *
  * (c) 2001-2004 Carsten Siebholz <c.siebholz AT t-online.de>
  * (c) 2004 Andreas Regel <andreas.regel AT powarman.de>
+ * (c) 2010 Wolfgang Astleitner <mrwastl AT users sourceforge net>
  */
 
 #include <stdlib.h>
@@ -44,6 +45,10 @@ cGraphLCDDisplay::cGraphLCDDisplay()
     mLastState = StateNormal;
 
     mShowVolume = false;
+
+    nCurrentBrightness = -1;
+    LastTimeBrightness = 0;
+    bBrightnessActive = true;
 }
 
 cGraphLCDDisplay::~cGraphLCDDisplay()
@@ -173,6 +178,19 @@ void cGraphLCDDisplay::Action(void)
                 mUpdate = true;
             }
 
+            // update display if BrightnessDelay is exceeded
+            if ((nCurrentBrightness == GraphLCDSetup.BrightnessActive) && 
+                ((cTimeMs::Now() - LastTimeBrightness) > (uint64_t) (GraphLCDSetup.BrightnessDelay*1000))) 
+            {
+                mUpdate = true;
+            }
+
+            // external service changed (check each second)
+            if ( (currTimeMs/1000 != mLastTimeMs/1000) && mGraphLCDState->CheckServiceEventUpdate())
+            {
+                mUpdate = true;
+            }
+
             if (mUpdate)
             {
                 mUpdateAt = 0;
@@ -206,6 +224,7 @@ void cGraphLCDDisplay::Action(void)
                 mLcd->SetScreen(mScreen->Data(), mScreen->Width(), mScreen->Height(), mScreen->LineSize());
                 mLcd->Refresh(false);
                 mLastTimeMs = currTimeMs;
+                SetBrightness();
             }
             else
             {
@@ -296,4 +315,42 @@ void cGraphLCDDisplay::SetMenuCurrent()
         mState = StateMenu;
     }
     UpdateIn(100);
+}
+
+void cGraphLCDDisplay::SetBrightness()
+{
+    //mutex.Lock();
+    bool bActive = bBrightnessActive
+                   || (mState != StateNormal)
+                   || (GraphLCDSetup.ShowVolume && mShowVolume)
+                   || (GraphLCDSetup.ShowMessages && mGraphLCDState->ShowMessage())
+                   || (GraphLCDSetup.BrightnessDelay == 900);
+    if (bActive)
+    {
+        LastTimeBrightness = cTimeMs::Now();
+        bBrightnessActive = false;
+    }
+    if ((bActive ? GraphLCDSetup.BrightnessActive : GraphLCDSetup.BrightnessIdle) != nCurrentBrightness)
+    {
+        if (bActive)
+        {
+            mLcd->SetBrightness(GraphLCDSetup.BrightnessActive);
+            nCurrentBrightness = GraphLCDSetup.BrightnessActive;
+        }
+        else
+        {
+            if (GraphLCDSetup.BrightnessDelay < 1
+                || ((cTimeMs::Now() - LastTimeBrightness) > (uint64_t) (GraphLCDSetup.BrightnessDelay*1000)))
+            {
+                mLcd->SetBrightness(GraphLCDSetup.BrightnessIdle);
+                nCurrentBrightness = GraphLCDSetup.BrightnessIdle;
+            }
+        }
+    }
+    //mutex.Unlock();
+}
+
+void cGraphLCDDisplay::ForceUpdateBrightness() {
+    bBrightnessActive = true;
+    SetBrightness();
 }
