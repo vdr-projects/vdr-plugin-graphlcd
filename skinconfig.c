@@ -268,7 +268,19 @@ std::string cGraphLCDSkinConfig::FontPath(void)
 
 std::string cGraphLCDSkinConfig::CharSet(void)
 {
-    return "iso-8859-15";
+#if APIVERSNUM >= 10503
+    if (cCharSetConv::SystemCharacterTable()) {
+      return cCharSetConv::SystemCharacterTable();
+    } else {
+      return "UTF-8";
+    }
+#else
+    if (I18nCharSets()[Setup.OSDLanguage]) {
+      return I18nCharSets()[Setup.OSDLanguage];
+    } else {
+      return "iso-8859-15";
+    }
+#endif
 }
 
 std::string cGraphLCDSkinConfig::Translate(const std::string & Text)
