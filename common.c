@@ -4,6 +4,35 @@
 
 #include <vdr/plugin.h>
 
+#if APIVERSNUM < 10503
+#include <locale.h>
+
+static char* locID[] = {
+ "en_US", //" English",
+ "de_DE", //   "Deutsch",
+ "sl_SI", //   "Slovenski",
+ "it_IT", //   "Italiano",
+ "nl_NL", //   "Nederlands",
+ "pt_PT", //   "Português",
+ "fr_FR", //   "Français",
+ "no_NO", //   "Norsk",
+ "fi_FI", //   "suomi",  Finnish (this is not a typo - it's really lowercase!)
+ "pl_PL", //   "Polski",
+ "es_ES", //   "Español",
+ "el_GR", //   "ÅëëçíéêÜ",  Greek
+ "sv_SE", //   "Svenska",
+ "ro_RO", //   "Românã",
+ "hu_HU", //   "Magyar",
+ "ca_ES", //   "Català",
+ "ru_RU", //   "ÀãááÚØÙ",  Russian
+ "hr_HR", //   "Hrvatski",
+ "et_EE", //   "Eesti",
+ "da_DK", //   "Dansk",
+ "cs_CZ" //   "Èesky", Czech
+};
+#endif
+
+
 GLCD::cType TimeType(time_t Time, const std::string &Format)
 {
     static char result[1000];
@@ -14,6 +43,10 @@ GLCD::cType TimeType(time_t Time, const std::string &Format)
     {
         if (Format.length() > 0)
         {
+// for vdr < 1.5.x: force locale for correct language output. for >= 1.5.x: system locale should be fine
+#if APIVERSNUM < 10503
+            setlocale(LC_TIME, locID[Setup.OSDLanguage]);
+#endif
             strftime(result, sizeof(result), Format.c_str(), tm);
 
             GLCD::cType r = result;
