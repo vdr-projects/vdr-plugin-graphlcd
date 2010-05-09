@@ -67,12 +67,15 @@ endif
 
 ### The object files (add further files here):
 
-OBJS = alias.o common.o display.o i18n.o menu.o plugin.o setup.o skinconfig.o state.o strfct.o
+#OBJS = alias.o common.o display.o i18n.o menu.o plugin.o setup.o skinconfig.o state.o strfct.o
+OBJS = alias.o common.o display.o menu.o plugin.o setup.o skinconfig.o state.o strfct.o
 
 ### The main target:
 TARGETS = libvdr-$(PLUGIN).so
 ifneq ($(shell grep -l 'Phrases' $(VDRDIR)/i18n.c),$(VDRDIR)/i18n.c)
 TARGETS += i18n
+else
+OBJS += i18n.o
 endif
 
 

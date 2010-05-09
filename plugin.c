@@ -131,7 +131,9 @@ bool cPluginGraphLCD::Initialize()
     unsigned int displayNumber = 0;
     const char * cfgDir;
 
+#if APIVERSNUM < 10503
     RegisterI18n(Phrases);
+#endif
 
     if (mConfigName.length() == 0)
     {
