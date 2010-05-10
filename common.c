@@ -45,7 +45,7 @@ GLCD::cType TimeType(time_t Time, const std::string &Format)
         {
 // for vdr < 1.5.x: force locale for correct language output. for >= 1.5.x: system locale should be fine
 #if APIVERSNUM < 10503
-            setlocale(LC_TIME, locID[Setup.OSDLanguage]);
+            setlocale(LC_TIME, ( Setup.OSDLanguage < (int)(sizeof(locID)/sizeof(char*)) ) ? locID[Setup.OSDLanguage] : "en_US" );
 #endif
             strftime(result, sizeof(result), Format.c_str(), tm);
 
