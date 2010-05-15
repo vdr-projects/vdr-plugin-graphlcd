@@ -166,6 +166,19 @@ void cGraphLCDDisplay::Action(void)
                 }
             }
 
+            {
+                GLCD::cSkinDisplay * display = NULL;
+
+                if (mState == StateNormal)
+                    display = mSkin->GetDisplay("normal");
+                else if (mState == StateReplay)
+                    display = mSkin->GetDisplay("replay");
+                else if (mState == StateMenu)
+                    display = mSkin->GetDisplay("menu");
+                if (display && display->NeedsUpdate(currTimeMs ) )
+                   mUpdate = true;
+
+            }
             // update Display every minute
             if (mState == StateNormal && currTimeMs/60000 != mLastTimeMs/60000)
             {

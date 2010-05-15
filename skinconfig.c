@@ -128,6 +128,14 @@ typedef enum _eTokenId
     tokSettingShowReplayLogo,
     tokSettingShowSymbols,
     tokSettingShowTimebar,
+
+    tokScrollMode,
+    tokScrollSpeed,
+    tokScrollTime,
+    tokBrightnessActive,
+    tokBrightnessIdle,
+    tokBrightnessDelay,
+
     tokPrivateSettingEnd,
 
     tokCountToken
@@ -239,6 +247,14 @@ static const std::string Tokens[tokCountToken] =
     "SettingShowReplayLogo",
     "SettingShowSymbols",
     "SettingShowTimebar",
+
+    "ScrollMode",
+    "ScrollSpeed",
+    "ScrollTime",
+    "BrightnessActive",
+    "BrightnessIdle",
+    "BrightnessDelay",
+
     "privateSettingEnd"
 };
 
@@ -607,6 +623,20 @@ GLCD::cType cGraphLCDSkinConfig::GetToken(const GLCD::tSkinToken & Token)
                 if (GraphLCDSetup.ShowTimebar)
                     return true;
                 return false;
+
+            case tokScrollMode:
+                return GraphLCDSetup.ScrollMode;
+            case tokScrollSpeed:
+                return GraphLCDSetup.ScrollSpeed;
+            case tokScrollTime:
+                return GraphLCDSetup.ScrollTime;
+            case tokBrightnessActive:
+                return GraphLCDSetup.BrightnessActive;
+            case tokBrightnessIdle:
+                return GraphLCDSetup.BrightnessIdle;
+            case tokBrightnessDelay:
+                return GraphLCDSetup.BrightnessDelay;
+
             default:
                 break;
         }
