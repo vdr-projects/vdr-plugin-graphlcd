@@ -93,23 +93,6 @@ struct tVolumeState
     uint64_t lastChange;
 };
 
-// Radiotext
-struct RadioTextService_v1_0 {
-  int rds_info;
-  int rds_pty;
-  char *rds_text;
-  char *rds_title;
-  char *rds_artist;
-  struct tm *title_start;
-};
-
-// LcrData
-struct LcrService_v1_0 {
-  cString destination;
-  cString price;
-  cString pulse;
-};
-
 class cGraphLCDDisplay;
 
 class cGraphLCDState : public cStatus
@@ -128,11 +111,6 @@ private:
     std::vector <tRecording> mRecordings;
     tOsdState mOsd;
     tVolumeState mVolume;
-
-    RadioTextService_v1_0  checkRTSData, currRTSData;
-    LcrService_v1_0        checkLcrData, currLcrData;
-    bool  rtsChanged, rtsActive;
-    bool  lcrChanged, lcrActive;
 
     void SetChannel(int ChannelNumber);
     void UpdateChannelInfo(void);
@@ -168,8 +146,6 @@ public:
     tOsdState GetOsdState();
     tVolumeState GetVolumeState();
     bool ShowMessage();
-
-    bool CheckServiceEventUpdate();
 };
 
 #endif

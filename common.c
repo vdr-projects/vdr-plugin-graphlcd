@@ -70,8 +70,8 @@ GLCD::cType DurationType(int Index, const std::string &Format)
             enum { normal, format } state = normal;
             int n = 0;
 #if VDRVERSNUM >= 10701
-            int f = (Index % DEFAULTFRAMESPERSECOND) + 1;
-            int s = (Index / DEFAULTFRAMESPERSECOND);
+            int f = (Index % (int)DEFAULTFRAMESPERSECOND) + 1;
+            int s = (Index / (int)DEFAULTFRAMESPERSECOND);
 #else
             int f = (Index % FRAMESPERSEC) + 1;
             int s = (Index / FRAMESPERSEC);

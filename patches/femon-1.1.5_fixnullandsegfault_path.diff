@@ -1,0 +1,38 @@
+--- femon.c_orig	2008-01-20 03:20:00.000000000 +0100
++++ femon.c	2010-06-05 01:30:33.000000000 +0200
+@@ -134,18 +134,23 @@
+ 
+ bool cPluginFemon::Service(const char *Id, void *Data)
+ {
+-  if ((strcmp(Id,"FemonService-v1.0") == 0) && Data) {
+-     FemonService_v1_0 *data = (FemonService_v1_0*)Data;
+-     int ndx = cDevice::ActualDevice()->CardIndex();
+-     data->fe_name = getFrontendName(ndx);
+-     data->fe_status = getFrontendStatus(ndx);
+-     data->fe_snr = getSNR(ndx);
+-     data->fe_signal = getSignal(ndx);
+-     data->fe_ber = getBER(ndx);
+-     data->fe_unc = getUNC(ndx);
+-     data->video_bitrate = cFemonOsd::Instance() ? cFemonOsd::Instance()->GetVideoBitrate() : 0.0;
+-     data->audio_bitrate = cFemonOsd::Instance() ? cFemonOsd::Instance()->GetAudioBitrate() : 0.0;
+-     data->dolby_bitrate = cFemonOsd::Instance() ? cFemonOsd::Instance()->GetDolbyBitrate() : 0.0;
++  if (strcmp(Id,"FemonService-v1.0") == 0) {
++     if (Data) {
++        FemonService_v1_0 *data = (FemonService_v1_0*)Data;
++        if (! cDevice::ActualDevice() )
++            return false;
++
++        int ndx = cDevice::ActualDevice()->CardIndex();
++        data->fe_name = getFrontendName(ndx);
++        data->fe_status = getFrontendStatus(ndx);
++        data->fe_snr = getSNR(ndx);
++        data->fe_signal = getSignal(ndx);
++        data->fe_ber = getBER(ndx);
++        data->fe_unc = getUNC(ndx);
++        data->video_bitrate = cFemonOsd::Instance() ? cFemonOsd::Instance()->GetVideoBitrate() : 0.0;
++        data->audio_bitrate = cFemonOsd::Instance() ? cFemonOsd::Instance()->GetAudioBitrate() : 0.0;
++        data->dolby_bitrate = cFemonOsd::Instance() ? cFemonOsd::Instance()->GetDolbyBitrate() : 0.0;
++        }
+      return true;
+      }
+ 

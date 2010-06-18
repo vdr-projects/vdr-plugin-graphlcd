@@ -28,6 +28,8 @@
 #include "state.h"
 #include "skinconfig.h"
 
+#include "service.h"
+
 #include <vdr/thread.h>
 
 
@@ -56,6 +58,7 @@ public:
 
     void ForceUpdateBrightness();
 
+    const cGraphLCDService * GetServiceObject() const { return mService; }
 protected:
     virtual void Action();
 
@@ -79,11 +82,13 @@ private:
 
     void UpdateIn(uint64_t msec);
 
-    /** set brightness depending on user activity */
+    /* set brightness depending on user activity */
     void SetBrightness();
     uint64_t LastTimeBrightness;
     int nCurrentBrightness;
     bool bBrightnessActive;
+    /* external services */
+    cGraphLCDService * mService;
 };
 
 #endif

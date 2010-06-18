@@ -17,7 +17,6 @@
 
 #include <vdr/eitscan.h>
 #include <vdr/i18n.h>
-#include <vdr/plugin.h>
 
 
 cGraphLCDState::cGraphLCDState(cGraphLCDDisplay * Display)
@@ -73,12 +72,6 @@ cGraphLCDState::cGraphLCDState(cGraphLCDDisplay * Display)
 
     mVolume.value = -1;
     mVolume.lastChange = 0;
-
-    /* change flags for RDS and LCR services */
-    rtsChanged = false;
-    rtsActive  = false;
-    lcrChanged = false;
-    lcrActive  = false;
 
     SetChannel(cDevice::CurrentChannel());
 }
@@ -650,8 +643,6 @@ void cGraphLCDState::UpdateChannelInfo(void)
 
 void cGraphLCDState::UpdateEventInfo(void)
 {
-    bool ptitle = false;
-
     mutex.Lock();
     const cEvent * present = NULL, * following = NULL;
     cSchedulesLock schedulesLock;
@@ -696,7 +687,6 @@ void cGraphLCDState::UpdateEventInfo(void)
                     mPresent.title = "";
                     if (present->Title()) {
                         mPresent.title = present->Title();
-                        ptitle = true;
                     }
                     mPresent.shortText = "";
                     if (present->ShortText())
@@ -722,31 +712,6 @@ void cGraphLCDState::UpdateEventInfo(void)
                         mFollowing.description = following->Description();
                 }
             }
-        }
-    }
-
-    /* get events from add. services (if activated) */
-    if (rtsActive) {
-        if (currRTSData.rds_info == 2 && strstr(currRTSData.rds_title, "---") == NULL) {
-            char rtpinfo[2][65], rtstr[140];
-            strcpy(rtpinfo[0], currRTSData.rds_title);
-            strcpy(rtpinfo[1], currRTSData.rds_artist);
-            sprintf(rtstr, "%02d:%02d  %s | %s", currRTSData.title_start->tm_hour, currRTSData.title_start->tm_min, trim(((std::string)(rtpinfo[0]))).c_str(), trim(((std::string)(rtpinfo[1]))).c_str());
-            ptitle ? mPresent.shortText = rtstr : mPresent.title = rtstr;
-        } else if (currRTSData.rds_info > 0) {
-            char rtstr[65];
-            strcpy(rtstr, currRTSData.rds_text);
-            ptitle ? mPresent.shortText = trim(rtstr) : mPresent.title = trim(rtstr);
-        }
-    } else if (lcrActive && lcrChanged) {
-        if ( strstr( currLcrData.destination, "---" ) == NULL ) {
-            char lcrStringParts[3][25], lcrString[100];
-            strcpy( lcrStringParts[0], (const char *)currLcrData.destination );
-            strcpy( lcrStringParts[1], (const char *)currLcrData.price );
-            strcpy( lcrStringParts[2], (const char *)currLcrData.pulse );
-            sprintf(lcrString, "%s | %s", trim((std::string)(lcrStringParts[1])).c_str(), trim((std::string)(lcrStringParts[2])).c_str());
-            mPresent.title = trim(lcrStringParts[0]);
-            mPresent.shortText = trim(lcrString);
         }
     }
 
@@ -905,68 +870,6 @@ bool cGraphLCDState::ShowMessage()
     ret = mOsd.message.length() > 0;
     mutex.Unlock();
     return ret;
-}
-
-
-/* async. check event updates for services from other plugins */
-/* only sets flags but does NOT update display output */
-bool cGraphLCDState::CheckServiceEventUpdate(void)
-{
-    mutex.Lock();
-
-    rtsChanged = false;
-    lcrChanged = false;
-    rtsActive  = false;
-    lcrActive  = false;
-
-    // get&display Radiotext
-    cPlugin *p;
-    p = cPluginManager::CallFirstService("RadioTextService-v1.0", NULL);
-    if (p) {
-        rtsActive = true;
-        if (cPluginManager::CallFirstService("RadioTextService-v1.0", &checkRTSData)) {
-            if (
-                    (currRTSData.rds_info != checkRTSData.rds_info) ||
-                    (currRTSData.rds_pty != checkRTSData.rds_pty) ||
-                    (strcmp(currRTSData.rds_text, checkRTSData.rds_text) != 0) ||
-                    (strcmp(currRTSData.rds_title, checkRTSData.rds_title) != 0) || 
-                    (strcmp(currRTSData.rds_artist, checkRTSData.rds_artist) != 0)
-               ) 
-            {
-                currRTSData.rds_info   = checkRTSData.rds_info;
-                currRTSData.rds_pty    = checkRTSData.rds_pty;
-                currRTSData.rds_text   = checkRTSData.rds_text;
-                currRTSData.rds_title  = checkRTSData.rds_title;
-                currRTSData.rds_artist = checkRTSData.rds_artist;
-                currRTSData.title_start= checkRTSData.title_start;
-
-                rtsChanged = true;
-            }
-        }
-    }
- 
- 
-    // get&display LcrData
-    p = cPluginManager::CallFirstService("LcrService-v1.0", NULL);
-    if (p) {
-        lcrActive = true;
-        if (cPluginManager::CallFirstService("LcrService-v1.0", &checkLcrData)) {
-            if (
-                    (strcmp(currLcrData.destination, checkLcrData.destination) != 0) ||
-                    (strcmp(currLcrData.price, checkLcrData.price) != 0) || 
-                    (strcmp(currLcrData.pulse, checkLcrData.pulse) != 0)
-               ) 
-            {
-                currLcrData.destination = checkLcrData.destination;
-                currLcrData.price       = checkLcrData.price;
-                currLcrData.pulse       = checkLcrData.pulse;
-
-                lcrChanged = true;
-            }
-        }
-    }
-    mutex.Unlock();
-    return (rtsChanged || lcrChanged);
 }
 
 

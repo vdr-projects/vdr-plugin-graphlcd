@@ -17,11 +17,12 @@
 #include "display.h"
 #include "state.h"
 #include "skinconfig.h"
+#include "service.h"
 
 typedef enum _eTokenId
 {
-	// current channel
-	tokPrivateChannelStart,
+    // current channel
+    tokPrivateChannelStart,
     tokChannelNumber,
     tokChannelName,
     tokChannelShortName,
@@ -42,10 +43,10 @@ typedef enum _eTokenId
     tokChannelAlias,
     tokPrivateChannelEnd,
 
-	tokPrivateRecordingStart,
-	tokIsRecording,
-	tokRecordings,
-	tokPrivateRecordingEnd,
+    tokPrivateRecordingStart,
+    tokIsRecording,
+    tokRecordings,
+    tokPrivateRecordingEnd,
 
     // present event
     tokPrivatePresentStart,
@@ -115,7 +116,7 @@ typedef enum _eTokenId
     tokButtonGreen,
     tokButtonYellow,
     tokButtonBlue,
-	tokPrivateOsdEnd,
+    tokPrivateOsdEnd,
 
     tokDateTime,
     tokConfigPath,
@@ -135,8 +136,13 @@ typedef enum _eTokenId
     tokBrightnessActive,
     tokBrightnessIdle,
     tokBrightnessDelay,
-
     tokPrivateSettingEnd,
+
+    // external services
+    tokPrivateServiceStart,
+    tokServiceIsAvailable,
+    tokServiceItem,
+    tokPrivateServiceEnd,
 
     tokCountToken
 } eTokenId;
@@ -164,10 +170,10 @@ static const std::string Tokens[tokCountToken] =
     "ChannelAlias",
     "privateChannelEnd",
 
-	"privateRecordingStart",
-	"IsRecording",
-	"Recordings",
-	"privateRecordingEnd",
+    "privateRecordingStart",
+    "IsRecording",
+    "Recordings",
+    "privateRecordingEnd",
 
     "privatePresentStart",
     "PresentValid",
@@ -254,8 +260,13 @@ static const std::string Tokens[tokCountToken] =
     "BrightnessActive",
     "BrightnessIdle",
     "BrightnessDelay",
+    "privateSettingEnd",
 
-    "privateSettingEnd"
+    // external services
+    "privateServiceStart",
+    "ServiceIsAvailable",
+    "ServiceItem",
+    "privateServiceEnd"
 };
 
 cGraphLCDSkinConfig::cGraphLCDSkinConfig(const cGraphLCDDisplay * Display, const std::string & CfgPath, const std::string & SkinsPath, const std::string & SkinName, cGraphLCDState * State)
@@ -641,6 +652,36 @@ GLCD::cType cGraphLCDSkinConfig::GetToken(const GLCD::tSkinToken & Token)
                 break;
         }
     }
+    else if (Token.Id > tokPrivateServiceStart && Token.Id < tokPrivateServiceEnd)
+    {
+        cGraphLCDService * s = (cGraphLCDService*)mDisplay->GetServiceObject();
+        switch (Token.Id)
+        {
+            case tokServiceIsAvailable: {
+                if (Token.Attrib.Text == "")
+                    return false;
+
+                return s->ServiceIsAvailable(Token.Attrib.Text);
+            }
+            break;
+            case tokServiceItem: {
+                size_t found = Token.Attrib.Text.find(",");
+                std::string ServiceName = "";
+                std::string ItemName = "";
+
+                if (found != std::string::npos) {
+                    ServiceName = Token.Attrib.Text.substr(0, found);
+                    ItemName = Token.Attrib.Text.substr(found+1);
+                } else {
+                    ServiceName = Token.Attrib.Text;
+                }
+                return s->GetItem(ServiceName, ItemName);
+            }
+            break;
+            default:
+                break;
+        }
+    }
     else
     {
         switch (Token.Id)
@@ -723,6 +764,12 @@ int cGraphLCDSkinConfig::GetTabPosition(int Index, int MaxWidth, const GLCD::cFo
         return mTabs[Index];
     return 0;
 }
+
+uint64_t cGraphLCDSkinConfig::Now(void)
+{
+    return cTimeMs::Now();
+}
+
 
 void cGraphLCDSkinConfig::SetMenuClear()
 {

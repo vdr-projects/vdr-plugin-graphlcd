@@ -65,10 +65,13 @@ ifdef HAVE_FREETYPE2
     DEFINES += -DHAVE_FREETYPE2
 endif
 
+### If femon-plugin <= 1.7.7 is used and has already been patched (see README)
+# DEFINES += -DGRAPHLCD_SERVICE_FEMON_VALID
+
 ### The object files (add further files here):
 
 #OBJS = alias.o common.o display.o i18n.o menu.o plugin.o setup.o skinconfig.o state.o strfct.o
-OBJS = alias.o common.o display.o menu.o plugin.o setup.o skinconfig.o state.o strfct.o
+OBJS = alias.o common.o display.o menu.o plugin.o setup.o skinconfig.o state.o strfct.o service.o
 
 ### The main target:
 TARGETS = libvdr-$(PLUGIN).so

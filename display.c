@@ -49,6 +49,8 @@ cGraphLCDDisplay::cGraphLCDDisplay()
     nCurrentBrightness = -1;
     LastTimeBrightness = 0;
     bBrightnessActive = true;
+
+    mService = NULL; /* cannot be initialised here (mGraphLCDState not yet available) */
 }
 
 cGraphLCDDisplay::~cGraphLCDDisplay()
@@ -59,6 +61,8 @@ cGraphLCDDisplay::~cGraphLCDDisplay()
     delete mSkinConfig;
     delete mScreen;
     delete mGraphLCDState;
+
+    delete mService;
 }
 
 bool cGraphLCDDisplay::Initialise(GLCD::cDriver * Lcd, const std::string & CfgPath, const std::string & SkinsPath, const std::string & SkinName)
@@ -72,6 +76,9 @@ bool cGraphLCDDisplay::Initialise(GLCD::cDriver * Lcd, const std::string & CfgPa
     mGraphLCDState = new cGraphLCDState(this);
     if (!mGraphLCDState)
         return false;
+
+    // must be initialised before cGraphLCDSkinConfig (else: seg fault)
+    mService = new cGraphLCDService(mGraphLCDState);
 
     skinsPath = SkinsPath;
     if (skinsPath == "")
@@ -191,18 +198,27 @@ void cGraphLCDDisplay::Action(void)
                 mUpdate = true;
             }
 
+
+            bool bActive = bBrightnessActive
+                   || (mState != StateNormal)
+                   || (GraphLCDSetup.ShowVolume && mShowVolume)
+                   || (GraphLCDSetup.ShowMessages && mGraphLCDState->ShowMessage())
+                   || (GraphLCDSetup.BrightnessDelay == 900);
+
             // update display if BrightnessDelay is exceeded
-            if ((nCurrentBrightness == GraphLCDSetup.BrightnessActive) && 
-                ((cTimeMs::Now() - LastTimeBrightness) > (uint64_t) (GraphLCDSetup.BrightnessDelay*1000))) 
+            if (bActive && (nCurrentBrightness == GraphLCDSetup.BrightnessActive) && 
+                ((int)((cTimeMs::Now() - LastTimeBrightness)) > (GraphLCDSetup.BrightnessDelay*1000))) 
             {
                 mUpdate = true;
             }
 
-            // external service changed (check each second)
-            if ( (currTimeMs/1000 != mLastTimeMs/1000) && mGraphLCDState->CheckServiceEventUpdate())
+
+            // external service changed (check each 1/10th second)
+            if ( (currTimeMs/100 != mLastTimeMs/100) && mService->NeedsUpdate(currTimeMs))
             {
                 mUpdate = true;
             }
+
 
             if (mUpdate)
             {
@@ -353,7 +369,7 @@ void cGraphLCDDisplay::SetBrightness()
         else
         {
             if (GraphLCDSetup.BrightnessDelay < 1
-                || ((cTimeMs::Now() - LastTimeBrightness) > (uint64_t) (GraphLCDSetup.BrightnessDelay*1000)))
+                || ((int)(cTimeMs::Now() - LastTimeBrightness) > (GraphLCDSetup.BrightnessDelay*1000)))
             {
                 mLcd->SetBrightness(GraphLCDSetup.BrightnessIdle);
                 nCurrentBrightness = GraphLCDSetup.BrightnessIdle;

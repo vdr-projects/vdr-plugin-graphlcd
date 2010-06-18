@@ -4,7 +4,8 @@ Written by Carsten Siebholz (c.siebholz AT t-online.de>
 From 0.0.8 on maintained by Andreas 'powARman' Regel (andreas.regel AT powarman.de)
 from 0.1.5 on maintained by Wolfgang Astleitner (mrwastl AT users.sourceforge.net) & Andreas 'randy' Weinberger (vdr AT smue.org)
 
-Project's homepage: http://graphlcd.berlios.de/
+Project's homepage: http://projects.vdr-developer.org/projects/show/graphlcd
+      before 0.1.5: http://graphlcd.berlios.de/
       before 0.0.8: http://c.siebholz.bei.t-online.de/
 GIT repo: http://projects.vdr-developer.org/projects/show/graphlcd
 
@@ -41,7 +42,9 @@ Installation and Configuration:
    |   |   |
    |   |   +-- fonts (contains *.fnt files)
    |   |   |
-   .   .   +-- logos (contains *.glcd files)
+   |   |   +-- logos (contains *.glcd files)
+   |   |   |
+   .   .   +-- skins (contains skin files and definitions)
    .   .
 
 5. If you are using VDR 1.3 or higher, you will have to recreate the
@@ -56,6 +59,8 @@ Installation and Configuration:
    Possible options are:
      -c CONFIG,   --config=CONFIG    file name and path of the configuration file
      -d DISPLAY,  --display=DISPLAY  name of the display
+     -s SKIN,     --skin=SKIN        name of the skin
+
 
    -c: Sets the file path and name of the driver library's config file.
        If this parameter is not given the default '/etc/graphlcd.conf'
@@ -63,10 +68,13 @@ Installation and Configuration:
    -d: Sets the name of the section in the config file that specifies
        the display used for the plugin's output. If this parameter is
        not given, the first section will be used.
+   -s: Sets the name of the skin to be used.
+       If this parameter is not given, skin 'default' will be used.
 
    Examples:
      vdr -P 'graphlcd -c /video/graphlcd.conf -d ks0108'
      vdr -P 'graphlcd -c /etc/graphlcd.conf'
+     vdr -P 'graphlcd -c /video/graphlcd.conf -d usb13700 -s bigskin'
 
 
 Channel Logos
@@ -187,47 +195,60 @@ Scroll time interval:
   (Possible values: 100 <= x <= 2000)
 
 
-Changing Fonts:
----------------
-It's very easy to change the fonts that are used by graphlcd.
-The plugin uses 4 fonts:
-- a large font, that is used for
-        the title of the current program and for
-        the title of the recording (during replay).
-- a normal font, that is used for
-        the date/time bar,
-        the channel bar,
-        the starttime, endtime and the subtitle of the current program,
-        the times in the replay screen,
-        the title and the items in the menus,
-        the popup-messages and for
-        the text items like the content of a recording.
-- a small font, that is only used for the text of the 4 colored buttons.
-- a symbol font, that contains the symbols.
 
-Because smaller displays should use smaller fonts, the displays will be
-classified in 3 categories. Each category should have all 4 fonts.
-The name of the font files depend on the category and on the font:
-  small displays  ( vertical size < 64 ):
-    f_s_l.fnt  : large font
-    f_s_n.fnt  : normal font
-    f_s_s.fnt  : small font
-    f_s_sym.fnt: symbols
-  medium displays ( vertical size 64..127 ):
-    f_m_l.fnt  : large font
-    f_m_n.fnt  : normal font
-    f_m_s.fnt  : small font
-    f_m_sym.fnt: symbols
-  large displays  ( vertical size >= 128 ):
-    f_l_l.fnt  : large font
-    f_l_n.fnt  : normal font
-    f_l_s.fnt  : small font
-    f_l_sym.fnt: symbols
+Patches
+-------
+femon:
+versions <= 1.7.7 require a patch to be functionable with graphlcd.
+if graphlcd-plugin detects a femon version <= 1.7.7 and this version has not yet been patched,
+femon will ignored by graphlcd (problem: if graphlcd calls an unpatched femon, vdr will crash
+when shutting or restarting). the bug has already been reported to the maintainer of femon and
+will be fixed in 1.7.8.
 
-To change the fonts you only have to change the related symbolic link to
-another font file.
-If you use another already existing font or if you want to create a new
-one by yourself does not matter. If you want to create a new one or if
-you want to modify an existing font, look into /tools/crtfont in the
-GraphLCD base package and read the README.
+note: $SOURCEDIR/VDR == source directory of vdr. replace accordingly.
 
+for femon <= 1.2.x  apply the following patch:
+cd $SOURCEDIR/VDR/PLUGINS/src/femon
+patch -p0 < $SOURCEDIR/VDR/PLUGINS/src/graphlcd/patches/femon-1.1.5_fixnullandsegfault_path.diff
+
+for femon > 1.2.x and <= 1.7.7 apply the following patch:
+cd $SOURCEDIR/VDR/PLUGINS/src/femon
+patch -p0 < $SOURCEDIR/VDR/PLUGINS/src/graphlcd/patches/femon-1.7.7_fixsegfault_patch.diff
+
+or, if you don't want to apply a patch or the patch fails with your version of femon,
+replace the entire function
+
+bool cPluginFemon::Service(const char *Id, void *Data)
+{
+....
+}
+
+with the following one (should be valid for all femon versions >= 1.1.x):
+
+bool cPluginFemon::Service(const char *Id, void *Data)
+{
+  if (strcmp(Id,"FemonService-v1.0") == 0) {
+     if (Data) {
+        FemonService_v1_0 *data = (FemonService_v1_0*)Data;
+        if (! cDevice::ActualDevice() )
+            return false;
+
+        int ndx = cDevice::ActualDevice()->CardIndex();
+        data->fe_name = getFrontendName(ndx);
+        data->fe_status = getFrontendStatus(ndx);
+        data->fe_snr = getSNR(ndx);
+        data->fe_signal = getSignal(ndx);
+        data->fe_ber = getBER(ndx);
+        data->fe_unc = getUNC(ndx);
+        data->video_bitrate = cFemonOsd::Instance() ? cFemonOsd::Instance()->GetVideoBitrate() : 0.0;
+        data->audio_bitrate = cFemonOsd::Instance() ? cFemonOsd::Instance()->GetAudioBitrate() : 0.0;
+        data->dolby_bitrate = cFemonOsd::Instance() ? cFemonOsd::Instance()->GetDolbyBitrate() : 0.0;
+        }
+     return true;
+     }
+
+  return false;
+}
+
+
+after applying this patch uncomment DEFINES += -DGRAPHLCD_SERVICE_FEMON_VALID in the Makefile.

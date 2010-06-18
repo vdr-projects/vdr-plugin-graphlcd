@@ -37,6 +37,7 @@ public:
     virtual GLCD::cType GetToken(const GLCD::tSkinToken & Token);
     virtual int GetTokenId(const std::string & Name);
     virtual int GetTabPosition(int Index, int MaxWidth, const GLCD::cFont & Font);
+    virtual uint64_t Now(void);
 
     const std::string & SkinName(void) const { return mSkinName; }
 };

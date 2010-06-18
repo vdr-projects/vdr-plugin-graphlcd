@@ -1,0 +1,11 @@
+--- femon.c_orig	2010-06-05 01:34:59.000000000 +0200
++++ femon.c	2010-06-05 01:35:23.000000000 +0200
+@@ -133,6 +133,8 @@
+   if (strcmp(Id,"FemonService-v1.0") == 0) {
+      if (Data) {
+         FemonService_v1_0 *data = (FemonService_v1_0*)Data;
++        if (! cDevice::ActualDevice() )
++            return false;
+         int ndx = cDevice::ActualDevice()->CardIndex();
+         data->fe_name = getFrontendName(ndx);
+         data->fe_status = getFrontendStatus(ndx);
