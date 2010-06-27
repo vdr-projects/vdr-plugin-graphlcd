@@ -122,7 +122,19 @@ void cGraphLCDDisplay::Action(void)
     mSkin = GLCD::XmlParse(*mSkinConfig, mSkinConfig->SkinName(), skinFileName);
     if (!mSkin)
     {
+        int skipx = mLcd->Width() >> 3;
+        int skipy = mLcd->Height() >> 3;
+
         esyslog("graphlcd plugin: ERROR loading skin\n");
+
+        // draw an 'X' to inform the user that there was a problem with loading the skin
+        // (better than just leaving an empty screen ...)
+        mLcd->Clear();
+        mScreen->DrawRectangle(0, 0, mLcd->Width()-1, mLcd->Height()-1, GLCD::clrBlack, true);
+        mScreen->DrawLine(skipx, skipy, mLcd->Width()-1-skipx, mLcd->Height()-1-skipy, GLCD::clrWhite);
+        mScreen->DrawLine(mLcd->Width()-1-skipx, skipy, skipx, mLcd->Height()-1-skipy, GLCD::clrWhite);
+        mLcd->SetScreen(mScreen->Data(), mScreen->Width(), mScreen->Height(), mScreen->LineSize());
+        mLcd->Refresh(true);
         return;
     }
     mSkin->SetBaseSize(mScreen->Width(), mScreen->Height());
