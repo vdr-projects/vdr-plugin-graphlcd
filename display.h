@@ -147,6 +147,9 @@ private:
     uint64_t LastTimeBrightness;
     int nCurrentBrightness;
     bool bBrightnessActive;
+
+    cCharSetConv *conv;
+    const char * Convert(const char *s);
 };
 
 #endif

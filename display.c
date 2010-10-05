@@ -114,6 +114,8 @@ cGraphLCDDisplay::cGraphLCDDisplay()
     nCurrentBrightness = -1;
     LastTimeBrightness = 0;
     bBrightnessActive = true;
+
+    conv = new cCharSetConv(cCharSetConv::SystemCharacterTable() ? cCharSetConv::SystemCharacterTable() : "UTF-8", "ISO-8859-1");
 }
 
 cGraphLCDDisplay::~cGraphLCDDisplay()
@@ -809,6 +811,7 @@ void cGraphLCDDisplay::DisplayChannel()
 {
     int FrameWidth, yPos;
     tChannelState channel;
+    const char * pszTmp1;
 
     channel = GraphLCDState->GetChannelState();
     if (GraphLCDSetup.ShowChannel)
@@ -858,17 +861,19 @@ void cGraphLCDDisplay::DisplayChannel()
 
         if (channel.strTmp.length() > 0)
         {
+            pszTmp1 = Convert(channel.strTmp.c_str());
             bitmap->DrawText(FRAME_SPACE_X + TEXT_OFFSET_X,
                              yPos + TEXT_OFFSET_Y_CHANNEL,
                              FRAME_SPACE_X + FrameWidth - 1,
-                             channel.strTmp, normalFont, GLCD::clrWhite);
+                             pszTmp1, normalFont, GLCD::clrWhite);
         }
         else if (channel.str.length() > 0)
         {
+            pszTmp1 = Convert(channel.str.c_str());
             bitmap->DrawText(FRAME_SPACE_X + TEXT_OFFSET_X,
                              yPos + TEXT_OFFSET_Y_CHANNEL,
                              FRAME_SPACE_X + FrameWidth - 1,
-                             channel.str, normalFont, GLCD::clrWhite);
+                             pszTmp1, normalFont, GLCD::clrWhite);
         }
     }
 }
@@ -1215,7 +1220,7 @@ void cGraphLCDDisplay::DisplayProgramme()
         strftime(buffer, sizeof(buffer), "%R", localtime_r(&event.presentTime, &tm_r));
         if (event.followingTime && event.followingTime != event.presentTime)
         {
-            str = buffer;
+            str = Convert(buffer);
             if ((bitmap->Width() >= MINY_L || !IsSymbolsActive()))
             {
                 str += " - ";
@@ -1236,7 +1241,7 @@ void cGraphLCDDisplay::DisplayProgramme()
         }
         else
         {
-            str = buffer;
+            str = Convert(buffer);
         }
 
         if (!event.presentTime)
@@ -1278,7 +1283,7 @@ void cGraphLCDDisplay::DisplayProgramme()
                     scroller[0].Init(FRAME_SPACE_X + TEXT_OFFSET_X,
                                      nTopY,
                                      nMaxX,
-                                     largeFont, event.presentTitle);
+                                     largeFont, Convert(event.presentTitle.c_str()));
                 }
                 else
                 {
@@ -1287,11 +1292,11 @@ void cGraphLCDDisplay::DisplayProgramme()
                     scroller[0].Init(FRAME_SPACE_X + TEXT_OFFSET_X,
                                      bitmap->Height() - 2 * (TEXT_OFFSET_Y_TITLE - 1) - largeFont->TotalHeight() - normalFont->TotalHeight(),
                                      bitmap->Width() - 1,
-                                     largeFont, event.presentTitle);
+                                     largeFont, Convert(event.presentTitle.c_str()));
                     scroller[1].Init(FRAME_SPACE_X + TEXT_OFFSET_X,
                                      bitmap->Height() - (TEXT_OFFSET_Y_TITLE-1) - normalFont->TotalHeight(),
                                      bitmap->Width() - 1,
-                                     normalFont, event.presentSubtitle);
+                                     normalFont, Convert(event.presentSubtitle.c_str()));
                 }
             }
             if (bitmap->Height() <= MAXY_S)
@@ -1300,7 +1305,7 @@ void cGraphLCDDisplay::DisplayProgramme()
                 bitmap->DrawText(FRAME_SPACE_X,
                                  bitmap->Height() - 2 * (TEXT_OFFSET_Y_TITLE - 1) - largeFont->TotalHeight() - normalFont->TotalHeight(),
                                  bitmap->Width() - 1,
-                                 str, normalFont);
+                                 Convert(str.c_str()), normalFont);
             }
             else
             {
@@ -1308,7 +1313,7 @@ void cGraphLCDDisplay::DisplayProgramme()
                 bitmap->DrawText(FRAME_SPACE_X,
                                  bitmap->Height() - 3 * (TEXT_OFFSET_Y_TITLE - 1) - largeFont->TotalHeight() - 2 * normalFont->TotalHeight() - (showTimeBar && GraphLCDSetup.ShowTimebar ? TIMEBAR_HEIGHT + 1 : 0),
                                  bitmap->Width() - 1,
-                                 str, normalFont);
+                                 Convert(str.c_str()), normalFont);
                 if (showTimeBar && GraphLCDSetup.ShowTimebar)
                 {
                     bitmap->DrawRectangle(FRAME_SPACE_X,
@@ -1581,7 +1586,7 @@ void cGraphLCDDisplay::DisplayReplay(tReplayState & replay)
 void cGraphLCDDisplay::DisplayMenu(void)
 {
     char buffer2[255];
-    char * pszTmp1;
+    const char * pszTmp1;
     char * pszTmp2;
     int iAT, t;
     int FrameWidth, yPos, iEntryHeight;
@@ -1607,6 +1612,7 @@ void cGraphLCDDisplay::DisplayMenu(void)
     // draw Menu Title
     if (osd.title.length() > 0)
     {
+        pszTmp1 = Convert(osd.title.c_str());
         bitmap->DrawRoundRectangle(FRAME_SPACE_X,
                                    yPos,
                                    FRAME_SPACE_X + FrameWidth - 1,
@@ -1615,7 +1621,7 @@ void cGraphLCDDisplay::DisplayMenu(void)
         bitmap->DrawText(FRAME_SPACE_X + TEXT_OFFSET_X,
                          yPos + TEXT_OFFSET_Y_TIME,
                          FRAME_SPACE_X + FrameWidth - 1,
-                         osd.title, normalFont, GLCD::clrWhite);
+                         pszTmp1, normalFont, GLCD::clrWhite);
     }
 
     if (!(textItemLines.size() > 0))
@@ -1653,7 +1659,7 @@ void cGraphLCDDisplay::DisplayMenu(void)
                                            GLCD::clrBlack, true, TEXT_OFFSET_Y_CHANNEL >= 4 ? 3 : 1);
             }
             strncopy(buffer2, osd.items[i].c_str(), sizeof(buffer2));
-            pszTmp1 = buffer2;
+            pszTmp1 = Convert(buffer2);
             pszTmp2 = strchr(pszTmp1, '\t');
             iAT = 0; t = 0;
 
@@ -1686,7 +1692,8 @@ void cGraphLCDDisplay::DisplayMessage()
     int maxTextLen, recW, recH;
     int entryHeight;
     tOsdState osd;
-
+    const char * pszTmp1;
+    
     osd = GraphLCDState->GetOsdState();
     if (GraphLCDSetup.ShowMessages && osd.message.length() > 0)
     {
@@ -1716,10 +1723,11 @@ void cGraphLCDDisplay::DisplayMessage()
         recW = recW - 2 * TEXT_OFFSET_X;
         for (int i = 0; i < lineCount; i++)
         {
+            pszTmp1 = Convert(lines[i].c_str());
             bitmap->DrawText((bitmap->Width() - normalFont->Width(lines[i])) / 2,
                              (bitmap->Height() - recH) / 2 + i * entryHeight + (normalFont->TotalHeight() - normalFont->TotalAscent()),
                              bitmap->Width() - (bitmap->Width() - recW) / 2,
-                             lines[i], normalFont);
+                             pszTmp1, normalFont);
         }
     }
 }
@@ -1730,7 +1738,8 @@ void cGraphLCDDisplay::DisplayTextItem()
     int iEntryHeight, iLineAnz;
     int yPos;
     tOsdState osd;
-
+    const char * pszTmp1;
+    
     osd = GraphLCDState->GetOsdState();
 
     mutex.Lock();
@@ -1765,11 +1774,13 @@ void cGraphLCDDisplay::DisplayTextItem()
         int startLine = textItemTop;
         for (int i = 0; i < std::min(lineCount, iLineAnz); i++)
         {
-            if (i + startLine < lineCount)
+            if (i + startLine < lineCount) {
+                pszTmp1 = Convert(textItemLines[i + startLine].c_str());
                 bitmap->DrawText(FRAME_SPACE_X + TEXT_OFFSET_X,
                                  yPos + i * iEntryHeight,
                                  bitmap->Width() - 1 - FRAME_SPACE_X,
-                                 textItemLines[i + startLine], normalFont);
+                                 pszTmp1, normalFont);
+            }
         }
     }
     mutex.Unlock();
@@ -1780,6 +1791,7 @@ void cGraphLCDDisplay::DisplayColorButtons()
     int i, buttonWidth, textLen;
     int extra = 0;
     tOsdState osd;
+    const char * pszTmp1;
 
     osd = GraphLCDState->GetOsdState();
 
@@ -1793,6 +1805,7 @@ void cGraphLCDDisplay::DisplayColorButtons()
         {
             if (osd.colorButton[i].length() > 0)
             {
+                pszTmp1 = Convert(osd.colorButton[i].c_str());
                 bitmap->DrawRoundRectangle(i * (bitmap->Width() / 4) + FRAME_SPACE_X,
                                            bitmap->Height() - smallFont->TotalHeight() - 2 * extra - FRAME_SPACE_Y / 3,
                                            i * (bitmap->Width() / 4) + FRAME_SPACE_X + buttonWidth - 1,
@@ -1804,14 +1817,14 @@ void cGraphLCDDisplay::DisplayColorButtons()
                     bitmap->DrawText(i * (bitmap->Width() / 4) + (bitmap->Width() / 8) - (textLen + 1) / 2,
                                      bitmap->Height() - smallFont->TotalHeight() - extra - FRAME_SPACE_Y / 3,
                                      i * (bitmap->Width() / 4) + FRAME_SPACE_X + buttonWidth - 1,
-                                     osd.colorButton[i], smallFont, GLCD::clrWhite);
+                                     pszTmp1, smallFont, GLCD::clrWhite);
                 }
                 else
                 {
                     bitmap->DrawText(i * (bitmap->Width() / 4) + FRAME_SPACE_X + 1,
                                      bitmap->Height() - smallFont->TotalHeight() - extra - FRAME_SPACE_Y / 3,
                                      i * (bitmap->Width() / 4) + FRAME_SPACE_X + buttonWidth - 1,
-                                     osd.colorButton[i], smallFont, GLCD::clrWhite);
+                                     pszTmp1, smallFont, GLCD::clrWhite);
                 }
             }
         }
@@ -1966,3 +1979,19 @@ void cGraphLCDDisplay::SetBrightness()
     }
     mutex.Unlock();
 }
+
+const char * cGraphLCDDisplay::Convert(const char *s)
+{
+// do character recoding to ISO-8859-1
+// code based on jowi24s vdr-lcdprog
+  if (!s || strlen(s)==0) {
+    return s;
+  }
+  const char *s_converted = conv->Convert(s);
+  if (s_converted == s) {
+    esyslog("graphlcd plugin: ERROR: conversion from %s to ISO-8859-1 failed.", cCharSetConv::SystemCharacterTable());
+    esyslog("graphlcd plugin: ERROR: '%s'",s);
+  }
+  return s_converted;
+}
+

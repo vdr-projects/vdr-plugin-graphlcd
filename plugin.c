@@ -37,7 +37,6 @@ private:
     std::string mDisplayName;
     GLCD::cDriver * mLcd;
     cGraphLCDDisplay * mDisplay;
-
 public:
     cPluginGraphLCD();
     virtual ~cPluginGraphLCD();
