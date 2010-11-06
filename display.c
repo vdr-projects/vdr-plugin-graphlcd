@@ -1587,7 +1587,7 @@ void cGraphLCDDisplay::DisplayMenu(void)
 {
     char buffer2[255];
     const char * pszTmp1;
-    char * pszTmp2;
+    const char * pszTmp2;
     int iAT, t;
     int FrameWidth, yPos, iEntryHeight;
     int extra = 0;
@@ -1665,7 +1665,7 @@ void cGraphLCDDisplay::DisplayMenu(void)
 
             while (pszTmp1 && pszTmp2)
             {
-                *pszTmp2 = '\0';
+                pszTmp2 = '\0';
                 bitmap->DrawText(FRAME_SPACE_X + TEXT_OFFSET_X + t,
                                  yPos + (i - menuTop) * iEntryHeight + extra,
                                  std::min(FRAME_SPACE_X + TEXT_OFFSET_X + t + tab[iAT + 1], bitmap->Width() - 1 - FRAME_SPACE_X),
