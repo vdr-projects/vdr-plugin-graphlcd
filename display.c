@@ -126,6 +126,10 @@ cGraphLCDDisplay::~cGraphLCDDisplay()
     delete GraphLCDState;
     delete bitmap;
     delete logoList;
+    
+    if (conv) {
+       delete conv;
+    } 
 }
 
 int cGraphLCDDisplay::Init(GLCD::cDriver * Lcd, const char * CfgDir)
