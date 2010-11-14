@@ -35,7 +35,7 @@
 char * strncopy(char * dest , const char * src , size_t n)
 {
     strncpy(dest, src, n);
-    if (strlen(src) >= n)
+    if (n)
     {
         *(dest + n - 1) = 0;
     }
