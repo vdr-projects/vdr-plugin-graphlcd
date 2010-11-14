@@ -1413,6 +1413,7 @@ void cGraphLCDDisplay::DisplayReplay(tReplayState & replay)
     {
         int lineHeight, maxLines;
         std::vector <std::string> lines;
+        std::string szReplayName = Convert(replay.name.c_str());
 
         nMaxX = std::max(1, bitmap->Width() - (2 * FRAME_SPACE_X) - 2 * TEXT_OFFSET_X);
         lineHeight = FRAME_SPACE_Y + largeFont->TotalHeight();
@@ -1433,16 +1434,16 @@ void cGraphLCDDisplay::DisplayReplay(tReplayState & replay)
             if (maxLines <= 1)
             {
                 // use singleline mode
-                lines.push_back(replay.name);
+                lines.push_back(szReplayName);
             }
             else
-                largeFont->WrapText(nMaxX, maxLines * lineHeight, replay.name, lines);
+                largeFont->WrapText(nMaxX, maxLines * lineHeight, szReplayName, lines);
         }
         else if (maxLines == 1) //singleline mode
             lines.push_back(replay.name);
         else
         {
-            largeFont->WrapText(nMaxX, maxLines * lineHeight, replay.name, lines);
+            largeFont->WrapText(nMaxX, maxLines * lineHeight, szReplayName, lines);
         }
 
         if (scroller.size() != lines.size() ||
@@ -1589,9 +1590,8 @@ void cGraphLCDDisplay::DisplayReplay(tReplayState & replay)
 
 void cGraphLCDDisplay::DisplayMenu(void)
 {
-    char buffer2[255];
     const char * pszTmp1;
-    const char * pszTmp2;
+    char * pszTmp2;
     int iAT, t;
     int FrameWidth, yPos, iEntryHeight;
     int extra = 0;
@@ -1662,20 +1662,19 @@ void cGraphLCDDisplay::DisplayMenu(void)
                                            yPos + (i - menuTop + 1) * iEntryHeight - 1,
                                            GLCD::clrBlack, true, TEXT_OFFSET_Y_CHANNEL >= 4 ? 3 : 1);
             }
-            strncopy(buffer2, osd.items[i].c_str(), sizeof(buffer2));
-            pszTmp1 = Convert(buffer2);
-            pszTmp2 = strchr(pszTmp1, '\t');
+            pszTmp1 = Convert(osd.items[i].c_str());
+            pszTmp2 = (char*) strchr(pszTmp1, '\t');
             iAT = 0; t = 0;
 
             while (pszTmp1 && pszTmp2)
             {
-                pszTmp2 = '\0';
+                *pszTmp2 = '\0';
                 bitmap->DrawText(FRAME_SPACE_X + TEXT_OFFSET_X + t,
                                  yPos + (i - menuTop) * iEntryHeight + extra,
                                  std::min(FRAME_SPACE_X + TEXT_OFFSET_X + t + tab[iAT + 1], bitmap->Width() - 1 - FRAME_SPACE_X),
                                  pszTmp1, normalFont, (i == osd.currentItemIndex) ? GLCD::clrWhite : GLCD::clrBlack);
                 pszTmp1 = pszTmp2+1;
-                pszTmp2 = strchr(pszTmp1, '\t');
+                pszTmp2 = (char*) strchr(pszTmp1, '\t');
                 t = t + tab[iAT + 1] + TEXT_OFFSET_X;
                 iAT++;
             }
@@ -1988,12 +1987,13 @@ const char * cGraphLCDDisplay::Convert(const char *s)
 {
 // do character recoding to ISO-8859-1
 // code based on jowi24s vdr-lcdprog
-  if (!s || strlen(s)==0) {
+  if (!s || !*s) {
     return s;
   }
   const char *s_converted = conv->Convert(s);
   if (s_converted == s) {
-    esyslog("graphlcd plugin: ERROR: conversion from %s to ISO-8859-1 failed.", cCharSetConv::SystemCharacterTable());
+    const char* SCT = cCharSetConv::SystemCharacterTable() ? cCharSetConv::SystemCharacterTable() : "UTF-8";
+    esyslog("graphlcd plugin: ERROR: conversion from %s to ISO-8859-1 failed.", SCT);
     esyslog("graphlcd plugin: ERROR: '%s'",s);
   }
   return s_converted;
