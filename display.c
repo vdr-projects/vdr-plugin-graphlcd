@@ -389,8 +389,8 @@ void cGraphLCDDisplay::Action(void)
                         {
                             // but only, if something has changed
 #if VDRVERSNUM >= 10701
-                            if (replay.total / DEFAULTFRAMESPERSECOND != replay.totalLast / DEFAULTFRAMESPERSECOND ||
-                                replay.current / DEFAULTFRAMESPERSECOND != replay.currentLast / DEFAULTFRAMESPERSECOND ||
+                            if (replay.total / replay.framesPerSecond != replay.totalLast / replay.framesPerSecond ||
+                                replay.current / replay.framesPerSecond != replay.currentLast / replay.framesPerSecond ||
                                 CurrTime/60 != LastTime/60 ||
                                 update)
 #else
@@ -1344,24 +1344,15 @@ void cGraphLCDDisplay::DisplayProgramme()
     }
 }
 
-bool cGraphLCDDisplay::IndexIsGreaterAsOneHour(int Index) const
+bool cGraphLCDDisplay::IndexIsGreaterAsOneHour(int Index, double framesPerSecond) const
 {
-#if VDRVERSNUM >= 10701
-    int h = (Index / DEFAULTFRAMESPERSECOND) / 3600;
-#else
-    int h = (Index / FRAMESPERSEC) / 3600;
-#endif
-    return h > 0;
+    return (((Index / framesPerSecond) / 3600) > 0);
 }
 
-const char * cGraphLCDDisplay::IndexToMS(int Index) const
+const char * cGraphLCDDisplay::IndexToMS(int Index, double framesPerSecond) const
 {
     static char buffer[16];
-#if VDRVERSNUM >= 10701
-    int s = (Index / DEFAULTFRAMESPERSECOND);
-#else
-    int s = (Index / FRAMESPERSEC);
-#endif
+    int s = (Index / framesPerSecond);
     int m = s / 60;
     s %= 60;
     snprintf(buffer, sizeof(buffer), "%02d:%02d", m, s);
@@ -1540,19 +1531,19 @@ void cGraphLCDDisplay::DisplayReplay(tReplayState & replay)
     }
     else
     {
-        if ((replay.total > 1 && IndexIsGreaterAsOneHour(replay.total)) ||
-            IndexIsGreaterAsOneHour(replay.current)) // Check if any index bigger as one hour
+        if ((replay.total > 1 && IndexIsGreaterAsOneHour(replay.total, replay.framesPerSecond)) ||
+            IndexIsGreaterAsOneHour(replay.current, replay.framesPerSecond)) // Check if any index bigger as one hour
         {
-            szCurrent = (const char *) IndexToHMSF(replay.current);
+            szCurrent = (const char *) IndexToHMSF(replay.current, replay.framesPerSecond);
             if (replay.total > 1) // Don't draw totaltime for endless streams
-                szTotal = (const char *) IndexToHMSF(replay.total);
+                szTotal = (const char *) IndexToHMSF(replay.total, replay.framesPerSecond);
         }
         else
         {
             // Show only minutes and seconds on short replays
-            szCurrent = (const char *) IndexToMS(replay.current);
+            szCurrent = (const char *) IndexToMS(replay.current, replay.framesPerSecond);
             if (replay.total > 1) // Don't draw totaltime for endless streams
-                szTotal = (const char *) IndexToMS(replay.total);
+                szTotal = (const char *) IndexToMS(replay.total, replay.framesPerSecond);
         }
     }
     // Get width of drawable strings

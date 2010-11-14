@@ -53,6 +53,7 @@ struct tReplayState
     int currentLast;
     int total;
     int totalLast;
+    double framesPerSecond;
 };
 
 struct tCardState

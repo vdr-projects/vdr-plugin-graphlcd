@@ -42,8 +42,10 @@ cGraphLCDState::cGraphLCDState(cGraphLCDDisplay * Display)
     replay.current = 0;
 #if VDRVERSNUM >= 10701
     replay.currentLast = DEFAULTFRAMESPERSECOND;
+    replay.framesPerSecond = DEFAULTFRAMESPERSECOND;
 #else
     replay.currentLast = FRAMESPERSEC;
+    replay.framesPerSecond = FRAMESPERSEC;
 #endif
     replay.total = 0;
     replay.totalLast = 1;
@@ -768,6 +770,11 @@ tReplayState cGraphLCDState::GetReplayState()
     {
         if (replay.control)
         {
+#if VDRVERSNUM >= 10701
+            replay.framesPerSecond = replay.control->FramesPerSecond();
+#else
+            replay.framesPerSecond = FRAMESPERSEC;
+#endif
             ret = replay;
             replay.currentLast = replay.current;
             replay.totalLast = replay.total;
@@ -781,6 +788,11 @@ tReplayState cGraphLCDState::GetReplayState()
     {
         if (replay.control)
         {
+#if VDRVERSNUM >= 10701
+            replay.framesPerSecond = replay.control->FramesPerSecond();
+#else
+            replay.framesPerSecond = FRAMESPERSEC;
+#endif
             if (replay.control->GetIndex(replay.current, replay.total, false))
             {
                 replay.total = (replay.total == 0) ? 1 : replay.total;
