@@ -45,7 +45,7 @@ cGraphLCDState::cGraphLCDState(cGraphLCDDisplay * Display)
     replay.framesPerSecond = DEFAULTFRAMESPERSECOND;
 #else
     replay.currentLast = FRAMESPERSEC;
-    replay.framesPerSecond = FRAMESPERSEC;
+    replay.framesPerSecond = FRAMESPERSECOND;
 #endif
     replay.total = 0;
     replay.totalLast = 1;
