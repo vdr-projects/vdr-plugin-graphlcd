@@ -132,7 +132,7 @@ private:
     bool CheckAndUpdateSymbols();
 
     /** Check if replay index bigger as one hour */
-    bool IndexIsGreaterAsOneHour(int Index,double framesPerSecond) const;
+    bool IndexIsGreaterAsOneHour(int Index, double framesPerSecond) const;
     /** Translate replay index to string with minute and second MM:SS */
     const char *IndexToMS(int Index, double framesPerSecond) const;
     /** Compare Scroller with new Textbuffer*/

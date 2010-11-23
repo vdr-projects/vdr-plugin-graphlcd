@@ -1431,7 +1431,7 @@ void cGraphLCDDisplay::DisplayReplay(tReplayState & replay)
                 largeFont->WrapText(nMaxX, maxLines * lineHeight, szReplayName, lines);
         }
         else if (maxLines == 1) //singleline mode
-            lines.push_back(replay.name);
+            lines.push_back(szReplayName);
         else
         {
             largeFont->WrapText(nMaxX, maxLines * lineHeight, szReplayName, lines);
@@ -1534,9 +1534,9 @@ void cGraphLCDDisplay::DisplayReplay(tReplayState & replay)
         if ((replay.total > 1 && IndexIsGreaterAsOneHour(replay.total, replay.framesPerSecond)) ||
             IndexIsGreaterAsOneHour(replay.current, replay.framesPerSecond)) // Check if any index bigger as one hour
         {
-            szCurrent = (const char *) IndexToHMSF(replay.current, replay.framesPerSecond);
+            szCurrent = (const char *) IndexToHMSF(replay.current, false, replay.framesPerSecond);
             if (replay.total > 1) // Don't draw totaltime for endless streams
-                szTotal = (const char *) IndexToHMSF(replay.total, replay.framesPerSecond);
+                szTotal = (const char *) IndexToHMSF(replay.total, false, replay.framesPerSecond);
         }
         else
         {
