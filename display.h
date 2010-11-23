@@ -131,10 +131,15 @@ private:
     void UpdateIn(long usec);
     bool CheckAndUpdateSymbols();
 
+#if VDRVERSNUM >= 10701
     /** Check if replay index bigger as one hour */
     bool IndexIsGreaterAsOneHour(int Index, double framesPerSecond) const;
     /** Translate replay index to string with minute and second MM:SS */
     const char *IndexToMS(int Index, double framesPerSecond) const;
+#else
+    bool IndexIsGreaterAsOneHour(int Index) const;
+    const char *IndexToMS(int Index) const;
+#endif
     /** Compare Scroller with new Textbuffer*/
     bool IsScrollerTextChanged(const std::vector<cScroller> & scroller, const std::vector <std::string> & lines) const;
     /** Returns true if Logo loaded and active*/

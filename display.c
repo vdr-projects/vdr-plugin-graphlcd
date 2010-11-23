@@ -1344,15 +1344,30 @@ void cGraphLCDDisplay::DisplayProgramme()
     }
 }
 
+#if VDRVERSNUM >= 10701
 bool cGraphLCDDisplay::IndexIsGreaterAsOneHour(int Index, double framesPerSecond) const
 {
     return (((Index / framesPerSecond) / 3600) > 0);
 }
+#else
+bool cGraphLCDDisplay::IndexIsGreaterAsOneHour(int Index) const
+{
+    int h = (Index / FRAMESPERSEC) / 3600;
+    return h > 0;
+}
+#endif
 
+#if VDRVERSNUM >= 10701
 const char * cGraphLCDDisplay::IndexToMS(int Index, double framesPerSecond) const
 {
     static char buffer[16];
     int s = (Index / framesPerSecond);
+#else
+const char * cGraphLCDDisplay::IndexToMS(int Index) const
+{
+    static char buffer[16];
+    int s = (Index / FRAMESPERSEC);
+#endif
     int m = s / 60;
     s %= 60;
     snprintf(buffer, sizeof(buffer), "%02d:%02d", m, s);
@@ -1531,7 +1546,8 @@ void cGraphLCDDisplay::DisplayReplay(tReplayState & replay)
     }
     else
     {
-        if ((replay.total > 1 && IndexIsGreaterAsOneHour(replay.total, replay.framesPerSecond)) ||
+#if VDRVERSNUM >= 10701
+	if ((replay.total > 1 && IndexIsGreaterAsOneHour(replay.total, replay.framesPerSecond)) ||
             IndexIsGreaterAsOneHour(replay.current, replay.framesPerSecond)) // Check if any index bigger as one hour
         {
             szCurrent = (const char *) IndexToHMSF(replay.current, false, replay.framesPerSecond);
@@ -1545,6 +1561,22 @@ void cGraphLCDDisplay::DisplayReplay(tReplayState & replay)
             if (replay.total > 1) // Don't draw totaltime for endless streams
                 szTotal = (const char *) IndexToMS(replay.total, replay.framesPerSecond);
         }
+#else
+        if ((replay.total > 1 && IndexIsGreaterAsOneHour(replay.total)) ||
+            IndexIsGreaterAsOneHour(replay.current)) // Check if any index bigger as one hour
+        {
+            szCurrent = (const char *) IndexToHMSF(replay.current);
+            if (replay.total > 1) // Don't draw totaltime for endless streams
+                szTotal = (const char *) IndexToHMSF(replay.total);
+        }
+        else
+        {
+            // Show only minutes and seconds on short replays
+            szCurrent = (const char *) IndexToMS(replay.current);
+            if (replay.total > 1) // Don't draw totaltime for endless streams
+                szTotal = (const char *) IndexToMS(replay.total);
+        }
+#endif
     }
     // Get width of drawable strings
     nWidthPreMsg = normalFont->Width(szPreMsg);
