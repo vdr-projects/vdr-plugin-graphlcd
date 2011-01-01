@@ -22,7 +22,7 @@
 #include <vdr/plugin.h>
 
 
-static const char *VERSION        = "0.1.9-pre (git 2010/11)";
+static const char *VERSION        = "0.1.9-pre (git 20110101)";
 static const char *DESCRIPTION    = "Output to graphic LCD";
 static const char *MAINMENUENTRY  = NULL;
 
@@ -52,6 +52,8 @@ public:
     virtual cOsdObject * MainMenuAction();
     virtual cMenuSetupPage * SetupMenu();
     virtual bool SetupParse(const char * Name, const char * Value);
+    virtual const char **SVDRPHelpPages(void);
+    virtual cString SVDRPCommand(const char *Command, const char *Option, int &ReplyCode);
 };
 
 cPluginGraphLCD::cPluginGraphLCD()
@@ -238,6 +240,48 @@ bool cPluginGraphLCD::SetupParse(const char * Name, const char * Value)
     else if (!strcasecmp(Name, "BrightnessDelay")) GraphLCDSetup.BrightnessDelay = atoi(Value);
     else return false;
     return true;
+}
+
+const char **cPluginGraphLCD::SVDRPHelpPages(void)
+{
+    static const char *HelpPages[] = {
+        "CLS	Clear Display.",
+        "UPD	Update Display.",
+        "OFF    Switch Plugin off.",
+        "ON     Switch Plugin on.",
+        NULL
+    };
+    return HelpPages;
+}
+
+cString cPluginGraphLCD::SVDRPCommand(const char *Command, const char *Option, int &ReplyCode)
+{
+    if (strcasecmp(Command, "CLS") == 0) {
+        if (GraphLCDSetup.PluginActive == 1) {
+            return "Error: Plugin is active.";
+        } else {
+            mDisplay->Clear();
+            return "GraphLCD cleared.";
+        };
+    }
+    if (strcasecmp(Command, "UPD") == 0) {
+        if (GraphLCDSetup.PluginActive == 0) {
+            return "Error: Plugin is not active.";
+        } else {
+            mDisplay->Update();
+            return "GraphLCD updated.";
+        };
+    }
+
+    if (strcasecmp(Command, "OFF") == 0) {
+        GraphLCDSetup.PluginActive = 0;
+        return "GraphLCD Plugin switched off.";
+    }
+    if (strcasecmp(Command, "ON") == 0) {
+        GraphLCDSetup.PluginActive = 1;
+        return "GraphLCD Plugin switched on.";
+    }
+    return NULL;
 }
 
 VDRPLUGINCREATOR(cPluginGraphLCD); // Don't touch this!

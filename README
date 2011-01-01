@@ -187,6 +187,23 @@ Scroll time interval:
   (Possible values: 100 <= x <= 2000)
 
 
+SVDRP Commands:
+---------------
+svdrpsend.pl "PLUG graphlcd <CMD>", where CMD is:
+
+ON
+  Switch Plugin on
+
+OFF
+  Switch Plugin off
+
+UPD
+  Update LCD Content, Plugin must be active.
+
+CLS
+  Clear LCD Content (aka blank screen), Plugin must not be active.
+
+
 Changing Fonts:
 ---------------
 It's very easy to change the fonts that are used by graphlcd.

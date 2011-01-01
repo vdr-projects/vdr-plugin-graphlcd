@@ -732,6 +732,13 @@ void cGraphLCDDisplay::Update()
     update = true;
 }
 
+void cGraphLCDDisplay::Clear()
+{
+  bitmap->Clear();
+  mLcd->SetScreen(bitmap->Data(), bitmap->Width(), bitmap->Height(), bitmap->LineSize());
+  mLcd->Refresh(false);
+}
+
 void cGraphLCDDisplay::DisplayTime()
 {
     static char buffer[32];
@@ -2021,4 +2028,5 @@ const char * cGraphLCDDisplay::Convert(const char *s)
   }
   return s_converted;
 }
+
 

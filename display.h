@@ -65,6 +65,7 @@ public:
     void SetVolume(int Volume, bool Absolute);
 
     void Update();
+    void Clear();
 
 protected:
     virtual void Action();
