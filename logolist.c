@@ -37,7 +37,7 @@
 #include <vdr/tools.h>
 
 const char * kGLCDFileExtension = ".glcd";
-const char * kAliasFileName = "logonames.alias";
+const char * kAliasFileName = "channels.alias";
 
 cGraphLCDLogoList::cGraphLCDLogoList(const std::string & logodir, const std::string & cfgdir)
 {
@@ -56,8 +56,10 @@ cGraphLCDLogoList::cGraphLCDLogoList(const std::string & logodir, const std::str
 #else
     file.open(aliasFileName.c_str(), std::ios_base::in);
 #endif
-    if (!file.is_open())
+    if (!file.is_open()) {
+        syslog(LOG_INFO, "graphlcd: WWARNING: cannot open '%s", aliasFileName.c_str());
         return;
+    }
 
     while (!file.eof())
     {
