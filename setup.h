@@ -54,7 +54,8 @@ public:
     int BrightnessActive;
     int BrightnessIdle;
     int BrightnessDelay;
-    int enableSpectrumAnalyzer; //span
+    int pluginSpectrumAnalyzer;
+    int enableSpectrumAnalyzer;
     int SAShowVolume;
 
 public:

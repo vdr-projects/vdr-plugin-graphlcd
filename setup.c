@@ -27,7 +27,6 @@
 
 #include "setup.h"
 
-
 cGraphLCDSetup GraphLCDSetup;
 
 cGraphLCDSetup::cGraphLCDSetup(void)
@@ -53,7 +52,8 @@ cGraphLCDSetup::cGraphLCDSetup(void)
     BrightnessActive(100),
     BrightnessIdle(100),
     BrightnessDelay(30),
-    enableSpectrumAnalyzer(1), //span
+    pluginSpectrumAnalyzer(0), // SPAN loaded?
+    enableSpectrumAnalyzer(1),
     SAShowVolume(1)
 {
 }
@@ -92,6 +92,7 @@ void cGraphLCDSetup::CopyFrom(const cGraphLCDSetup * source)
     BrightnessActive = source->BrightnessActive;
     BrightnessIdle = source->BrightnessIdle;
     BrightnessDelay = source->BrightnessDelay;
+    pluginSpectrumAnalyzer = source->pluginSpectrumAnalyzer;
     enableSpectrumAnalyzer = source->enableSpectrumAnalyzer;
     SAShowVolume = source->SAShowVolume;
 }

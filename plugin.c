@@ -177,6 +177,19 @@ bool cPluginGraphLCD::Start()
 {
     int count;
 
+    for (int i = 0; ; i++) {
+      cPlugin *p = cPluginManager::GetPlugin(i);
+      if (p) {
+        if (strstr(p->Name(), "span")) {
+          isyslog("graphlcd plugin: found %s (%s) plugin\n", p->Name(), p->Version());
+          GraphLCDSetup.pluginSpectrumAnalyzer=1;
+        };
+      } else {
+        break;
+      }
+    }
+                                                              
+
     dsyslog("graphlcd plugin: waiting for display thread to get ready");
     for (count = 0; count < 1200; count++)
     {
