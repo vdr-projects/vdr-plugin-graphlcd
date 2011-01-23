@@ -966,5 +966,53 @@ const tI18nPhrase Phrases[] =
 # endif
 #endif
     },
+    {
+        "Show spectrum analyzer",
+        "Zeige Spektrum Analyzer",
+        "",// TODO Slovenski
+        "",// TODO Italiano
+        "",// TODO Nederlands
+        "",// TODO Português
+        "",// TODO Francais
+        "",// TODO Norsk
+        "",// TODO Suomi
+        "",// TODO Polski
+        "",// TODO Español
+        "",// TODO Ellinika
+        "",// TODO Svenska
+        "",// TODO Românã
+        "",// TODO Magyar
+        "",// TODO Català
+#if VDRVERSNUM > 10302
+        "",// TODO Russian
+# if VDRVERSNUM > 10307
+        "",// TODO Croatian
+# endif
+#endif
+    },
+    {
+        "Show analyzer volume",
+        "Zeige Analyzer Lautstärke",
+        "",// TODO Slovenski
+        "",// TODO Italiano
+        "",// TODO Nederlands
+        "",// TODO Português
+        "",// TODO Francais
+        "",// TODO Norsk
+        "",// TODO Suomi
+        "",// TODO Polski
+        "",// TODO Español
+        "",// TODO Ellinika
+        "",// TODO Svenska
+        "",// TODO Românã
+        "",// TODO Magyar
+        "",// TODO Català
+#if VDRVERSNUM > 10302
+        "",// TODO Russian
+# if VDRVERSNUM > 10307
+        "",// TODO Croatian
+# endif
+#endif
+    },
     { NULL }
 };

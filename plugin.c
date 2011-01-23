@@ -22,7 +22,7 @@
 #include <vdr/plugin.h>
 
 
-static const char *VERSION        = "0.1.9-pre (git 20110101)";
+static const char *VERSION        = "0.1.9-pre (git 20110123)";
 static const char *DESCRIPTION    = "Output to graphic LCD";
 static const char *MAINMENUENTRY  = NULL;
 
@@ -54,6 +54,7 @@ public:
     virtual bool SetupParse(const char * Name, const char * Value);
     virtual const char **SVDRPHelpPages(void);
     virtual cString SVDRPCommand(const char *Command, const char *Option, int &ReplyCode);
+    virtual bool Service(const char *Id, void *Data); // for span
 };
 
 cPluginGraphLCD::cPluginGraphLCD()
@@ -238,6 +239,8 @@ bool cPluginGraphLCD::SetupParse(const char * Name, const char * Value)
     else if (!strcasecmp(Name, "BrightnessActive")) GraphLCDSetup.BrightnessActive = atoi(Value);
     else if (!strcasecmp(Name, "BrightnessIdle")) GraphLCDSetup.BrightnessIdle = atoi(Value);
     else if (!strcasecmp(Name, "BrightnessDelay")) GraphLCDSetup.BrightnessDelay = atoi(Value);
+    else if (!strcasecmp(Name, "enableSpectrumAnalyzer")) GraphLCDSetup.enableSpectrumAnalyzer = atoi(Value);
+    else if (!strcasecmp(Name, "SAShowVolume")) GraphLCDSetup.SAShowVolume = atoi(Value);
     else return false;
     return true;
 }
@@ -245,10 +248,14 @@ bool cPluginGraphLCD::SetupParse(const char * Name, const char * Value)
 const char **cPluginGraphLCD::SVDRPHelpPages(void)
 {
     static const char *HelpPages[] = {
-        "CLS	Clear Display.",
-        "UPD	Update Display.",
-        "OFF    Switch Plugin off.",
-        "ON     Switch Plugin on.",
+        "CLS\n"
+        "     Clear Display.",
+        "UPD\n"
+        "     Update Display.",
+        "OFF\n"
+        "     Switch Plugin off.",
+        "ON \n"
+        "     Switch Plugin on.",
         NULL
     };
     return HelpPages;
@@ -283,5 +290,20 @@ cString cPluginGraphLCD::SVDRPCommand(const char *Command, const char *Option, i
     }
     return NULL;
 }
+
+ bool cPluginGraphLCD::Service(const char *Id, void *Data)
+  {
+     if (strcmp(Id, SPAN_CLIENT_CHECK_ID) == 0)
+     {
+         if ( GraphLCDSetup.enableSpectrumAnalyzer && (Data != NULL) )
+         {
+             *((Span_Client_Check_1_0*)Data)->isActive = true;
+         }
+         return true;
+     }
+     return false;
+ }
+ 
+ 
 
 VDRPLUGINCREATOR(cPluginGraphLCD); // Don't touch this!

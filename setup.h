@@ -54,6 +54,8 @@ public:
     int BrightnessActive;
     int BrightnessIdle;
     int BrightnessDelay;
+    int enableSpectrumAnalyzer; //span
+    int SAShowVolume;
 
 public:
     cGraphLCDSetup(void);

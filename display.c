@@ -28,6 +28,7 @@
 
 #include <vdr/tools.h>
 #include <vdr/menu.h>
+#include <vdr/plugin.h>
 
 #include "compat.h"
 
@@ -114,6 +115,7 @@ cGraphLCDDisplay::cGraphLCDDisplay()
     nCurrentBrightness = -1;
     LastTimeBrightness = 0;
     bBrightnessActive = true;
+    LastTimeSA.Set(0); //span
 
     conv = new cCharSetConv(cCharSetConv::SystemCharacterTable() ? cCharSetConv::SystemCharacterTable() : "UTF-8", "ISO-8859-1");
 }
@@ -382,6 +384,12 @@ void cGraphLCDDisplay::Action(void)
                             TimeMs() - logo->LastChange() >= logo->Delay())
                         {
                             update = true;
+                        }
+
+                        if ( LastTimeSA.TimedOut() ) //span
+                        {
+                            update = true;
+                            LastTimeSA.Set(1000);
                         }
 
                         // update Display every second or due to an update
@@ -1504,6 +1512,8 @@ void cGraphLCDDisplay::DisplayReplay(tReplayState & replay)
                           nTopY + nProgressbarHeight,
                           GLCD::clrBlack, false);
 
+    DisplaySA(); //span
+
     if (1 < replay.total && 1 < replay.current) // Don't show full progressbar for endless streams
     {
         bitmap->DrawRectangle(FRAME_SPACE_X,
@@ -2030,3 +2040,139 @@ const char * cGraphLCDDisplay::Convert(const char *s)
 }
 
 
+
+void cGraphLCDDisplay::DisplaySA() //span
+{
+// Spectrum Analyzer visualization
+    if ( GraphLCDSetup.enableSpectrumAnalyzer )
+    {
+        if (cPluginManager::CallFirstService(SPAN_GET_BAR_HEIGHTS_ID, NULL))
+        {
+            Span_GetBarHeights_v1_0 GetBarHeights;
+
+            int bandsSA = 20;
+            int falloffSA = 8;
+            int channelsSA = 1;
+
+            unsigned int bar;
+            unsigned int *barHeights = new unsigned int[bandsSA];
+            unsigned int *barHeightsLeftChannel = new unsigned int[bandsSA];
+            unsigned int *barHeightsRightChannel = new unsigned int[bandsSA];
+            unsigned int volumeLeftChannel;
+            unsigned int volumeRightChannel;
+            unsigned int volumeBothChannels;
+            unsigned int *barPeaksBothChannels = new unsigned int[bandsSA];
+            unsigned int *barPeaksLeftChannel = new unsigned int[bandsSA];
+            unsigned int *barPeaksRightChannel = new unsigned int[bandsSA];
+
+            GetBarHeights.bands                   = bandsSA;
+            GetBarHeights.barHeights              = barHeights;
+            GetBarHeights.barHeightsLeftChannel   = barHeightsLeftChannel;
+            GetBarHeights.barHeightsRightChannel  = barHeightsRightChannel;
+            GetBarHeights.volumeLeftChannel       = &volumeLeftChannel;
+            GetBarHeights.volumeRightChannel      = &volumeRightChannel;
+            GetBarHeights.volumeBothChannels      = &volumeBothChannels;
+            GetBarHeights.name                    = "graphlcd";
+            GetBarHeights.falloff                 = falloffSA;
+            GetBarHeights.barPeaksBothChannels    = barPeaksBothChannels;
+            GetBarHeights.barPeaksLeftChannel     = barPeaksLeftChannel;
+            GetBarHeights.barPeaksRightChannel    = barPeaksRightChannel;
+
+            if ( cPluginManager::CallFirstService(SPAN_GET_BAR_HEIGHTS_ID, &GetBarHeights ))
+            {
+                int i;
+                int barWidth = 2;
+                int saStartX = FRAME_SPACE_X;
+                int saEndX = saStartX + barWidth*bandsSA*2 + bandsSA/4 - 1;
+                int saStartY = FRAME_SPACE_Y;
+                int saEndY = FRAME_SPACE_Y + bitmap->Height()/2 - 3;
+
+                LastTimeSA.Set(100);
+
+                if ( GraphLCDSetup.SAShowVolume )
+                {
+
+                    saStartX = FRAME_SPACE_X  + bitmap->Width()/2 - (barWidth*bandsSA*2 + bandsSA/4)/2 - 2;
+                    saEndX = saStartX + barWidth*bandsSA*2 + bandsSA/4 - 1;
+
+                    // left volume
+                    bitmap->DrawRectangle(FRAME_SPACE_X,
+                                          saStartY,
+                                          saStartX-1,
+                                          saEndY + 1,
+                                          GLCD::clrWhite, true);
+
+                    for ( i=0; (i<(int)logo->Width()/2-2) && (i<3*((int)volumeLeftChannel*(int)saStartX)/100); i++)
+                    {
+                        bitmap->DrawRectangle(saStartX - i - 2,
+                                              saStartY + saEndY/2 - i,
+                                              saStartX - i - 4,
+                                              saStartY + saEndY/2 + i,
+                                              GLCD::clrBlack, true);
+                    }
+
+                    // right volume
+                    bitmap->DrawRectangle(saEndX + 1,
+                                          saStartY,
+                                          bitmap->Width() - 1,
+                                          saEndY + 1,
+                                          GLCD::clrWhite, true);
+
+                    for ( i=0; (i<(int)logo->Width()/2-2) && (i<3*((int)volumeRightChannel*(int)saStartX)/100); i++)
+                    {
+                        bitmap->DrawRectangle(saEndX + 2 + i,
+                                              saStartY + saEndY/2 - i,
+                                              saEndX + i + 4,
+                                              saStartY + saEndY/2 + i,
+                                              GLCD::clrBlack, true);
+                    }
+                }
+                // black background
+                bitmap->DrawRectangle(saStartX,
+                                      saStartY,
+                                      saEndX,
+                                      saEndY + 1,
+                                      GLCD::clrBlack, true);
+
+                for ( i=0; i < bandsSA; i++ )
+                {
+/*
+                    if ( channelsSA == 2 )
+                    {
+                        bar = barHeightsLeftChannel[i];
+                        bar = barHeightsRightChannel[i];
+                     }
+*/
+                     if ( channelsSA == 1)
+                     {
+                         // the bar
+                         bar = (barHeights[i]*(saEndY-saStartY))/100;
+                         bitmap->DrawRectangle(saStartX + barWidth*2*(i)+ barWidth + 1,
+                                               saEndY,
+                                               saStartX + barWidth*2*(i) + barWidth+ barWidth + 1,
+                                               saEndY - bar,
+                                               GLCD::clrWhite, true);
+
+                         // the peak
+                         bar = (barPeaksBothChannels[i]*(saEndY-saStartY))/100;
+                         if ( bar > 0 )
+                         {
+                             bitmap->DrawRectangle(saStartX + barWidth*2*(i)+ barWidth + 1,
+                                                   saEndY - bar,
+                                                   saStartX + barWidth*2*(i) + barWidth+ barWidth + 1,
+                                                   saEndY - bar+1,
+                                                   GLCD::clrWhite, true);
+                         }
+                     }
+                }
+            }
+
+            delete [] barHeights;
+            delete [] barHeightsLeftChannel;
+            delete [] barHeightsRightChannel;
+            delete [] barPeaksBothChannels;
+            delete [] barPeaksLeftChannel;
+            delete [] barPeaksRightChannel;
+        }
+    }
+}

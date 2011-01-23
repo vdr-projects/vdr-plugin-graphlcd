@@ -52,7 +52,9 @@ cGraphLCDSetup::cGraphLCDSetup(void)
     ScrollTime(500),
     BrightnessActive(100),
     BrightnessIdle(100),
-    BrightnessDelay(30)
+    BrightnessDelay(30),
+    enableSpectrumAnalyzer(1), //span
+    SAShowVolume(1)
 {
 }
 
@@ -90,4 +92,6 @@ void cGraphLCDSetup::CopyFrom(const cGraphLCDSetup * source)
     BrightnessActive = source->BrightnessActive;
     BrightnessIdle = source->BrightnessIdle;
     BrightnessDelay = source->BrightnessDelay;
+    enableSpectrumAnalyzer = source->enableSpectrumAnalyzer;
+    SAShowVolume = source->SAShowVolume;
 }

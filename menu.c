@@ -75,6 +75,8 @@ cGraphLCDMenuSetup::cGraphLCDMenuSetup()
     Add(new cMenuEditIntItem(tr("Brightness on user activity"), &newGraphLCDSetup.BrightnessActive, 0, 100));
     Add(new cMenuEditIntItem(tr("Brightness on user inactivity"), &newGraphLCDSetup.BrightnessIdle, 0, 100));
     Add(new cMenuEditIntItem(tr("Brightness delay [s]"), &newGraphLCDSetup.BrightnessDelay, 0, 600));
+    Add(new cMenuEditBoolItem(tr("Show spectrum analyzer"), &newGraphLCDSetup.enableSpectrumAnalyzer));
+    Add(new cMenuEditBoolItem(tr("Show analyzer volume"), &newGraphLCDSetup.SAShowVolume));
 }
 
 void cGraphLCDMenuSetup::Store()
@@ -101,4 +103,6 @@ void cGraphLCDMenuSetup::Store()
     SetupStore("BrightnessActive", GraphLCDSetup.BrightnessActive = newGraphLCDSetup.BrightnessActive);
     SetupStore("BrightnessIdle", GraphLCDSetup.BrightnessIdle = newGraphLCDSetup.BrightnessIdle);
     SetupStore("BrightnessDelay", GraphLCDSetup.BrightnessDelay = newGraphLCDSetup.BrightnessDelay);
+    SetupStore("enableSpectrumAnalyzer", GraphLCDSetup.enableSpectrumAnalyzer = newGraphLCDSetup.enableSpectrumAnalyzer); //span
+    SetupStore("SAShowVolume", GraphLCDSetup.SAShowVolume = newGraphLCDSetup.SAShowVolume);
 }

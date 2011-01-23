@@ -31,9 +31,38 @@
 #include <vdr/thread.h>
 #include <vdr/player.h>
 
+#define SPAN_CLIENT_CHECK_ID   "Span-ClientCheck-v1.0"
+#define SPAN_GET_BAR_HEIGHTS_ID "Span-GetBarHeights-v1.0"
 
 #define LCDMAXCARDS 4
 static const int kMaxTabCount = 10;
+
+struct Span_Client_Check_1_0 {
+    bool *isActive;
+    bool *isRunning;
+};
+
+struct Span_GetBarHeights_v1_0 {
+    unsigned int bands;                   // number of bands to compute
+    unsigned int *barHeights;             // the heights of the bars of the
+                                          // two channels combined
+    unsigned int *barHeightsLeftChannel;  // the heights of the bars of the
+                                          // left channel
+    unsigned int *barHeightsRightChannel; // the heights of the bars of the
+                                          // right channel
+    unsigned int *volumeLeftChannel;      // the volume of the left channels
+    unsigned int *volumeRightChannel;     // the volume of the right channels
+    unsigned int *volumeBothChannels;     // the combined volume of the two
+                                          // channels
+    const char *name;                     // name of the plugin that wants to
+                                          // get the data (must be unique for
+                                          // each client!)
+    unsigned int falloff;                 // bar falloff value
+    unsigned int *barPeaksBothChannels;   // bar peaks of the two channels
+                                          // combined
+    unsigned int *barPeaksLeftChannel;    // bar peaks of the left channel
+    unsigned int *barPeaksRightChannel;   // bar peaks of the right channel
+};
 
 enum ThreadState
 {
@@ -107,6 +136,7 @@ private:
     time_t LastTime;
     time_t LastTimeCheckSym;
     time_t LastTimeModSym;
+    cTimeMs LastTimeSA; //span
     struct timeval CurrTimeval;
     struct timeval UpdateAt;
 
@@ -128,6 +158,7 @@ private:
     void DisplayTextItem();
     void DisplayColorButtons();
     void DisplayVolume();
+    void DisplaySA(); //span
 
     void UpdateIn(long usec);
     bool CheckAndUpdateSymbols();
