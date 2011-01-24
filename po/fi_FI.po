@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VDR 1.5.7\n"
 "Report-Msgid-Bugs-To: <nobody@domain.com>\n"
-"POT-Creation-Date: 2008-07-09 13:15+0200\n"
+"POT-Creation-Date: 2011-01-24 21:00+0100\n"
 "PO-Revision-Date: 2008-07-09 13:14+0200\n"
 "Last-Translator: Rolf Ahrenberg <rahrenbe@cc.hut.fi>\n"
 "Language-Team: <vdr@linuxtv.org>\n"
@@ -127,6 +127,12 @@ msgid "Brightness on user inactivity"
 msgstr ""
 
 msgid "Brightness delay [s]"
+msgstr ""
+
+msgid "Show spectrum analyzer"
+msgstr ""
+
+msgid "Show analyzer volume"
 msgstr ""
 
 msgid "Unknown title"
