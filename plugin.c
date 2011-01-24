@@ -308,7 +308,7 @@ cString cPluginGraphLCD::SVDRPCommand(const char *Command, const char *Option, i
   {
      if (strcmp(Id, SPAN_CLIENT_CHECK_ID) == 0)
      {
-         if ( GraphLCDSetup.enableSpectrumAnalyzer && (Data != NULL) )
+         if ( GraphLCDSetup.pluginSpectrumAnalyzer && GraphLCDSetup.enableSpectrumAnalyzer && (Data != NULL) )
          {
              *((Span_Client_Check_1_0*)Data)->isActive = true;
          }

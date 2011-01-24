@@ -2044,7 +2044,7 @@ const char * cGraphLCDDisplay::Convert(const char *s)
 void cGraphLCDDisplay::DisplaySA() //span
 {
 // Spectrum Analyzer visualization
-    if ( GraphLCDSetup.enableSpectrumAnalyzer )
+    if ( GraphLCDSetup.enableSpectrumAnalyzer && GraphLCDSetup.pluginSpectrumAnalyzer )
     {
         if (cPluginManager::CallFirstService(SPAN_GET_BAR_HEIGHTS_ID, NULL))
         {
