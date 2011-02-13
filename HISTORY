@@ -1,7 +1,14 @@
 VDR Plugin 'graphlcd' Revision History
 -------------------------------------
 
-2010.11-21: version 0.1.8
+2011-02-13: version 0.1.9
+- fixed vdr 1.6.0 combatibility and several typos
+- added SVDRP support (TomJoad): http://projects.vdr-developer.org/issues/488
+- added SPAN support (Mreimer): http://projects.vdr-developer.org/issues/523
+- new: logonames.alias is now named channels.alias, which is maintained by wbreu
+
+
+2010-11-21: version 0.1.8
 - added --exclude .git in make dist
 - code minimizing (http://www.vdrportal.de/board/thread.php?postid=955543#post955543)
 - wrong recordinglength with vdr-1.7.x (http://projects.vdr-developer.org/issues/443)

@@ -22,7 +22,7 @@
 #include <vdr/plugin.h>
 
 
-static const char *VERSION        = "0.1.9-pre (git 20110123)";
+static const char *VERSION        = "0.2.0-pre (git 20110213)";
 static const char *DESCRIPTION    = "Output to graphic LCD";
 static const char *MAINMENUENTRY  = NULL;
 
