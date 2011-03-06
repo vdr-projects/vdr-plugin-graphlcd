@@ -788,12 +788,12 @@ void cGraphLCDDisplay::DisplayTime()
         const char *amonth = tr("JanFebMarAprMayJunJulAugSepOctNovDec");
         amonth += Utf8SymChars(amonth, tm->tm_mon * 3);
         strn0cpy(month, amonth, min(Utf8SymChars(amonth, 3) + 1, int(sizeof(month))));
-        snprintf(buffer, sizeof(buffer), "%s %2d.%s  %d:%02d", (const char *) WeekDayName(tm->tm_wday), tm->tm_mday, month, tm->tm_hour, tm->tm_min);
+        snprintf(buffer, sizeof(buffer), "%s %2d.%s  %d:%02d", (const char *) WeekDayName(tm->tm_wday), tm->tm_mday, Convert(month), tm->tm_hour, tm->tm_min);
         TextLen = normalFont->Width(buffer);
 
         if (TextLen > std::max(FrameWidth - 2 * TEXT_OFFSET_X, 1))
         {
-            snprintf(buffer, sizeof(buffer), "%d.%s  %d:%02d", tm->tm_mday, month, tm->tm_hour, tm->tm_min);
+            snprintf(buffer, sizeof(buffer), "%d.%s  %d:%02d", tm->tm_mday, Convert(month), tm->tm_hour, tm->tm_min);
             TextLen = normalFont->Width(buffer);
         }
 
