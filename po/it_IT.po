@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: VDR 1.5.7\n"
 "Report-Msgid-Bugs-To: <nobody@domain.com>\n"
 "POT-Creation-Date: 2011-01-24 21:00+0100\n"
-"PO-Revision-Date: 2010-11-06 20:12+0100\n"
+"PO-Revision-Date: 2011-03-05 16:38+0100\n"
 "Last-Translator: Diego Pierotto <vdr-italian@tiscali.it>\n"
 "Language-Team:  <vdr@linuxtv.org>\n"
 "MIME-Version: 1.0\n"
@@ -132,10 +132,11 @@ msgid "Brightness delay [s]"
 msgstr "Ritardo luminosità [s]"
 
 msgid "Show spectrum analyzer"
-msgstr ""
+msgstr "Mostra analizzatore di spretto"
 
 msgid "Show analyzer volume"
-msgstr ""
+msgstr "Mostra analizzatore volume"
 
 msgid "Unknown title"
 msgstr "Titolo sconosciuto"
+
