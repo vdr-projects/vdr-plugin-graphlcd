@@ -32,6 +32,10 @@
 
 #include "compat.h"
 
+#ifdef USE_WAREAGLEICON
+#include <vdr/iconpatch.h>
+#endif
+
 #define MAXLINES_MSG  4
 #define MAXLINES_TEXT 16
 #define FILENAME_EXTERNAL_TRIGGERED_SYMBOLS "/tmp/graphlcd_symbols"
@@ -117,7 +121,12 @@ cGraphLCDDisplay::cGraphLCDDisplay()
     bBrightnessActive = true;
     LastTimeSA.Set(0); //span
 
-    conv = new cCharSetConv(cCharSetConv::SystemCharacterTable() ? cCharSetConv::SystemCharacterTable() : "UTF-8", "ISO-8859-1");
+    // convert to UTF-8 internally, if we want to support anything else and not only ISO-8859-1
+    conv = new cCharSetConv(cCharSetConv::SystemCharacterTable() ? cCharSetConv::SystemCharacterTable() : "UTF-8", "UTF-8");
+#ifdef USE_WAREAGLEICON
+    bIsUTF8 = IsLangUtf8();
+    textWithIcons = 0;
+#endif
 }
 
 cGraphLCDDisplay::~cGraphLCDDisplay()
@@ -131,7 +140,11 @@ cGraphLCDDisplay::~cGraphLCDDisplay()
     
     if (conv) {
        delete conv;
-    } 
+    }
+#ifdef USE_WAREAGLEICON
+    if (textWithIcons)
+	free(textWithIcons);
+#endif 
 }
 
 int cGraphLCDDisplay::Init(GLCD::cDriver * Lcd, const char * CfgDir)
@@ -2023,6 +2036,46 @@ void cGraphLCDDisplay::SetBrightness()
     mutex.Unlock();
 }
 
+#ifdef USE_WAREAGLEICON
+const char * cGraphLCDDisplay::ConvertWarEagleIconsUtf8(const char *s)
+{
+	if (textWithIcons)
+		free(textWithIcons);
+	textWithIcons = (char *)malloc(sizeof(char *) * strlen(s) + 10);
+	textWithIcons[0] = '\0';
+	int sl;
+	uint sym;
+	char * iconChar;
+	iconChar = (char *)malloc(sizeof(char *) * 4);
+	iconChar[0] = '\0';
+	// will replace unicode access codes with non-unicode ones between
+	// start and end code of wareagle icons defined in VDRSymbols.ttf,
+	// see http://andreas.vdr-developer.org/fonts/symbols.html and iconpatch.h of
+	// vdr sources patched with USE_WAREAGLEICON support:
+	uint symStart  = 0xE000;		// ICON_RESUME_UTF8
+	//uint symEnd    = 0xE000 + 0x15;	// ICON_CLOCK_LH_UTF8
+	uint symEnd    = 0xE000 + 0x1C;		// last custom icon beyond ICON_CLOCK_LH_UTF8
+	int symOffset = - 0xDF80;
+	for (const char *p = s; *p; )
+	{
+		sl = Utf8CharLen(p);
+		sym = Utf8CharGet(p, sl);
+		if (sym >= symStart && sym <= symEnd)
+		{
+			sl = Utf8CharSet(sym + symOffset, iconChar);
+			strncat(textWithIcons, iconChar, sl - 1);
+		}
+		else
+		{
+			strncat(textWithIcons, p, sl);
+		}
+		p += sl;
+	}
+	free (iconChar);
+	return textWithIcons;
+}
+#endif
+
 const char * cGraphLCDDisplay::Convert(const char *s)
 {
 // do character recoding to ISO-8859-1
@@ -2033,9 +2086,14 @@ const char * cGraphLCDDisplay::Convert(const char *s)
   const char *s_converted = conv->Convert(s);
   if (s_converted == s) {
     const char* SCT = cCharSetConv::SystemCharacterTable() ? cCharSetConv::SystemCharacterTable() : "UTF-8";
-    esyslog("graphlcd plugin: ERROR: conversion from %s to ISO-8859-1 failed.", SCT);
+    esyslog("graphlcd plugin: ERROR: conversion from %s to UTF-8 failed.", SCT);
     esyslog("graphlcd plugin: ERROR: '%s'",s);
   }
+#ifdef USE_WAREAGLEICON
+  if (bIsUTF8)
+    return ConvertWarEagleIconsUtf8(s_converted);
+  else
+#endif
   return s_converted;
 }
 

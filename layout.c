@@ -66,7 +66,8 @@ bool cFontElement::Load(const std::string & url)
             file += url.substr(4, pos - 4);
         }
 #if APIVERSNUM >= 10503
-		return font.LoadFT2(file, cCharSetConv::SystemCharacterTable() ? cCharSetConv::SystemCharacterTable() : "ISO-8859-1", size);
+        // NULL SystemCharacterTable defaults to UTF-8 (see VDR tools.h)
+        return font.LoadFT2(file, cCharSetConv::SystemCharacterTable() ? cCharSetConv::SystemCharacterTable() : "UTF-8", size);
 #else
         return font.LoadFT2(file, I18nCharSets()[Setup.OSDLanguage], size);
 #endif

@@ -147,6 +147,12 @@ private:
 
     char szETSymbols[32];
 
+#ifdef USE_WAREAGLEICON
+    bool bIsUTF8;
+    char * textWithIcons;
+    const char * ConvertWarEagleIconsUtf8(const char *s);
+#endif
+
     void DisplayChannel();
     void DisplayTime();
     void DisplayLogo();
