@@ -6,7 +6,8 @@
  * This file is released under the GNU General Public License. Refer
  * to the COPYING file distributed with this package.
  *
- * (c) 2004 Andreas Regel <andreas.regel AT powarman.de>
+ * (c) 2004-2010 Andreas Regel <andreas.regel AT powarman.de>
+ * (c) 2010-2011 Wolfgang Astleitner <mrwastl AT users sourceforge net>
  */
 
 #include <glcdskin/config.h>
@@ -136,6 +137,7 @@ typedef enum _eTokenId
     tokBrightnessActive,
     tokBrightnessIdle,
     tokBrightnessDelay,
+    tokDisplayMode,
     tokPrivateSettingEnd,
 
     // external services
@@ -260,6 +262,7 @@ static const std::string Tokens[tokCountToken] =
     "BrightnessActive",
     "BrightnessIdle",
     "BrightnessDelay",
+    "DisplayMode",
     "privateSettingEnd",
 
     // external services
@@ -647,6 +650,16 @@ GLCD::cType cGraphLCDSkinConfig::GetToken(const GLCD::tSkinToken & Token)
                 return GraphLCDSetup.BrightnessIdle;
             case tokBrightnessDelay:
                 return GraphLCDSetup.BrightnessDelay;
+            case tokDisplayMode:
+                switch (mDisplay->GetDisplayMode())
+                {
+                    case DisplayModeNormal:
+                        return "Normal";
+                    case DisplayModeInteractive:
+                        return "Interactive";
+                    default:
+                        return "Normal";
+                }
 
             default:
                 break;
@@ -765,13 +778,18 @@ int cGraphLCDSkinConfig::GetTabPosition(int Index, int MaxWidth, const GLCD::cFo
     return 0;
 }
 
+void cGraphLCDSkinConfig::SetMenuClear()
+{
+    mTabs.clear();
+}
+
+
 uint64_t cGraphLCDSkinConfig::Now(void)
 {
     return cTimeMs::Now();
 }
 
-
-void cGraphLCDSkinConfig::SetMenuClear()
+GLCD::cDriver * cGraphLCDSkinConfig::GetDriver(void) const
 {
-    mTabs.clear();
+    return (mDisplay) ? (mDisplay)->GetDriver() : NULL;
 }

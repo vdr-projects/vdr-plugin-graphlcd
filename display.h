@@ -7,8 +7,8 @@
  * to the COPYING file distributed with this package.
  *
  * (c) 2001-2004 Carsten Siebholz <c.siebholz AT t-online.de>
- * (c) 2004 Andreas Regel <andreas.regel AT powarman.de>
- * (c) 2010 Wolfgang Astleitner <mrwastl AT users sourceforge net>
+ * (c) 2004-2010 Andreas Regel <andreas.regel AT powarman.de>
+ * (c) 2010-2011 Wolfgang Astleitner <mrwastl AT users sourceforge net>
  */
 
 #ifndef _GRAPHLCD_DISPLAY_H_
@@ -40,6 +40,13 @@ enum eThreadState
     StateMenu
 };
 
+// state of current display mode (interesting for displays w/ touchpads)
+enum eDisplayMode
+{
+    DisplayModeNormal,
+    DisplayModeInteractive
+};
+
 // Display update Thread
 class cGraphLCDDisplay : public cThread
 {
@@ -59,6 +66,10 @@ public:
     void ForceUpdateBrightness();
 
     const cGraphLCDService * GetServiceObject() const { return mService; }
+
+    GLCD::cDriver * GetDriver() const { return mLcd; }
+
+    const eDisplayMode GetDisplayMode() const { return mDisplayMode; }
 protected:
     virtual void Action();
 
@@ -89,6 +100,9 @@ private:
     bool bBrightnessActive;
     /* external services */
     cGraphLCDService * mService;
+    /* display mode (normal or interactive) */
+    eDisplayMode mDisplayMode;
+    uint64_t LastTimeDisplayMode;
 };
 
 #endif

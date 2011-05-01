@@ -7,8 +7,8 @@
  * to the COPYING file distributed with this package.
  *
  * (c) 2001-2004 Carsten Siebholz <c.siebholz AT t-online.de>
- * (c) 2004 Andreas Regel <andreas.regel AT powarman.de>
- * (c) 2010 Wolfgang Astleitner <mrwastl AT users sourceforge net>
+ * (c) 2004-2010 Andreas Regel <andreas.regel AT powarman.de>
+ * (c) 2010-2011 Wolfgang Astleitner <mrwastl AT users sourceforge net>
  */
 
 #include <stdlib.h>
@@ -29,6 +29,8 @@
 #include <vdr/tools.h>
 #include <vdr/menu.h>
 
+#include <vdr/remote.h>
+
 cGraphLCDDisplay::cGraphLCDDisplay()
 :   cThread("glcd_display"),
     mLcd(NULL),
@@ -43,6 +45,9 @@ cGraphLCDDisplay::cGraphLCDDisplay()
 
     mState = StateNormal;
     mLastState = StateNormal;
+    
+    mDisplayMode = DisplayModeNormal;
+    LastTimeDisplayMode = 0;
 
     mShowVolume = false;
 
@@ -119,7 +124,8 @@ void cGraphLCDDisplay::Action(void)
     }
 
     skinFileName = mSkinConfig->SkinPath() + "/" + mSkinConfig->SkinName() + ".skin";
-    mSkin = GLCD::XmlParse(*mSkinConfig, mSkinConfig->SkinName(), skinFileName);
+    std::string errorString = "";
+    mSkin = GLCD::XmlParse(*mSkinConfig, mSkinConfig->SkinName(), skinFileName, errorString);
     if (!mSkin)
     {
         int skipx = mLcd->Width() >> 3;
@@ -127,13 +133,42 @@ void cGraphLCDDisplay::Action(void)
 
         esyslog("graphlcd plugin: ERROR loading skin\n");
 
-        // draw an 'X' to inform the user that there was a problem with loading the skin
-        // (better than just leaving an empty screen ...)
         mLcd->Clear();
+        // clear the screen with a filled rectangle using a defined colour to guarantee visible text or 'X'
+#ifdef GRAPHLCD_CBITMAP_ARGB
+        mScreen->DrawRectangle(0, 0, mLcd->Width()-1, mLcd->Height()-1, GLCD::cColor::Black, true);
+#else
         mScreen->DrawRectangle(0, 0, mLcd->Width()-1, mLcd->Height()-1, GLCD::clrBlack, true);
-        mScreen->DrawLine(skipx, skipy, mLcd->Width()-1-skipx, mLcd->Height()-1-skipy, GLCD::clrWhite);
-        mScreen->DrawLine(mLcd->Width()-1-skipx, skipy, skipx, mLcd->Height()-1-skipy, GLCD::clrWhite);
+#endif
+
+        GLCD::cFont * font = new GLCD::cFont();
+        if ( font->LoadFNT( mSkinConfig->FontPath() + "/" + "f8n.fnt") ) {
+          std::vector <std::string> lines;
+          font->WrapText(mLcd->Width()-10, mLcd->Height()-1, errorString, lines);
+          int lh = font->LineHeight();
+          for (size_t i = 0; i < lines.size(); i++) {
+#ifdef GRAPHLCD_CBITMAP_ARGB
+              mScreen->DrawText(3, 1+i*lh, mLcd->Width()-1, lines[i], font, GLCD::cColor::White);
+#else
+              mScreen->DrawText(3, 1+i*lh, mLcd->Width()-1, lines[i], font, GLCD::clrWhite);
+#endif
+          }
+        } else {
+          // draw an 'X' to inform the user that there was a problem with loading the skin
+          // (better than just leaving an empty screen ...)
+#ifdef GRAPHLCD_CBITMAP_ARGB
+          mScreen->DrawLine(skipx, skipy, mLcd->Width()-1-skipx, mLcd->Height()-1-skipy, GLCD::cColor::White);
+          mScreen->DrawLine(mLcd->Width()-1-skipx, skipy, skipx, mLcd->Height()-1-skipy, GLCD::cColor::White);
+#else
+          mScreen->DrawLine(skipx, skipy, mLcd->Width()-1-skipx, mLcd->Height()-1-skipy, GLCD::clrWhite);
+          mScreen->DrawLine(mLcd->Width()-1-skipx, skipy, skipx, mLcd->Height()-1-skipy, GLCD::clrWhite);
+#endif
+        }
+#ifdef GRAPHLCD_CBITMAP_ARGB
+        mLcd->SetScreen(mScreen->Data(), mScreen->Width(), mScreen->Height());
+#else
         mLcd->SetScreen(mScreen->Data(), mScreen->Width(), mScreen->Height(), mScreen->LineSize());
+#endif
         mLcd->Refresh(true);
         return;
     }
@@ -143,11 +178,15 @@ void cGraphLCDDisplay::Action(void)
     mLcd->Refresh(true);
     mUpdate = true;
 
+    uint64_t lastEventMs = 0;
+#define MIN_EVENT_DELAY 500
+
     while (Running())
     {
         if (GraphLCDSetup.PluginActive)
         {
             uint64_t currTimeMs = cTimeMs::Now();
+            GLCD::cSkinDisplay * display = NULL;
 
             if (mUpdateAt != 0)
             {
@@ -185,27 +224,31 @@ void cGraphLCDDisplay::Action(void)
                 }
             }
 
-            {
-                GLCD::cSkinDisplay * display = NULL;
-
-                if (mState == StateNormal)
-                    display = mSkin->GetDisplay("normal");
-                else if (mState == StateReplay)
-                    display = mSkin->GetDisplay("replay");
-                else if (mState == StateMenu)
-                    display = mSkin->GetDisplay("menu");
-                if (display && display->NeedsUpdate(currTimeMs ) )
-                   mUpdate = true;
-
+            /* display mode (normal or interactive): reset after 10 secs if not normal */
+            if ( (mDisplayMode != DisplayModeNormal) && ( (uint32_t)(currTimeMs - LastTimeDisplayMode) > (uint32_t)(10000)) ) {
+                mDisplayMode = DisplayModeNormal;
+                LastTimeDisplayMode = currTimeMs;
+                mUpdate = true;
             }
+
+            if (mState == StateNormal)
+                display = mSkin->GetDisplay("normal");
+            else if (mState == StateReplay)
+                display = mSkin->GetDisplay("replay");
+            else if (mState == StateMenu)
+                display = mSkin->GetDisplay("menu");
+            if (display && display->NeedsUpdate(currTimeMs ) )
+               mUpdate = true;
+
+
             // update Display every minute
-            if (mState == StateNormal && currTimeMs/60000 != mLastTimeMs/60000)
+            if (mState == StateNormal && (currTimeMs/60000 != mLastTimeMs/60000))
             {
                 mUpdate = true;
             }
 
             // update Display every second in replay state
-            if (mState == StateReplay && currTimeMs/1000 != mLastTimeMs/1000)
+            if (mState == StateReplay && (currTimeMs/1000 != mLastTimeMs/1000))
             {
                 mUpdate = true;
             }
@@ -219,7 +262,7 @@ void cGraphLCDDisplay::Action(void)
 
             // update display if BrightnessDelay is exceeded
             if (bActive && (nCurrentBrightness == GraphLCDSetup.BrightnessActive) && 
-                ((int)((cTimeMs::Now() - LastTimeBrightness)) > (GraphLCDSetup.BrightnessDelay*1000))) 
+                ((uint32_t)((cTimeMs::Now() - LastTimeBrightness)) > (uint32_t)(GraphLCDSetup.BrightnessDelay*1000))) 
             {
                 mUpdate = true;
             }
@@ -232,6 +275,29 @@ void cGraphLCDDisplay::Action(void)
             }
 
 
+            // check event
+            GLCD::cGLCDEvent * ev = mSkin->Config().GetDriver()->GetEvent();
+            if (ev && display && ((uint32_t)(currTimeMs-lastEventMs) > (uint32_t)(MIN_EVENT_DELAY) )) {
+                std::string rv = "";
+
+                if ( (rv = display->CheckAction(ev) ) != "") {
+                    if (rv.substr(0,4) == "Key.") {
+                        cRemote::Put(cKey::FromString(rv.substr(4).c_str()), true);
+                        LastTimeDisplayMode = currTimeMs; /* if interactive mode: extend it */ 
+                    } else if (rv.substr(0,5) == "Mode.") {
+                        if (rv.substr(5) == "Interactive") {
+                            mDisplayMode = DisplayModeInteractive;
+                            LastTimeDisplayMode = currTimeMs;
+                        } else if (rv.substr(5) == "Normal") {
+                            mDisplayMode = DisplayModeNormal;
+                            LastTimeDisplayMode = currTimeMs;
+                        }
+                        mUpdate = true;
+                    }
+                    lastEventMs = currTimeMs;
+                }
+            }
+
             if (mUpdate)
             {
                 mUpdateAt = 0;
@@ -239,7 +305,8 @@ void cGraphLCDDisplay::Action(void)
 
                 mGraphLCDState->Update();
 
-                mScreen->Clear();
+                mScreen->Clear(mSkin->GetBackgroundColor());
+
                 GLCD::cSkinDisplay * display = NULL;
 
                 if (mState == StateNormal)
@@ -262,13 +329,33 @@ void cGraphLCDDisplay::Action(void)
                     if (display)
                         display->Render(mScreen);
                 }
+#ifdef GRAPHLCD_CBITMAP_ARGB
+                mLcd->SetScreen(mScreen->Data(), mScreen->Width(), mScreen->Height());
+#else
                 mLcd->SetScreen(mScreen->Data(), mScreen->Width(), mScreen->Height(), mScreen->LineSize());
+#endif
                 mLcd->Refresh(false);
                 mLastTimeMs = currTimeMs;
                 SetBrightness();
+
+                // flush events
+                mSkin->Config().GetDriver()->GetEvent();
             }
             else
             {
+#if 0
+                GLCD::cGLCDEvent * ev = mSkin->Config().GetDriver()->GetEvent();
+                if (ev && display && ((uint32_t)(currTimeMs-lastEventMs) > (uint32_t)(MIN_EVENT_DELAY) )) {
+                    std::string rv = "";
+
+                    if ( (rv = display->CheckAction(ev) ) != "") {
+                        if (rv.substr(0,4) == "Key.") {
+                            cRemote::Put(cKey::FromString(rv.substr(4).c_str()), true);
+                        }
+                        lastEventMs = currTimeMs;
+                    }
+                }
+#endif
                 cCondWait::SleepMs(100);
             }
         }
@@ -381,7 +468,7 @@ void cGraphLCDDisplay::SetBrightness()
         else
         {
             if (GraphLCDSetup.BrightnessDelay < 1
-                || ((int)(cTimeMs::Now() - LastTimeBrightness) > (GraphLCDSetup.BrightnessDelay*1000)))
+                || ((unsigned int)(cTimeMs::Now() - LastTimeBrightness) > (unsigned int)(GraphLCDSetup.BrightnessDelay*1000)))
             {
                 mLcd->SetBrightness(GraphLCDSetup.BrightnessIdle);
                 nCurrentBrightness = GraphLCDSetup.BrightnessIdle;

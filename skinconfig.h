@@ -6,13 +6,16 @@
  * This file is released under the GNU General Public License. Refer
  * to the COPYING file distributed with this package.
  *
- * (c) 2004 Andreas Regel <andreas.regel AT powarman.de>
+ * (c) 2004-2010 Andreas Regel <andreas.regel AT powarman.de>
+ * (c) 2010-2011 Wolfgang Astleitner <mrwastl AT users sourceforge net>
  */
 
 #ifndef _GRAPHLCD_SKINCONFIG_H_
 #define _GRAPHLCD_SKINCONFIG_H_
 
 #include "alias.h"
+
+#include <glcddrivers/driver.h>
 
 class cGraphLCDSkinConfig : public GLCD::cSkinConfig
 {
@@ -37,9 +40,11 @@ public:
     virtual GLCD::cType GetToken(const GLCD::tSkinToken & Token);
     virtual int GetTokenId(const std::string & Name);
     virtual int GetTabPosition(int Index, int MaxWidth, const GLCD::cFont & Font);
-    virtual uint64_t Now(void);
 
     const std::string & SkinName(void) const { return mSkinName; }
+
+    virtual uint64_t Now(void);
+    virtual GLCD::cDriver * GetDriver(void) const;
 };
 
 #endif
