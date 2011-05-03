@@ -53,6 +53,8 @@ public:
     virtual bool Initialize();
     virtual bool Start();
     virtual void Housekeeping();
+    virtual const char **SVDRPHelpPages(void);
+    virtual cString SVDRPCommand(const char *Command, const char *Option, int &ReplyCode);
     virtual void MainThreadHook(void);
     virtual const char * MainMenuEntry() { return MAINMENUENTRY; }
     virtual cOsdObject * MainMenuAction();
@@ -221,6 +223,48 @@ void cPluginGraphLCD::MainThreadHook()
 {
     if (mDisplay)
         mDisplay->Tick();
+}
+
+const char **cPluginGraphLCD::SVDRPHelpPages(void)
+{
+    static const char *HelpPages[] = {
+        "CLS   Clear Display.",
+        "UPD   Update Display.",
+        "OFF    Switch Plugin off.",
+        "ON     Switch Plugin on.",
+        NULL
+    };
+    return HelpPages;
+}
+
+cString cPluginGraphLCD::SVDRPCommand(const char *Command, const char *Option, int &ReplyCode)
+{
+    if (strcasecmp(Command, "CLS") == 0) {
+        if (GraphLCDSetup.PluginActive == 1) {
+            return "Error: Plugin is active.";
+        } else {
+            mDisplay->Clear();
+            return "GraphLCD cleared.";
+        };
+    }
+    if (strcasecmp(Command, "UPD") == 0) {
+        if (GraphLCDSetup.PluginActive == 0) {
+            return "Error: Plugin is not active.";
+        } else {
+            mDisplay->Update();
+            return "GraphLCD updated.";
+        };
+    }
+
+    if (strcasecmp(Command, "OFF") == 0) {
+        GraphLCDSetup.PluginActive = 0;
+        return "GraphLCD Plugin switched off.";
+    }
+    if (strcasecmp(Command, "ON") == 0) {
+        GraphLCDSetup.PluginActive = 1;
+        return "GraphLCD Plugin switched on.";
+    }
+    return NULL;
 }
 
 cOsdObject * cPluginGraphLCD::MainMenuAction()

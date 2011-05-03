@@ -57,6 +57,7 @@ public:
     bool Initialise(GLCD::cDriver * Lcd, const std::string & CfgPath, const std::string & SkinsPath, const std::string & SkinName);
     void Tick();
     void Update();
+    void Clear();
     void Replaying(bool Starting);
     void SetMenuClear();
     void SetMenuTitle();

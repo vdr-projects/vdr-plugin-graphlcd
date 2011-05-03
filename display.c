@@ -482,3 +482,14 @@ void cGraphLCDDisplay::ForceUpdateBrightness() {
     bBrightnessActive = true;
     SetBrightness();
 }
+
+
+void cGraphLCDDisplay::Clear() {
+  mScreen->Clear();
+#ifdef GRAPHLCD_CBITMAP_ARGB
+  mLcd->SetScreen(mScreen->Data(), mScreen->Width(), mScreen->Height());
+#else
+  mLcd->SetScreen(mScreen->Data(), mScreen->Width(), mScreen->Height(), mScreen->LineSize());
+#endif
+  mLcd->Refresh(false);
+}
