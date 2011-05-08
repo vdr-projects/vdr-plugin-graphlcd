@@ -262,6 +262,7 @@ cString cPluginGraphLCD::SVDRPCommand(const char *Command, const char *Option, i
     }
     if (strcasecmp(Command, "ON") == 0) {
         GraphLCDSetup.PluginActive = 1;
+        mDisplay->Update();
         return "GraphLCD Plugin switched on.";
     }
     return NULL;

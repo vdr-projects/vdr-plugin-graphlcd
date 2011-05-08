@@ -606,6 +606,14 @@ void cGraphLCDState::UpdateChannelInfo(void)
     if (mChannel.number == 0)
         return;
 
+    // correct stored channel number if differs from device's channel number
+    // e.g after switching off plugin, switching channel, re-enabling plugin
+    if (mChannel.number != cDevice::CurrentChannel()) {
+      mutex.Lock();
+      mChannel.number = cDevice::CurrentChannel();
+      mutex.Unlock();
+    }
+
     mutex.Lock();
 
     cChannel * ch = Channels.GetByNumber(mChannel.number);
