@@ -7,8 +7,8 @@
  * to the COPYING file distributed with this package.
  *
  * (c) 2001-2004 Carsten Siebholz <c.siebholz AT t-online.de>
- * (c) 2004 Andreas Regel <andreas.regel AT powarman.de>
- * (c) 2010 Wolfgang Astleitner <mrwastl AT users sourceforge net>
+ * (c) 2004-2010 Andreas Regel <andreas.regel AT powarman.de>
+ * (c) 2010-2011 Wolfgang Astleitner <mrwastl AT users sourceforge net>
  */
 
 #include <getopt.h>
@@ -82,9 +82,10 @@ cPluginGraphLCD::~cPluginGraphLCD()
 
 const char * cPluginGraphLCD::CommandLineHelp()
 {
-    return "  -c CFG,   --config=CFG   use CFG as driver config file\n"
+    return "  -c CFG,   --config=CFG   use CFG as driver config file (default is \"/etc/graphlcd.conf\")\n"
            "  -d DISP,  --display=DISP use display DISP for output\n"
-           "  -s SKIN,  --skin=SKIN    use skin SKIN (default is \"default\")\n";
+           "  -s SKIN,  --skin=SKIN    use skin SKIN (default is \"default\")\n"
+           "  -p PATH,  --skinspath=PATH  use path PATH for skins (default is \"<plugin_config>/skins/\")\n";
 }
 
 bool cPluginGraphLCD::ProcessArgs(int argc, char * argv[])
