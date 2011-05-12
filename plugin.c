@@ -203,7 +203,7 @@ bool cPluginGraphLCD::Start()
     int count;
 
     dsyslog("graphlcd plugin: waiting for display thread to get ready");
-    for (count = 0; count < 1200; count++)
+    for (count = 0; count < 100 /*1200*/; count++)
     {
         if (mDisplay->Active())
         {
@@ -213,7 +213,10 @@ bool cPluginGraphLCD::Start()
         cCondWait::SleepMs(100);
     }
     dsyslog ("graphlcd plugin: timeout while waiting for display thread");
-    return false;
+    /* no activity after 10 secs: display is unusable */
+    GraphLCDSetup.PluginActive = 0;
+    /* don't return false, else VDR would restart itself */
+    return true /*false*/;
 }
 
 void cPluginGraphLCD::Housekeeping()
