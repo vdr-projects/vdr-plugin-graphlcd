@@ -364,6 +364,9 @@ void cGraphLCDDisplay::Action(void)
             cCondWait::SleepMs(100);
         }
     }
+    // clear screen before thread is stopping
+    mLcd->Clear();
+    mLcd->Refresh(true);
 }
 
 void cGraphLCDDisplay::Update()
