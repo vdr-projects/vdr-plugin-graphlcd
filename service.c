@@ -222,8 +222,8 @@ bool cGraphLCDService::NeedsUpdate(uint64_t CurrentTime)
         radioLastChange = CurrentTime;
         p = cPluginManager::CallFirstService("RadioTextService-v1.0", NULL);
         if (p) {
-            radioActive = true;
             if (cPluginManager::CallFirstService("RadioTextService-v1.0", &checkRTSData)) {
+                radioActive = true;
                 if (
                         (currRTSData.rds_info != checkRTSData.rds_info) ||
                         (currRTSData.rds_pty != checkRTSData.rds_pty) ||
@@ -251,8 +251,8 @@ bool cGraphLCDService::NeedsUpdate(uint64_t CurrentTime)
         lcrLastChange = CurrentTime;
         p = cPluginManager::CallFirstService("LcrService-v1.0", NULL);
         if (p) {
-            lcrActive = true;
             if (cPluginManager::CallFirstService("LcrService-v1.0", &checkLcrData)) {
+                lcrActive = true;
                 if (
                         (strcmp(currLcrData.destination, checkLcrData.destination) != 0) ||
                         (strcmp(currLcrData.price, checkLcrData.price) != 0) ||
@@ -321,8 +321,8 @@ bool cGraphLCDService::NeedsUpdate(uint64_t CurrentTime)
 #endif  /* GRAPHLCD_SERVICE_FEMON_VALID */
 
             if (femonVersionValid) {
-                femonActive = true;
                 if (cPluginManager::CallFirstService("FemonService-v1.0", &checkFemonData)) {
+                    femonActive = true;
                     if (
 #if 0
                             (strcmp(currFemonData.fe_name, checkFemonData.fe_name) != 0)  ||
