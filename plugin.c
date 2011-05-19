@@ -23,6 +23,8 @@
 
 #include <vdr/plugin.h>
 
+#include <ctype.h>
+
 
 static const char * kPluginName = "graphlcd";
 static const char *VERSION        = "0.2.0-git";
@@ -234,8 +236,12 @@ const char **cPluginGraphLCD::SVDRPHelpPages(void)
     static const char *HelpPages[] = {
         "CLS   Clear Display.",
         "UPD   Update Display.",
-        "OFF    Switch Plugin off.",
-        "ON     Switch Plugin on.",
+        "OFF   Switch Plugin off.",
+        "ON   Switch Plugin on.",
+        "SET <key> <value>   Set a key=value entry.",
+        "SETEXP <exp> <key> <value>   Set a key=value entry which expires after <exp> secs.",
+        "UNSET <key>   Unset (clear) entry <key>.",
+        "GET <key>   Get value assigned to key.",
         NULL
     };
     return HelpPages;
@@ -243,6 +249,25 @@ const char **cPluginGraphLCD::SVDRPHelpPages(void)
 
 cString cPluginGraphLCD::SVDRPCommand(const char *Command, const char *Option, int &ReplyCode)
 {
+    std::string option = Option;
+    size_t firstpos = std::string::npos;
+    size_t secondpos = std::string::npos;
+    firstpos = option.find_first_of(' ');
+    if (firstpos != std::string::npos) {
+        // remove extra spaces
+        while ( ((firstpos+1) < option.length()) && (option[firstpos+1] == ' ') ) {
+            option.erase(firstpos+1, 1);
+        }
+        secondpos = option.find_first_of(' ', firstpos+1);
+        if (firstpos != std::string::npos) {
+            // remove extra spaces
+            while ( ((secondpos+1) < option.length()) && (option[secondpos+1] == ' ') ) {
+                option.erase(secondpos+1, 1);
+           }
+        }
+    }
+    
+
     if (strcasecmp(Command, "CLS") == 0) {
         if (GraphLCDSetup.PluginActive == 1) {
             return "Error: Plugin is active.";
@@ -250,7 +275,7 @@ cString cPluginGraphLCD::SVDRPCommand(const char *Command, const char *Option, i
             mDisplay->Clear();
             return "GraphLCD cleared.";
         };
-    }
+    } else
     if (strcasecmp(Command, "UPD") == 0) {
         if (GraphLCDSetup.PluginActive == 0) {
             return "Error: Plugin is not active.";
@@ -258,16 +283,59 @@ cString cPluginGraphLCD::SVDRPCommand(const char *Command, const char *Option, i
             mDisplay->Update();
             return "GraphLCD updated.";
         };
-    }
-
+    } else
     if (strcasecmp(Command, "OFF") == 0) {
         GraphLCDSetup.PluginActive = 0;
         return "GraphLCD Plugin switched off.";
-    }
+    } else
     if (strcasecmp(Command, "ON") == 0) {
         GraphLCDSetup.PluginActive = 1;
         mDisplay->Update();
         return "GraphLCD Plugin switched on.";
+    } else
+    if (strcasecmp(Command, "SET") == 0) {
+        if (firstpos != std::string::npos) {
+            std::string key = option.substr(0, firstpos);
+            if ( isalpha(key[0]) ) { 
+                mDisplay->GetExtData()->Set(key, option.substr(firstpos+1));
+                return "SET ok";
+            }
+        }
+        return "SET requires two parameters: SET <key> <value>.";
+    } else
+    if (strcasecmp(Command, "SETEXP") == 0) {
+        if (secondpos != std::string::npos) {
+            std::string key = option.substr(firstpos+1, secondpos-firstpos-1);
+            std::string value = option.substr(secondpos+1);
+            if ( isalpha(key[0]) && isdigit(option[0]) ) { 
+                uint32_t expsec = (uint32_t)strtol( option.substr(0, firstpos).c_str(), NULL, 10);
+                mDisplay->GetExtData()->Set( key, value, expsec );
+                return "SETEXP ok";
+            }
+        }
+        return "SETEXP requires three parameters: SETEXP <exp> <key> <value>.";
+    } else
+    if (strcasecmp(Command, "UNSET") == 0) {
+        if (firstpos == std::string::npos) {
+            mDisplay->GetExtData()->Unset( option );
+            return "UNSET ok";
+        } else {
+            return "UNSET requires exactly one parameter: UNSET <key>.";
+        }
+    } else
+    if (strcasecmp(Command, "GET") == 0) {
+        if (firstpos == std::string::npos) {
+            std::string res = mDisplay->GetExtData()->Get( option );
+            std::string retval = "GET "; retval.append(option); retval.append(": "); 
+            if (res != "" ) {
+                retval.append(res);
+            } else {
+                retval.append("(null)");
+            }
+            return retval.c_str();
+        } else {
+            return "GET requires exactly one parameter: GET <key>.";
+        }
     }
     return NULL;
 }

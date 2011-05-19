@@ -140,10 +140,12 @@ typedef enum _eTokenId
     tokDisplayMode,
     tokPrivateSettingEnd,
 
-    // external services
+    // external services and data
     tokPrivateServiceStart,
     tokServiceIsAvailable,
     tokServiceItem,
+    tokExtDataIsAvailable,
+    tokExtDataItem,
     tokPrivateServiceEnd,
 
     tokCountToken
@@ -269,6 +271,8 @@ static const std::string Tokens[tokCountToken] =
     "privateServiceStart",
     "ServiceIsAvailable",
     "ServiceItem",
+    "ExtDataIsAvailable",
+    "ExtDataItem",
     "privateServiceEnd"
 };
 
@@ -689,6 +693,20 @@ GLCD::cType cGraphLCDSkinConfig::GetToken(const GLCD::tSkinToken & Token)
                     ServiceName = Token.Attrib.Text;
                 }
                 return s->GetItem(ServiceName, ItemName);
+            }
+            break;
+            case tokExtDataIsAvailable: {
+                if (Token.Attrib.Text == "")
+                    return false;
+
+                return mDisplay->GetExtData()->IsSet( Token.Attrib.Text );
+            }
+            break;
+            case tokExtDataItem: {
+                if (Token.Attrib.Text == "")
+                    return false;
+
+                return mDisplay->GetExtData()->Get( Token.Attrib.Text );
             }
             break;
             default:
