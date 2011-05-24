@@ -124,6 +124,8 @@ typedef enum _eTokenId
     tokSkinPath,
     tokScreenWidth,
     tokScreenHeight,
+    tokDefaultForegroundColor,
+    tokDefaultBackgroundColor,
 
     tokPrivateSettingStart,
     tokSettingShowChannelLogo,
@@ -251,6 +253,8 @@ static const std::string Tokens[tokCountToken] =
     "SkinPath",
     "ScreenWidth",
     "ScreenHeight",
+    "DefaultForegroundColor",
+    "DefaultBackgroundColor",
 
     "privateSettingStart",
     "SettingShowChannelLogo",
@@ -732,6 +736,18 @@ GLCD::cType cGraphLCDSkinConfig::GetToken(const GLCD::tSkinToken & Token)
             {
                 const GLCD::cBitmap * bitmap = mDisplay->GetScreen();
                 return bitmap->Height();
+            }
+            case tokDefaultForegroundColor:
+            {
+                char buffer[9];
+                snprintf(buffer, 8, "%08x", (uint32_t)((mDisplay)->GetDriver()->GetForegroundColor()));
+                return buffer;
+            }
+            case tokDefaultBackgroundColor:
+            {
+                char buffer[5];
+                snprintf(buffer, 8, "%08x", (uint32_t)((mDisplay)->GetDriver()->GetBackgroundColor()));
+                return buffer;
             }
             default:
                 break;
