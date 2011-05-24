@@ -739,14 +739,14 @@ GLCD::cType cGraphLCDSkinConfig::GetToken(const GLCD::tSkinToken & Token)
             }
             case tokDefaultForegroundColor:
             {
-                char buffer[9];
-                snprintf(buffer, 8, "0x%08x", (uint32_t)((mDisplay)->GetDriver()->GetForegroundColor()));
+                char buffer[11];
+                snprintf(buffer, 10, "0x%08x", (uint32_t)((mDisplay)->GetDriver()->GetForegroundColor()));
                 return buffer;
             }
             case tokDefaultBackgroundColor:
             {
-                char buffer[5];
-                snprintf(buffer, 8, "0x%08x", (uint32_t)((mDisplay)->GetDriver()->GetBackgroundColor()));
+                char buffer[11];
+                snprintf(buffer, 10, "0x%08x", (uint32_t)((mDisplay)->GetDriver()->GetBackgroundColor()));
                 return buffer;
             }
             default:
