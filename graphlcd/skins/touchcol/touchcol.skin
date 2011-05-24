@@ -2,6 +2,20 @@
 
 <skin version="1.1" name="touchcol" enable="touchscreen">
 
+  <font id="FontInfo"               url="fnt:f12bn.fnt" condition="le({ScreenHeight},128)"/> 
+  <font id="FontChannel"            url="fnt:f12bn.fnt" condition="le({ScreenHeight},128)"/> 
+  <font id="FontMenuTitle"          url="fnt:f8n.fnt" condition="le({ScreenHeight},128)"/>
+  <font id="FontMenuItem"           url="fnt:f8n.fnt" condition="le({ScreenHeight},128)"/>
+  <font id="FontMenuButton"         url="fnt:f5n.fnt" condition="le({ScreenHeight},128)"/>
+  <font id="FontTimes"              url="fnt:f8n.fnt" condition="le({ScreenHeight},128)"/>
+  <font id="FontTitle"              url="ft2:VeraBd.ttf:12" condition="le({ScreenHeight},128)"/>
+  <font id="FontTitleSmall"         url="ft2:VeraBd.ttf:10" condition="le({ScreenHeight},128)"/>
+  <font id="FontInfoSmall"          url="ft2:Vera.ttf:10"  condition="le({ScreenHeight},128)"/>
+  <font id="FontInfoSmall2"         url="ft2:Vera.ttf:8"  condition="le({ScreenHeight},128)"/>
+  <font id="FontInfoFollowing"      url="ft2:Vera.ttf:8"  condition="le({ScreenHeight},128)"/>
+  <font id="FontInfoFollowingShort" url="ft2:Vera.ttf:7"  condition="le({ScreenHeight},128)"/>
+
+
   <font id="FontTimes"              url="fnt:verdana-018.fnt"/>
   <!--font id="FontTitle"              url="fnt:verdana-022.fnt"/-->
   <font id="FontTitle"              url="ft2:VeraBd.ttf:24"/>
@@ -28,20 +42,28 @@
   
   <variable id="UseTouchscreen"     value="1"  condition="QueryFeature('touchscreen')" default="0"/>
 
+  <variable id="ColFemonSigProg"       value="'0xFF5555'"   condition="le({ServiceItem:femon,percent_signal},33)"/>
+  <variable id="ColFemonSigProg"       value="'green'" condition="gt({ServiceItem:femon,percent_signal},66)" default="'yellow'"/>
+ 
+  <variable id="ColFemonSNRProg"       value="'0xFF5555'"   condition="le({ServiceItem:femon,percent_snr},33)"/>
+  <variable id="ColFemonSNRProg"       value="'green'" condition="gt({ServiceItem:femon,percent_snr},66)" default="'yellow'"/>
+ 
+
   <!-- COLOURS -->
   <!-- defines -->
-  <variable id="ColMonoFG"          value="'white'"/>
-  <variable id="ColMonoBG"          value="'black'"/>
+  <variable id="ColMonoFG"          value="{DefaultForegroundColor}"/>
+  <variable id="ColMonoBG"          value="{DefaultBackgroundColor}"/>
 
   <condblock condition="QueryFeature('iscolour')">
     <!-- display id normal -->
-    <variable id="ColChannelBG"       value="'0x300060'"         default="#ColMonoBG" />
-    <variable id="ColChannelInfo"     value="'white'"            default="#ColMonoFG" />
-    <variable id="ColDateTime"        value="'white'"            default="#ColMonoFG" />
-    <variable id="ColBorder"          value="'blue'"             default="#ColMonoFG" />
+    <variable id="ColChannelBG"       value="'0x300060'"         default="#ColMonoFG" />
+    <variable id="ColChannelInfo"     value="'white'"            default="#ColMonoBG" />
+    <variable id="ColDateTime"        value="'white'"            default="#ColMonoBG" />
+    <variable id="ColBorder"          value="'blue'"             default="#ColMonoBG" />
     <variable id="ColLogoBG"          value="'black'"            default="#ColMonoBG" />
     <variable id="ColLogoFG"          value="'cyan'"             default="#ColMonoFG" />
     <variable id="ColSymbol"          value="'yellow'"           default="#ColMonoFG" />
+    <variable id="ColSymbolGreyed"    value="'0x333333'"         default="#ColMonoBG" />
     <variable id="ColPresProgrText"   value="'0xFF777700'"       default="#ColMonoFG" />
     <variable id="ColPresProgrBar"    value="'white'"            default="#ColMonoFG" />
     <variable id="ColPresentTitle"    value="'0x77C077'"         default="#ColMonoFG" />
@@ -71,7 +93,7 @@
     <!-- display id menu -->
     <!--variable id="ColMenuHeaderBG"    value="'yellow'"     condition="QueryFeature('iscolour')"/-->
     <variable id="ColMenuHeaderBG"    value="#ColChannelBG"      default="#ColChannelBG"/> <!-- -->
-    <variable id="ColMenuHeaderFG"    value="'white'"            default="#ColMonoFG" />
+    <variable id="ColMenuHeaderFG"    value="'white'"            default="#ColChannelInfo"/>
     <variable id="ColMenuBorder"      value="#ColMenuHeaderBG"   default="#ColBorder" />
     <variable id="ColMenuEntryCurr"   value="'yellow'"           default="#ColMonoFG" />
     <variable id="ColMenuEntryMarker" value="'yellow'"           default="#ColMonoFG" />
@@ -121,7 +143,6 @@
   <variable id="MenuHeaderH"       value="sub(#ButtonHeight,2)" condition="#UseTouchscreen"
                                  default="FontLineHeight('FontMenuTitle')" />
 
-
   <display id="normal">
     
     <block condition="equal({DisplayMode},'Normal')">
@@ -132,13 +153,13 @@
 
       <rectangle x1="0" y1="0" width="add({ScreenWidth},0)" height="#LogoH" color="#ColChannelBG" filled="yes"/>
 
-      <text x1="1" y1="0" width="sub({ScreenWidth},2)" color="#ColChannelInfo" bgcolor="#ColChannelBG" align="left" font="FontChannel" scrollmode="never">
+      <text x1="1" y1="0" width="sub({ScreenWidth},2)" color="#ColChannelInfo" align="left" font="FontChannel" scrollmode="never">
         {ChannelNumber} | {ChannelName}
       </text>
-      <text x1="1" y1="sub(#LogoH,FontLineHeight('FontInfo'))" color="#ColDateTime" bgcolor="#ColChannelBG" align="left" font="FontInfo">
+      <text x1="1" y1="sub(#LogoH,FontLineHeight('FontInfo'))" color="#ColDateTime" align="left" font="FontInfo">
         {DateTime:%a %d.%m.}
       </text>
-      <text x1="1" y1="sub(#LogoH,FontLineHeight('FontInfo'))" x2="sub({ScreenWidth},1)" color="#ColDateTime" bgcolor="#ColChannelBG" align="right" font="FontInfo">
+      <text x1="1" y1="sub(#LogoH,FontLineHeight('FontInfo'))" x2="sub({ScreenWidth},1)" color="#ColDateTime" align="right" font="FontInfo">
         {DateTime:%H\:%M}
       </text>
       <rectangle x1="0" x2="-1" y1="#LogoH" height="#LineThickness" color="#ColBorder" filled="yes"/>
@@ -151,9 +172,13 @@
       </block>
       <block condition="{SettingShowSymbols}">
         <image x="mul(-4,#SymbolPitch)" y="mul(add(#LogoH,#LineThickness,1),2)" color="#ColSymbol" path="#SymbolTeletext"  condition="{ChannelHasTeletext}"/>
+        <image x="mul(-4,#SymbolPitch)" y="mul(add(#LogoH,#LineThickness,1),2)" color="#ColSymbolGreyed" path="#SymbolTeletext"  condition="not({ChannelHasTeletext})"/>
         <image x="mul(-3,#SymbolPitch)" y="mul(add(#LogoH,#LineThickness,1),2)" color="#ColSymbol" path="#SymbolDolby"     condition="{ChannelHasDolby}"/>
+        <image x="mul(-3,#SymbolPitch)" y="mul(add(#LogoH,#LineThickness,1),2)" color="#ColSymbolGreyed" path="#SymbolDolby"     condition="not({ChannelHasDolby})"/>
         <image x="mul(-2,#SymbolPitch)" y="mul(add(#LogoH,#LineThickness,1),2)" color="#ColSymbol" path="#SymbolScrambled" condition="{ChannelIsEncrypted}"/>
+        <image x="mul(-2,#SymbolPitch)" y="mul(add(#LogoH,#LineThickness,1),2)" color="#ColSymbolGreyed" path="#SymbolScrambled" condition="not({ChannelIsEncrypted})"/>
         <image x="mul(-1,#SymbolPitch)" y="mul(add(#LogoH,#LineThickness,1),2)" color="#ColSymbol" path="#SymbolMute"      condition="{VolumeIsMute}"/>
+        <image x="mul(-1,#SymbolPitch)" y="mul(add(#LogoH,#LineThickness,1),2)" color="#ColSymbolGreyed" path="#SymbolMute"      condition="not({VolumeIsMute})"/>
       </block>
       <block condition="{SettingShowTimebar}">
         <block condition="{PresentValid}">
@@ -168,9 +193,11 @@
       <variable id="FemonBarY" value="sub(#TimeBarY,10)"/>
       <block condition="{ServiceIsAvailable:femon}">
         <rectangle x1="add(#TimeBarW,20)" width="74" y1="#FemonBarY" height="6" color="#ColFemonBar"/>
-        <progress x1="add(#TimeBarW,22)" width="70" y1="add(#FemonBarY,2)" height="2" color="#ColFemonBar" direction="0" current="{ServiceItem:femon,signal}" total="65536"/>
+        <!--progress x1="add(#TimeBarW,22)" width="70" y1="add(#FemonBarY,2)" height="2" color="#ColFemonBar" direction="0" current="{ServiceItem:femon,signal}" total="65536"/-->
+        <progress x1="add(#TimeBarW,22)" width="70" y1="add(#FemonBarY,2)" height="2" color="#ColFemonSigProg" direction="0" current="{ServiceItem:femon,signal}" total="65536"/>
         <rectangle x1="add(#TimeBarW,20)" width="74" y1="#TimeBarY" height="6" color="#ColFemonBar"/>
-        <progress x1="add(#TimeBarW,22)" width="70" y1="add(#TimeBarY,2)" height="2" color="#ColFemonBar" direction="0" current="{ServiceItem:femon,snr}" total="65536"/>
+        <!--progress x1="add(#TimeBarW,22)" width="70" y1="add(#TimeBarY,2)" height="2" color="#ColFemonBar" direction="0" current="{ServiceItem:femon,snr}" total="65536"/-->
+        <progress x1="add(#TimeBarW,22)" width="70" y1="add(#TimeBarY,2)" height="2" color="#ColFemonSNRProg" direction="0" current="{ServiceItem:femon,snr}" total="65536"/>
         <text x1="add(#TimeBarW,98)" width="16" y1="sub(#FemonBarY,2)" y2="-1" color="#ColFemonText" align="right" scrollmode="never" font="FontInfoSignal">
           {ServiceItem:femon,percent_signal}% 
         </text>
@@ -181,6 +208,11 @@
               VBR: {ServiceItem:femon,vbr,%2.2f,1048576} M/s
         </text-->
       </block>
+      <!--block condition="{ExtDataIsAvailable:somemsg}">
+        <text x1="add(#TimeBarW)" width="90" y1="sub(#FemonBarY,2)" y2="-1" color="#ColFemonText" align="right" scrollmode="never" font="FontInfoSignal">
+          {ExtDataItem:somemsg}
+        </text>
+      </block-->
 
       <variable id="RecordingsTextY"     value="mul(-1,FontLineHeight('FontTimes'))"/>
       <variable id="RecordingsLineY"     value="sub(sub(#RecordingsTextY,#LineThickness),1)"/>
@@ -306,8 +338,8 @@
     <variable id="ReplayProgressGap" value="1"/>
     <variable id="ReplayTimeY" value="mul(FontLineHeight('FontInfo'),-1)"/>
     <variable id="ReplayProgressY" value="sub(#ReplayTimeY,#ReplayProgressH,#ReplayProgressGap)"/>
-    <variable id="ReplayLogo" value="'{ConfigPath}/logos/replay/replay-{ReplayMode}_m.glcd'" condition="le({ScreenHeight},64)"
-                            default="'{ConfigPath}/logos/replay/replay-{ReplayMode}_l.glcd'"/>
+    <variable id="ReplayLogo" value="'{ConfigPath}/logos/replay/animated/replay-{ReplayMode}_m.glcd'" condition="le({ScreenHeight},64)"
+                            default="'{ConfigPath}/logos/replay/animated/replay-{ReplayMode}_l.glcd'"/>
 
     <item x1="0" y1="0" height="div({ScreenWidth},3)" width="div({ScreenHeight},5)" action="Key.Back"/>
     <item x1="mul(div({ScreenWidth},3),2)" y1="0" height="mul(div({ScreenHeight},5),2)" action="Key.Up"/>
@@ -364,7 +396,7 @@
     <item x1="0" y1="0" height="#MenuHeaderH" width="#ButtonWidth5" action="Key.Back"/>
 
     <rectangle x1="0" y1="0" width="#MenuHeaderW" height="add(#MenuHeaderH,1)" color="#ColMenuHeaderBG" filled="yes"/>
-    <text x1="0" x2="-1" height="#MenuHeaderH" width="#MenuHeaderW" color="#ColMenuHeaderFG" bgcolor="#ColMenuHeaderBG" multiline="yes" valign="middle" font="FontMenuTitle">{MenuTitle}</text>
+    <text x1="0" x2="-1" height="#MenuHeaderH" width="#MenuHeaderW" color="#ColMenuHeaderFG" multiline="yes" valign="middle" font="FontMenuTitle">{MenuTitle}</text>
     <rectangle x1="0" y1="add(#MenuHeaderH,1)" width="#MenuHeaderW" x2="-1" height="#LineThickness" color="#ColMenuBorder" filled="yes"/>
     <list x1="0" y1="add(#MenuHeaderH,4)" x2="-1" y2="#ButtonY">
       <item height="#ItemHeight"/>
