@@ -124,10 +124,10 @@ typedef enum _eTokenId
     tokSkinPath,
     tokScreenWidth,
     tokScreenHeight,
-    tokForegroundColor,
-    tokBackgroundColor,
     tokDefaultForegroundColor,
     tokDefaultBackgroundColor,
+    tokForegroundColor,
+    tokBackgroundColor,
 
     tokPrivateSettingStart,
     tokSettingShowChannelLogo,
@@ -255,10 +255,10 @@ static const std::string Tokens[tokCountToken] =
     "SkinPath",
     "ScreenWidth",
     "ScreenHeight",
-    "ForegroundColor",
-    "BackgroundColor",
     "DefaultForegroundColor",
     "DefaultBackgroundColor",
+    "ForegroundColor",
+    "BackgroundColor",
 
     "privateSettingStart",
     "SettingShowChannelLogo",
@@ -741,28 +741,28 @@ GLCD::cType cGraphLCDSkinConfig::GetToken(const GLCD::tSkinToken & Token)
                 const GLCD::cBitmap * bitmap = mDisplay->GetScreen();
                 return bitmap->Height();
             }
-            case tokForegroundColor:
-            {
-                char buffer[11];
-                snprintf(buffer, 10, "0x%08x", (uint32_t)((mDisplay)->GetDriver()->GetForegroundColor(false)));
-                return buffer;
-            }
-            case tokBackgroundColor:
-            {
-                char buffer[11];
-                snprintf(buffer, 10, "0x%08x", (uint32_t)((mDisplay)->GetDriver()->GetBackgroundColor(false)));
-                return buffer;
-            }
             case tokDefaultForegroundColor:
             {
-                char buffer[11];
-                snprintf(buffer, 10, "0x%08x", (uint32_t)((mDisplay)->GetDriver()->GetForegroundColor(true)));
+                char buffer[12];
+                snprintf(buffer, 11, "0x%08x", (uint32_t)((mDisplay)->GetDriver()->GetForegroundColor(true)));
                 return buffer;
             }
             case tokDefaultBackgroundColor:
             {
-                char buffer[11];
-                snprintf(buffer, 10, "0x%08x", (uint32_t)((mDisplay)->GetDriver()->GetBackgroundColor(true)));
+                char buffer[12];
+                snprintf(buffer, 11, "0x%08x", (uint32_t)((mDisplay)->GetDriver()->GetBackgroundColor(true)));
+                return buffer;
+            }
+            case tokForegroundColor:
+            {
+                char buffer[12];
+                snprintf(buffer, 11, "0x%08x", (uint32_t)((mDisplay)->GetDriver()->GetForegroundColor(false)));
+                return buffer;
+            }
+            case tokBackgroundColor:
+            {
+                char buffer[12];
+                snprintf(buffer, 11, "0x%08x", (uint32_t)((mDisplay)->GetDriver()->GetBackgroundColor(false)));
                 return buffer;
             }
             default:
