@@ -128,6 +128,7 @@ typedef enum _eTokenId
     tokDefaultBackgroundColor,
     tokForegroundColor,
     tokBackgroundColor,
+    tokIsUTF8,
 
     tokPrivateSettingStart,
     tokSettingShowChannelLogo,
@@ -259,6 +260,7 @@ static const std::string Tokens[tokCountToken] =
     "DefaultBackgroundColor",
     "ForegroundColor",
     "BackgroundColor",
+    "IsUTF8",
 
     "privateSettingStart",
     "SettingShowChannelLogo",
@@ -764,6 +766,10 @@ GLCD::cType cGraphLCDSkinConfig::GetToken(const GLCD::tSkinToken & Token)
                 char buffer[12];
                 snprintf(buffer, 11, "0x%08x", (uint32_t)((mDisplay)->GetDriver()->GetBackgroundColor(false)));
                 return buffer;
+            }
+            case tokIsUTF8:
+            {
+                return (CharSet() == "UTF-8");
             }
             default:
                 break;
