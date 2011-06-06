@@ -3,10 +3,13 @@
  *
  *  service.h  -  class for events from external services
  *
- *  (c)      2010 Wolfgang Astleitner <mrwastl AT users sourceforge net>
+ *  (c) 2010-2011 Wolfgang Astleitner <mrwastl AT users sourceforge net>
+ *
+ *  mailbox-contribution: user 'Keine_Ahnung'
  **/
 
 #include "strfct.h"
+#include <limits>
 
 #include "service.h"
 
@@ -18,18 +21,20 @@ cGraphLCDService::cGraphLCDService(cGraphLCDState * state)
     mState = state;
 
     /* initialise flags for services */
-    radioActive  = false;    radioChanged = false;    radioUse     = false;
-    lcrActive    = false;    lcrChanged   = false;    lcrUse       = false;
-    femonActive  = false;    femonChanged = false;    femonUse     = false;
+    radioActive    = false;    radioChanged   = false;    radioUse     = false;
+    lcrActive      = false;    lcrChanged     = false;    lcrUse       = false;
+    femonActive    = false;    femonChanged   = false;    femonUse     = false;
+    mailboxActive  = false;    mailboxChanged = false;    mailboxUse   = false;
 
-    radioLastChange = lcrLastChange = femonLastChange = 0;
+    radioLastChange = lcrLastChange = femonLastChange = mailboxLastChange = 0;
 
     femonVersionChecked = femonVersionValid = false;
 
     // default min. change delays
-    radioUpdateDelay = 100;   // 100 ms
-    lcrUpdateDelay   = 60000; // 60 sec
-    femonUpdateDelay = 2000;  // 2 sec
+    radioUpdateDelay   = 100;   // 100 ms
+    lcrUpdateDelay     = 60000; // 60 sec
+    femonUpdateDelay   = 2000;  // 2 sec
+    mailboxUpdateDelay = 10000; // 10 sec
 }
 
 cGraphLCDService::~cGraphLCDService()
@@ -47,6 +52,9 @@ bool cGraphLCDService::ServiceIsAvailable(const std::string & Name) {
     } else if (Name == "FemonService-v1.0" || Name == "femon") {
         femonUse = true;
         return femonActive;
+    } else if (Name == "MailBox-1.0" || Name == "mailbox") {
+        mailboxUse = true;
+        return mailboxActive;
     }
     return false;
 }
@@ -62,6 +70,8 @@ void cGraphLCDService::SetServiceUpdateDelay(const std::string & Name, int delay
         lcrUpdateDelay = delay;
     } else if (Name == "FemonService-v1.0" || Name == "femon") {
         femonUpdateDelay = delay;
+    } else if (Name == "MailBox-1.0" || Name == "mailbox") {
+        mailboxUpdateDelay = delay;
     }
 }
 
@@ -197,6 +207,19 @@ GLCD::cType cGraphLCDService::GetItem(const std::string & ServiceName, const std
                 }
             }
         }
+    } else if (ServiceName == "MailBox-1.0" || ServiceName == "mailbox") {
+        mailboxUse = true;
+        if (mailboxActive) {
+            if (ItemName == "" || ItemName == "default"|| ItemName == "hasnew") {
+                return (bool)currMailboxNewData;
+            } else if (ItemName == "newcount") {
+                if (currMailboxUnseenData > std::numeric_limits<int>::max()) {
+                    return (int)-1;
+                } else {
+                    return (int)currMailboxUnseenData;
+                }
+            }
+        }
     }
 
     return "";
@@ -210,9 +233,10 @@ bool cGraphLCDService::NeedsUpdate(uint64_t CurrentTime)
 {
     //mutex.Lock();
 
-    /*radioActive  = false;*/    radioChanged = false;
-    /*lcrActive    = false;*/    lcrChanged   = false;
-    /*femonActive  = false;*/    femonChanged = false;
+    /*radioActive  = false;*/    radioChanged   = false;
+    /*lcrActive    = false;*/    lcrChanged     = false;
+    /*femonActive  = false;*/    femonChanged   = false;
+                                 mailboxChanged = false;
 
     cPlugin *p = NULL;
 
@@ -353,6 +377,29 @@ bool cGraphLCDService::NeedsUpdate(uint64_t CurrentTime)
         }
     }
 
+    // Mailbox
+    // only ask if mailbox-services are defined in the skin and min. request delay exceeded
+    if (mailboxUse && ((CurrentTime-mailboxLastChange) >= (uint64_t)mailboxUpdateDelay)) {
+        mailboxLastChange = CurrentTime;
+        if (cPluginManager::CallFirstService("MailBox-HasNewMail-1.0", NULL) &&
+            cPluginManager::CallFirstService("MailBox-GetTotalUnseen-1.0", NULL)) {
+            if (cPluginManager::CallFirstService("MailBox-HasNewMail-1.0", &checkMailboxNewData) &&
+                cPluginManager::CallFirstService("MailBox-GetTotalUnseen-1.0", &checkMailboxUnseenData)) {
+                mailboxActive = true;
+                if (
+                        (currMailboxNewData != checkMailboxNewData) ||
+                        (currMailboxUnseenData != checkMailboxUnseenData)
+                  )
+                {
+                    currMailboxNewData = checkMailboxNewData;
+                    currMailboxUnseenData = checkMailboxUnseenData;
+
+                    mailboxChanged = true;
+                }
+            }
+        }
+    }
+
     //mutex.Unlock();
-    return (radioChanged || lcrChanged || femonChanged);
+    return (radioChanged || lcrChanged || femonChanged || mailboxChanged);
 }

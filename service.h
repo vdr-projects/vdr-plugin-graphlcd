@@ -3,7 +3,9 @@
  *
  *  service.h  -  class for events from external services
  *
- *  (c)      2010 Wolfgang Astleitner <mrwastl AT users sourceforge net>
+ *  (c) 2010-2011 Wolfgang Astleitner <mrwastl AT users sourceforge net>
+ *
+ *  mailbox-contribution: user 'Keine_Ahnung'
  **/
 
 #ifndef _GRAPHLCD_SERVICE_H_
@@ -55,19 +57,22 @@ private:
     //cMutex mutex;
     cGraphLCDState * mState;
 
-    RadioTextService_v1_0  checkRTSData,   currRTSData;
-    LcrService_v1_0        checkLcrData,   currLcrData;
-    FemonService_v1_0      checkFemonData, currFemonData;
+    RadioTextService_v1_0               checkRTSData,            currRTSData;
+    LcrService_v1_0                     checkLcrData,            currLcrData;
+    FemonService_v1_0                   checkFemonData,          currFemonData;
+    bool                                checkMailboxNewData,     currMailboxNewData;
+    unsigned long                       checkMailboxUnseenData,  currMailboxUnseenData;
     /*  __Changed = data has been changed */
     /*  __Active  = plugin/service is available and active */
     /*  __Use     = service is requested in skin (don't call services that wouldn't be used anyway) */
-    bool                   radioChanged, radioActive,  radioUse;
-    bool                   lcrChanged,   lcrActive,    lcrUse;
-    bool                   femonChanged, femonActive,  femonUse;
+    bool                   radioChanged,   radioActive,    radioUse;
+    bool                   lcrChanged,     lcrActive,      lcrUse;
+    bool                   femonChanged,   femonActive,    femonUse;
+    bool                   mailboxChanged, mailboxActive,  mailboxUse;
     // timestamp of last service update request
-    uint64_t               radioLastChange, lcrLastChange, femonLastChange;
+    uint64_t               radioLastChange, lcrLastChange, femonLastChange, mailboxLastChange;
     // min. delay between two service update requests
-    int                    radioUpdateDelay, lcrUpdateDelay, femonUpdateDelay;
+    int                    radioUpdateDelay, lcrUpdateDelay, femonUpdateDelay, mailboxUpdateDelay;
 
     // check if femon version <= 1.7.7
     bool                   femonVersionChecked, femonVersionValid;
