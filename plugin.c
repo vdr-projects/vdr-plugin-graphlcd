@@ -308,7 +308,7 @@ cString cPluginGraphLCD::SVDRPCommand(const char *Command, const char *Option, i
             std::string key = option.substr(firstpos+1, secondpos-firstpos-1);
             std::string value = option.substr(secondpos+1);
             if ( isalpha(key[0]) && isdigit(option[0]) ) { 
-                uint32_t expsec = (uint32_t)strtol( option.substr(0, firstpos).c_str(), NULL, 10);
+                uint32_t expsec = (uint32_t)strtoul( option.substr(0, firstpos).c_str(), NULL, 10);
                 mDisplay->GetExtData()->Set( key, value, expsec );
                 return "SETEXP ok";
             }
