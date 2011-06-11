@@ -12,6 +12,10 @@ PLUGIN = graphlcd
 # define this if you built graphlcd-base with freetype:
 HAVE_FREETYPE2 = 1
 
+# define this if femon-plugin <= 1.7.7 is used AND which has already been patched (see README)
+# either define this setting here or in $VDRDIR/Make.config or in $VDRDIR/Make.global
+# HAVE_VALID_FEMON = 1
+
 ### The version number of this plugin (taken from the main source file):
 
 VERSION = $(shell grep 'static const char \*VERSION *=' plugin.c | awk '{ print $$6 }' | sed -e 's/[";]//g')
@@ -65,8 +69,11 @@ ifdef HAVE_FREETYPE2
     DEFINES += -DHAVE_FREETYPE2
 endif
 
-### If femon-plugin <= 1.7.7 is used and has already been patched (see README)
-# DEFINES += -DGRAPHLCD_SERVICE_FEMON_VALID
+# if a valid and/or fixed femon-plugin is available
+ifdef HAVE_VALID_FEMON
+    DEFINES += -DGRAPHLCD_SERVICE_FEMON_VALID
+endif
+
 
 ### The object files (add further files here):
 
