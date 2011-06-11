@@ -213,7 +213,7 @@ GLCD::cType cGraphLCDService::GetItem(const std::string & ServiceName, const std
             if (ItemName == "" || ItemName == "default"|| ItemName == "hasnew") {
                 return (bool)currMailboxNewData;
             } else if (ItemName == "newcount") {
-                if (currMailboxUnseenData > std::numeric_limits<int>::max()) {
+                if (currMailboxUnseenData > (long)std::numeric_limits<int>::max()) {
                     return (int)-1;
                 } else {
                     return (int)currMailboxUnseenData;
@@ -246,14 +246,18 @@ bool cGraphLCDService::NeedsUpdate(uint64_t CurrentTime)
         radioLastChange = CurrentTime;
         p = cPluginManager::CallFirstService("RadioTextService-v1.0", NULL);
         if (p) {
+            checkRTSData.rds_title   = NULL;
+            checkRTSData.rds_artist  = NULL;
+            checkRTSData.title_start = NULL;
+
             if (cPluginManager::CallFirstService("RadioTextService-v1.0", &checkRTSData)) {
                 radioActive = true;
                 if (
                         (currRTSData.rds_info != checkRTSData.rds_info) ||
                         (currRTSData.rds_pty != checkRTSData.rds_pty) ||
-                        (strcmp(currRTSData.rds_text, checkRTSData.rds_text) != 0) ||
-                        (strcmp(currRTSData.rds_title, checkRTSData.rds_title) != 0) ||
-                        (strcmp(currRTSData.rds_artist, checkRTSData.rds_artist) != 0)
+                        (checkRTSData.rds_text   && (strcmp(currRTSData.rds_text, checkRTSData.rds_text) != 0)) ||
+                        (checkRTSData.rds_title  && (strcmp(currRTSData.rds_title, checkRTSData.rds_title) != 0)) ||
+                        (checkRTSData.rds_artist && (strcmp(currRTSData.rds_artist, checkRTSData.rds_artist) != 0))
                   )
                 {
                     currRTSData.rds_info   = checkRTSData.rds_info;
@@ -275,12 +279,16 @@ bool cGraphLCDService::NeedsUpdate(uint64_t CurrentTime)
         lcrLastChange = CurrentTime;
         p = cPluginManager::CallFirstService("LcrService-v1.0", NULL);
         if (p) {
+            checkLcrData.destination = NULL;
+            checkLcrData.price       = NULL;
+            checkLcrData.pulse       = NULL;
+
             if (cPluginManager::CallFirstService("LcrService-v1.0", &checkLcrData)) {
                 lcrActive = true;
                 if (
-                        (strcmp(currLcrData.destination, checkLcrData.destination) != 0) ||
-                        (strcmp(currLcrData.price, checkLcrData.price) != 0) ||
-                        (strcmp(currLcrData.pulse, checkLcrData.pulse) != 0)
+                        (((const char*)checkLcrData.destination) && (strcmp(currLcrData.destination, checkLcrData.destination) != 0)) ||
+                        (((const char*)checkLcrData.price)       && (strcmp(currLcrData.price, checkLcrData.price) != 0)) ||
+                        (((const char*)checkLcrData.pulse)       && (strcmp(currLcrData.pulse, checkLcrData.pulse) != 0))
                   )
                 {
                     currLcrData.destination = checkLcrData.destination;
