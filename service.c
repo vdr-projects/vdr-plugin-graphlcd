@@ -35,6 +35,20 @@ cGraphLCDService::cGraphLCDService(cGraphLCDState * state)
     lcrUpdateDelay     = 60000; // 60 sec
     femonUpdateDelay   = 2000;  // 2 sec
     mailboxUpdateDelay = 10000; // 10 sec
+
+    // pre-init strings
+    checkRTSData.rds_text    = (char*)"";
+    checkRTSData.rds_title   = (char*)"";
+    checkRTSData.rds_artist  = (char*)"";
+
+    checkLcrData.destination = (char*)"";
+    checkLcrData.price       = (char*)"";
+    checkLcrData.pulse       = (char*)"";
+
+#if 0
+    currFemonData.fe_name    = (char*)"";
+    currFemonData.fe_status  = (char*)"";
+#endif
 }
 
 cGraphLCDService::~cGraphLCDService()
@@ -213,7 +227,7 @@ GLCD::cType cGraphLCDService::GetItem(const std::string & ServiceName, const std
             if (ItemName == "" || ItemName == "default"|| ItemName == "hasnew") {
                 return (bool)currMailboxNewData;
             } else if (ItemName == "newcount") {
-                if (currMailboxUnseenData > (long)std::numeric_limits<int>::max()) {
+                if (currMailboxUnseenData > (unsigned long)std::numeric_limits<int>::max()) {
                     return (int)-1;
                 } else {
                     return (int)currMailboxUnseenData;
@@ -246,9 +260,9 @@ bool cGraphLCDService::NeedsUpdate(uint64_t CurrentTime)
         radioLastChange = CurrentTime;
         p = cPluginManager::CallFirstService("RadioTextService-v1.0", NULL);
         if (p) {
+            checkRTSData.rds_text    = NULL;
             checkRTSData.rds_title   = NULL;
             checkRTSData.rds_artist  = NULL;
-            checkRTSData.title_start = NULL;
 
             if (cPluginManager::CallFirstService("RadioTextService-v1.0", &checkRTSData)) {
                 radioActive = true;
