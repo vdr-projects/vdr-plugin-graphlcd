@@ -18,16 +18,19 @@
 
 #include "display.h"
 #include "global.h"
-#include "i18n.h"
 #include "menu.h"
 
 #include <vdr/plugin.h>
 
 #include <ctype.h>
 
+#if APIVERSNUM < 10503
+#include "i18n.h"
+#endif
+
 
 static const char * kPluginName = "graphlcd";
-static const char *VERSION        = "0.2.0-git";
+static const char *VERSION        = "0.2.0-touchcol-git";
 static const char *DESCRIPTION    = "Output to graphic LCD";
 static const char *MAINMENUENTRY  = NULL;
 
