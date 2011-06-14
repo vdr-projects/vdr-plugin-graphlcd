@@ -1,0 +1,100 @@
+# VDR plugin language source file.
+# Copyright (C) 2007 Klaus Schmidinger <kls@cadsoft.de>
+# This file is distributed under the same license as the VDR package.
+# Alberto Carraro <bertocar@tin.it>, 2001
+# Antonio Ospite <ospite@studenti.unina.it>, 2003
+# Sean Carlos <seanc@libero.it>, 2005
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: VDR 1.5.7\n"
+"Report-Msgid-Bugs-To: <nobody@domain.com>\n"
+"POT-Creation-Date: 2011-06-14 20:35+0200\n"
+"PO-Revision-Date: 2011-03-05 16:38+0100\n"
+"Last-Translator: Diego Pierotto <vdr-italian@tiscali.it>\n"
+"Language-Team:  <vdr@linuxtv.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Italian\n"
+"X-Poedit-Country: ITALY\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+msgid "not in menu"
+msgstr "non nel menu"
+
+msgid "never"
+msgstr "mai"
+
+msgid "once"
+msgstr "una volta"
+
+msgid "always"
+msgstr "sempre"
+
+msgid "Plugin active"
+msgstr "Plugin attivo"
+
+msgid "Show Date/Time"
+msgstr "Mostra Data/Ora"
+
+msgid "Show Channel"
+msgstr "Mostra Canale"
+
+msgid "Show Logo"
+msgstr "Mostra Logo"
+
+msgid "Show Symbols"
+msgstr "Mostra Simboli"
+
+msgid "Show Program"
+msgstr "Mostra Programmi"
+
+msgid "Show Timebar"
+msgstr "Mostra barra ora"
+
+msgid "Show Menu"
+msgstr "Mostra Menu"
+
+msgid "Show Messages"
+msgstr "Mostra messaggi"
+
+msgid "Show Color Buttons"
+msgstr "Mostra pulsanti colorati"
+
+msgid "Show Volume"
+msgstr "Mostra Volume"
+
+msgid "Show free Cards"
+msgstr "Mostra schede disponibili"
+
+msgid "Identify replay type"
+msgstr "Identifica tipo riproduzione"
+
+msgid "Modify replay string"
+msgstr "Modifica testo riproduzione"
+
+msgid "Show Logo on Replay"
+msgstr "Mostra logo in riproduzione"
+
+msgid "Scroll text lines"
+msgstr "Scorrimento testo"
+
+msgid "Scroll speed"
+msgstr "Velocità scorrimento"
+
+msgid "Scroll time interval"
+msgstr "Intervallo tempo scorrimento"
+
+msgid "Brightness on user activity"
+msgstr "Luminosità con attività utente"
+
+msgid "Brightness on user inactivity"
+msgstr "Luminosità con inattività utente"
+
+msgid "Brightness delay [s]"
+msgstr "Ritardo luminosità [s]"
+
+msgid "Output to graphic LCD"
+msgstr ""

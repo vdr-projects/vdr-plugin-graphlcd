@@ -18,6 +18,10 @@
 #include <vdr/eitscan.h>
 #include <vdr/i18n.h>
 
+#if APIVERSNUM < 10503
+  #define trNOOP(_s) (_s)
+  #define trVDR(_s) tr(_s)
+#endif
 
 cGraphLCDState::cGraphLCDState(cGraphLCDDisplay * Display)
 :   mDisplay(Display),
@@ -197,7 +201,7 @@ void cGraphLCDState::Replaying(const cControl * Control, const char * Name, cons
                             }
                             else
                             { //if Name empty, set fallback title
-                                mReplay.name = tr("Unknown title");
+                                mReplay.name = trVDR("Unknown title");
                             }
                             mReplay.mode = eReplayMusic;
                         }
@@ -248,7 +252,7 @@ void cGraphLCDState::Replaying(const cControl * Control, const char * Name, cons
                                 }
                                 else
                                 { //if Name empty, set fallback title
-                                    mReplay.name = tr("Unknown title");
+                                    mReplay.name = trVDR("Unknown title");
                                 }
                                 mReplay.mode = eReplayDVD;
                             }
@@ -634,8 +638,8 @@ void cGraphLCDState::UpdateChannelInfo(void)
     else
     {
         mChannel.id = tChannelID::InvalidID;
-        mChannel.name = tr("*** Invalid Channel ***");
-        mChannel.shortName = tr("*** Invalid Channel ***");
+        mChannel.name = trVDR("*** Invalid Channel ***");
+        mChannel.shortName = trVDR("*** Invalid Channel ***");
         mChannel.provider = "";
         mChannel.portal = "";
         mChannel.source = "";

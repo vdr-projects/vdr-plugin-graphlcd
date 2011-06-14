@@ -54,7 +54,7 @@ const tI18nPhrase Phrases[] =
 		"Plugin active",
 		"Plugin aktiv",
 		"",// TODO Slovenski
-		"",// TODO Italiano
+		"Plugin attivo",// Italiano
 		"",// TODO Nederlands
 		"",// TODO Português
 		"Plugin actif",
@@ -71,30 +71,10 @@ const tI18nPhrase Phrases[] =
 		"",// TODO Croatian
 	},
 	{
-		"JanFebMarAprMayJunJulAugSepOctNovDec",
-		"JanFebMärAprMaiJunJulAugSepOktNovDez",
-		"",// TODO Slovenski
-		"",// TODO Italiano
-		"",// TODO Nederlands
-		"",// TODO Português
-		"JanFevMarAvrMaiJunJuiAouSepOctNovDec",
-		"",// TODO Norsk
-		"TamHelMaaHuhTouKesHeiEloSyyLokMarJou",// Suomi
-		"",// TODO Polski
-		"",// TODO Español
-		"",// TODO Ellinika
-		"",// TODO Svenska
-		"IanFebMarAprMaiIunIulAugSepOctNoiDec",// Românã
-		"",// TODO Magyar
-		"",// TODO Català
-		"",// TODO Russian
-		"",// TODO Croatian
-	},
-	{
 		"Show Date/Time",
 		"Zeige Datum/Uhrzeit",
 		"",// TODO Slovenski
-		"",// TODO Italiano
+		"Mostra Data/Ora",// Italiano
 		"",// TODO Nederlands
 		"",// TODO Português
 		"Afficher Date/Heure",
@@ -114,10 +94,10 @@ const tI18nPhrase Phrases[] =
 		"not in menu",
 		"nicht im Menu",
 		"",// TODO Slovenski
-		"",// TODO Italiano
+		"non nel menu",// Italiano
 		"",// TODO Nederlands
 		"",// TODO Português
-		"pas dans le menu"
+		"pas dans le menu",
 		"",// TODO Norsk
 		"ei valikossa",// Suomi
 		"",// TODO Polski
@@ -134,7 +114,7 @@ const tI18nPhrase Phrases[] =
 		"Show Channel",
 		"Zeige Kanal",
 		"",// TODO Slovenski
-		"",// TODO Italiano
+		"Mostra Canale",// Italiano
 		"",// TODO Nederlands
 		"",// TODO Português
 		"Afficher le nom de la Chaine",
@@ -154,7 +134,7 @@ const tI18nPhrase Phrases[] =
 		"Show Logo",
 		"Zeige Logo",
 		"",// TODO Slovenski
-		"",// TODO Italiano
+		"Mostra Logo",// Italiano
 		"",// TODO Nederlands
 		"",// TODO Português
 		"Afficher le Logo",
@@ -174,7 +154,7 @@ const tI18nPhrase Phrases[] =
 		"Show Logo on Replay",
 		"Zeige Logo bei Wiedergabe",
 		"",// TODO Slovenski
-		"",// TODO Italiano
+		"Mostra logo in riproduzione",// Italiano
 		"",// TODO Nederlands
 		"",// TODO Português
 		"Afficher le Logo en lecture",
@@ -194,7 +174,7 @@ const tI18nPhrase Phrases[] =
 		"Show Symbols",
 		"Zeige Symbole",
 		"",// TODO Slovenski
-		"",// TODO Italiano
+		"Mostra Simboli",// Italiano
 		"",// TODO Nederlands
 		"",// TODO Português
 		"Afficher les Symboles",
@@ -211,30 +191,10 @@ const tI18nPhrase Phrases[] =
 		"",// TODO Croatian
 	},
 	{
-		"Show ET Symbols",
-		"Zeige ET Symbole",
-		"",// TODO Slovenski
-		"",// TODO Italiano
-		"",// TODO Nederlands
-		"",// TODO Português
-		"Afficher les Symboles ET",
-		"",// TODO Norsk
-		"Näytä ET-symbolit",// Suomi
-		"",// TODO Polski
-		"",// TODO Español
-		"",// TODO Ellinika
-		"",// TODO Svenska
-		"Aratã simboluri externe",// Românã
-		"",// TODO Magyar
-		"",// TODO Català
-		"",// TODO Russian
-		"",// TODO Croatian
-	},
-	{
 		"Show Program",
 		"Zeige Programm",
 		"",// TODO Slovenski
-		"",// TODO Italiano
+		"Mostra Programmi",// Italiano
 		"",// TODO Nederlands
 		"",// TODO Português
 		"Afficher les programmes",
@@ -254,7 +214,7 @@ const tI18nPhrase Phrases[] =
 		"Show Timebar",
 		"Zeige Zeitbalken",
 		"",// TODO Slovenski
-		"",// TODO Italiano
+		"Mostra barra ora",// Italiano
 		"",// TODO Nederlands
 		"",// TODO Português
 		"Afficher la barre de progression",
@@ -274,7 +234,7 @@ const tI18nPhrase Phrases[] =
 		"Show Menu",
 		"Zeige Menüs",
 		"",// TODO Slovenski
-		"",// TODO Italiano
+		"Mostra Menu",// Italiano
 		"",// TODO Nederlands
 		"",// TODO Português
 		"Afficher le menu",
@@ -294,7 +254,7 @@ const tI18nPhrase Phrases[] =
 		"Show Messages",
 		"Zeige Nachrichten",
 		"",// TODO Slovenski
-		"",// TODO Italiano
+		"Mostra messaggi",// Italiano
 		"",// TODO Nederlands
 		"",// TODO Português
 		"Afficher les messages",
@@ -314,7 +274,7 @@ const tI18nPhrase Phrases[] =
 		"Show Color Buttons",
 		"Zeige farbige Tasten",
 		"",// TODO Slovenski
-		"",// TODO Italiano
+		"Mostra pulsanti colorati",// Italiano
 		"",// TODO Nederlands
 		"",// TODO Português
 		"Afficher les boutons couleurs",
@@ -334,7 +294,7 @@ const tI18nPhrase Phrases[] =
 		"Show Volume",
 		"Zeige Lautstärke",
 		"",// TODO Slovenski
-		"",// TODO Italiano
+		"Mostra Volume",// Italiano
 		"",// TODO Nederlands
 		"",// TODO Português
 		"Afficher le Volume",
@@ -351,90 +311,10 @@ const tI18nPhrase Phrases[] =
 		"",// TODO Croatian
 	},
 	{
-		"compressed",
-		"komprimiert",
-		"",// TODO Slovenski
-		"",// TODO Italiano
-		"",// TODO Nederlands
-		"",// TODO Português
-		"Compressé",
-		"",// TODO Norsk
-		"pakattu",// Suomi
-		"",// TODO Polski
-		"",// TODO Español
-		"",// TODO Ellinika
-		"",// TODO Svenska
-		"comprimat",// Românã
-		"",// TODO Magyar
-		"",// TODO Català
-		"",// TODO Russian
-		"",// TODO Croatian
-	},
-	{
-		"auto",
-		"auto",
-		"",// TODO Slovenski
-		"",// TODO Italiano
-		"",// TODO Nederlands
-		"",// TODO Português
-		"auto",
-		"",// TODO Norsk
-		"automaattinen",// Suomi
-		"",// TODO Polski
-		"",// TODO Español
-		"",// TODO Ellinika
-		"",// TODO Svenska
-		"auto",// Românã
-		"",// TODO Magyar
-		"",// TODO Català
-		"",// TODO Russian
-		"",// TODO Croatian
-	},
-	{
-		"medium",
-		"mittel",
-		"",// TODO Slovenski
-		"",// TODO Italiano
-		"",// TODO Nederlands
-		"",// TODO Português
-		"moyen",
-		"",// TODO Norsk
-		"keskikokoinen",// Suomi
-		"",// TODO Polski
-		"",// TODO Español
-		"",// TODO Ellinika
-		"",// TODO Svenska
-		"mediu",// Românã
-		"",// TODO Magyar
-		"",// TODO Català
-		"",// TODO Russian
-		"",// TODO Croatian
-	},
-	{
-		"large",
-		"groß",
-		"",// TODO Slovenski
-		"",// TODO Italiano
-		"",// TODO Nederlands
-		"",// TODO Português
-		"grand",
-		"",// TODO Norsk
-		"suuri",// Suomi
-		"",// TODO Polski
-		"",// TODO Español
-		"",// TODO Ellinika
-		"",// TODO Svenska
-		"mare",// Românã
-		"",// TODO Magyar
-		"",// TODO Català
-		"",// TODO Russian
-		"",// TODO Croatian
-	},
-	{
 		"Show free Cards",
 		"Zeige freie Karten",
 		"",// TODO Slovenski
-		"",// TODO Italiano
+		"Mostra schede disponibili",// Italiano
 		"",// TODO Nederlands
 		"",// TODO Português
 		"Afficher les cartes disponibles",
@@ -451,150 +331,10 @@ const tI18nPhrase Phrases[] =
 		"",// TODO Croatian
 	},
 	{
-		"Replay",
-		"Spiele",
-		"",// TODO Slovenski
-		"",// TODO Italiano
-		"",// TODO Nederlands
-		"",// TODO Português
-		"Lecture",
-		"",// TODO Norsk
-		"Toistotila",// Suomi
-		"",// TODO Polski
-		"",// TODO Español
-		"",// TODO Ellinika
-		"",// TODO Svenska
-		"Redare",// Românã
-		"",// TODO Magyar
-		"",// TODO Català
-		"",// TODO Russian
-		"",// TODO Croatian
-	},
-	{
-		"DVD",
-		"DVD",
-		"",// TODO Slovenski
-		"",// TODO Italiano
-		"",// TODO Nederlands
-		"",// TODO Português
-		"DVD",
-		"",// TODO Norsk
-		"DVD",// Suomi
-		"",// TODO Polski
-		"",// TODO Español
-		"",// TODO Ellinika
-		"",// TODO Svenska
-		"DVD",// Românã
-		"",// TODO Magyar
-		"",// TODO Català
-		"",// TODO Russian
-		"",// TODO Croatian
-	},
-	{
-		"Music",
-		"Musik",
-		"",// TODO Slovenski
-		"",// TODO Italiano
-		"",// TODO Nederlands
-		"",// TODO Português
-		"Musique",
-		"",// TODO Norsk
-		"Musiikki",// Suomi
-		"",// TODO Polski
-		"",// TODO Español
-		"",// TODO Ellinika
-		"",// TODO Svenska
-		"Muzicã",// Românã
-		"",// TODO Magyar
-		"",// TODO Català
-		"",// TODO Russian
-		"",// TODO Croatian
-	},
-	{
-		"File",
-		"Datei",
-		"",// TODO Slovenski
-		"",// TODO Italiano
-		"",// TODO Nederlands
-		"",// TODO Português
-		"Fichier:",
-		"",// TODO Norsk
-		"Tiedostot",// Suomi
-		"",// TODO Polski
-		"",// TODO Español
-		"",// TODO Ellinika
-		"",// TODO Svenska
-		"Fiºier",// Românã
-		"",// TODO Magyar
-		"",// TODO Català
-		"",// TODO Russian
-		"",// TODO Croatian
-	},
-	{
-		"Image",
-		"Bild",
-		"",// TODO Slovenski
-		"",// TODO Italiano
-		"",// TODO Nederlands
-		"",// TODO Português
-		"Image",
-		"",// TODO Norsk
-		"Kuvat",// Suomi
-		"",// TODO Polski
-		"",// TODO Español
-		"",// TODO Ellinika
-		"",// TODO Svenska
-		"Imagine",// Românã
-		"",// TODO Magyar
-		"",// TODO Català
-		"",// TODO Russian
-		"",// TODO Croatian
-	},
-	{
-		"CD",
-		"CD",
-		"",// TODO Slovenski
-		"",// TODO Italiano
-		"",// TODO Nederlands
-		"",// TODO Português
-		"CD",
-		"",// TODO Norsk
-		"CD",// Suomi
-		"",// TODO Polski
-		"",// TODO Español
-		"",// TODO Ellinika
-		"",// TODO Svenska
-		"CD",// Românã
-		"",// TODO Magyar
-		"",// TODO Català
-		"",// TODO Russian
-		"",// TODO Croatian
-	},
-	{
-		"Unknown title",
-		"Unbekannter Titel",
-		"",// TODO Slovenski
-		"",// TODO Italiano
-		"",// TODO Nederlands
-		"",// TODO Português
-		"Titre inconnu",
-		"",// TODO Norsk
-		"Tuntematon nimi",// Suomi
-		"",// TODO Polski
-		"",// TODO Español
-		"",// TODO Ellinika
-		"",// TODO Svenska
-		"Titlu necunoscut",// Românã
-		"",// TODO Magyar
-		"",// TODO Català
-		"",// TODO Russian
-		"",// TODO Croatian
-	},
-	{
 		"Identify replay type",
 		"Wiedergabetyp erkennen",
 		"",// TODO Slovenski
-		"",// TODO Italiano
+		"Identifica tipo riproduzione",// Italiano
 		"",// TODO Nederlands
 		"",// TODO Português
 		"Identifier le type de lecture",
@@ -614,7 +354,7 @@ const tI18nPhrase Phrases[] =
 		"Modify replay string",
 		"Wiedergabetext verändern",
 		"",// TODO Slovenski
-		"",// TODO Italiano
+		"Modifica testo riproduzione",// Italiano
 		"",// TODO Nederlands
 		"",// TODO Português
 		"Modifier la chaine de lecture",
@@ -634,7 +374,7 @@ const tI18nPhrase Phrases[] =
 		"Scroll text lines",
 		"Textzeilen scrollen",
 		"",// TODO Slovenski
-		"",// TODO Italiano
+		"Scorrimento testo",// Italiano
 		"",// TODO Nederlands
 		"",// TODO Português
 		"Faire défiler le texte",
@@ -654,7 +394,7 @@ const tI18nPhrase Phrases[] =
 		"Scroll speed",
 		"Scrollgeschwindigkeit",
 		"",// TODO Slovenski
-		"",// TODO Italiano
+		"Velocità scorrimento",// Italiano
 		"",// TODO Nederlands
 		"",// TODO Português
 		"Vitesse de défilement",
@@ -674,7 +414,7 @@ const tI18nPhrase Phrases[] =
 		"Scroll time interval",
 		"Zeitabstand beim Scrollen",
 		"",// TODO Slovenski
-		"",// TODO Italiano
+		"Intervallo tempo scorrimento",// Italiano
 		"",// TODO Nederlands
 		"",// TODO Português
 		"Intervalle de défilement",
@@ -694,7 +434,7 @@ const tI18nPhrase Phrases[] =
 		"never",
 		"niemals",
 		"",// TODO Slovenski
-		"",// TODO Italiano
+		"mai",// Italiano
 		"",// TODO Nederlands
 		"",// TODO Português
 		"jamais",
@@ -714,7 +454,7 @@ const tI18nPhrase Phrases[] =
 		"once",
 		"einmal",
 		"",// TODO Slovenski
-		"",// TODO Italiano
+		"una volta",// Italiano
 		"",// TODO Nederlands
 		"",// TODO Português
 		"une fois",
@@ -734,7 +474,7 @@ const tI18nPhrase Phrases[] =
 		"always",
 		"ständig",
 		"",// TODO Slovenski
-		"",// TODO Italiano
+		"sempre",// Italiano
 		"",// TODO Nederlands
 		"",// TODO Português
 		"toujours",
@@ -754,7 +494,7 @@ const tI18nPhrase Phrases[] =
 		"Brightness on user activity",
 		"Helligkeit bei Nutzeraktivität",
 		"",// TODO Slovenski
-		"",// TODO Italiano
+		"Luminosità con attività utente",// Italiano
 		"",// TODO Nederlands
 		"",// TODO Português
 		"Luminosité en utilisation",
@@ -774,7 +514,7 @@ const tI18nPhrase Phrases[] =
 		"Brightness on user inactivity",
 		"Helligkeit bei Nutzerinaktivität",
 		"",// TODO Slovenski
-		"",// TODO Italiano
+		"Luminosità con inattività utente",// Italiano
 		"",// TODO Nederlands
 		"",// TODO Português
 		"Luminosité en non-utilisation",
@@ -794,7 +534,7 @@ const tI18nPhrase Phrases[] =
 		"Brightness delay [s]",
 		"Verzögerung der Helligkeit [s]",
 		"",// TODO Slovenski
-		"",// TODO Italiano
+		"Ritardo luminosità [s]",// Italiano
 		"",// TODO Nederlands
 		"",// TODO Português
 		"Delai de Luminosité [s]",
@@ -812,3 +552,267 @@ const tI18nPhrase Phrases[] =
 	},
 	{ NULL }
 };
+
+// not needed any longer but keep it just in case of ...
+#if 0
+  {
+    "JanFebMarAprMayJunJulAugSepOctNovDec",
+    "JanFebMärAprMaiJunJulAugSepOktNovDez",
+    "",// TODO Slovenski
+    "GenFebMarAprMagGiuLugAgoSetOttNovDic",// Italiano
+    "",// TODO Nederlands
+    "",// TODO Português
+    "JanFevMarAvrMaiJunJuiAouSepOctNovDec",
+    "",// TODO Norsk
+    "TamHelMaaHuhTouKesHeiEloSyyLokMarJou",// Suomi
+    "",// TODO Polski
+    "",// TODO Español
+    "",// TODO Ellinika
+    "",// TODO Svenska
+    "IanFebMarAprMaiIunIulAugSepOctNoiDec",// Românã
+    "",// TODO Magyar
+    "",// TODO Català
+    "",// TODO Russian
+    "",// TODO Croatian
+  },
+  {
+    "Show ET Symbols",
+    "Zeige ET Symbole",
+    "",// TODO Slovenski
+    "Mostra Simboli ET",// Italiano
+    "",// TODO Nederlands
+    "",// TODO Português
+    "Afficher les Symboles ET",
+    "",// TODO Norsk
+    "Näytä ET-symbolit",// Suomi
+    "",// TODO Polski
+    "",// TODO Español
+    "",// TODO Ellinika
+    "",// TODO Svenska
+    "Aratã simboluri externe",// Românã
+    "",// TODO Magyar
+    "",// TODO Català
+    "",// TODO Russian
+    "",// TODO Croatian
+  },
+  {
+    "compressed",
+    "komprimiert",
+    "",// TODO Slovenski
+    "compresso",// Italiano
+    "",// TODO Nederlands
+    "",// TODO Português
+    "Compressé",
+    "",// TODO Norsk
+    "pakattu",// Suomi
+    "",// TODO Polski
+    "",// TODO Español
+    "",// TODO Ellinika
+    "",// TODO Svenska
+    "comprimat",// Românã
+    "",// TODO Magyar
+    "",// TODO Català
+    "",// TODO Russian
+    "",// TODO Croatian
+  },
+  {
+    "auto",
+    "auto",
+    "",// TODO Slovenski
+    "automatico",// Italiano
+    "",// TODO Nederlands
+    "",// TODO Português
+    "auto",
+    "",// TODO Norsk
+    "automaattinen",// Suomi
+    "",// TODO Polski
+    "",// TODO Español
+    "",// TODO Ellinika
+    "",// TODO Svenska
+    "auto",// Românã
+    "",// TODO Magyar
+    "",// TODO Català
+    "",// TODO Russian
+    "",// TODO Croatian
+  },
+  {
+    "medium",
+    "mittel",
+    "",// TODO Slovenski
+    "medio",// Italiano
+    "",// TODO Nederlands
+    "",// TODO Português
+    "moyen",
+    "",// TODO Norsk
+    "keskikokoinen",// Suomi
+    "",// TODO Polski
+    "",// TODO Español
+    "",// TODO Ellinika
+    "",// TODO Svenska
+    "mediu",// Românã
+    "",// TODO Magyar
+    "",// TODO Català
+    "",// TODO Russian
+    "",// TODO Croatian
+  },
+  {
+    "large",
+    "groß",
+    "",// TODO Slovenski
+    "grande",// Italiano
+    "",// TODO Nederlands
+    "",// TODO Português
+    "grand",
+    "",// TODO Norsk
+    "suuri",// Suomi
+    "",// TODO Polski
+    "",// TODO Español
+    "",// TODO Ellinika
+    "",// TODO Svenska
+    "mare",// Românã
+    "",// TODO Magyar
+    "",// TODO Català
+    "",// TODO Russian
+    "",// TODO Croatian
+  },
+  {
+    "Replay",
+    "Spiele",
+    "",// TODO Slovenski
+    "Riproduci",// Italiano
+    "",// TODO Nederlands
+    "",// TODO Português
+    "Lecture",
+    "",// TODO Norsk
+    "Toistotila",// Suomi
+    "",// TODO Polski
+    "",// TODO Español
+    "",// TODO Ellinika
+    "",// TODO Svenska
+    "Redare",// Românã
+    "",// TODO Magyar
+    "",// TODO Català
+    "",// TODO Russian
+    "",// TODO Croatian
+  },
+  {
+    "DVD",
+    "DVD",
+    "",// TODO Slovenski
+    "DVD",// Italiano
+    "",// TODO Nederlands
+    "",// TODO Português
+    "DVD",
+    "",// TODO Norsk
+    "DVD",// Suomi
+    "",// TODO Polski
+    "",// TODO Español
+    "",// TODO Ellinika
+    "",// TODO Svenska
+    "DVD",// Românã
+    "",// TODO Magyar
+    "",// TODO Català
+    "",// TODO Russian
+    "",// TODO Croatian
+  },
+  {
+    "Music",
+    "Musik",
+    "",// TODO Slovenski
+    "Musica",// Italiano
+    "",// TODO Nederlands
+    "",// TODO Português
+    "Musique",
+    "",// TODO Norsk
+    "Musiikki",// Suomi
+    "",// TODO Polski
+    "",// TODO Español
+    "",// TODO Ellinika
+    "",// TODO Svenska
+    "Muzicã",// Românã
+    "",// TODO Magyar
+    "",// TODO Català
+    "",// TODO Russian
+    "",// TODO Croatian
+  },
+  {
+    "File",
+    "Datei",
+    "",// TODO Slovenski
+    "File",// Italiano
+    "",// TODO Nederlands
+    "",// TODO Português
+    "Fichier:",
+    "",// TODO Norsk
+    "Tiedostot",// Suomi
+    "",// TODO Polski
+    "",// TODO Español
+    "",// TODO Ellinika
+    "",// TODO Svenska
+    "Fiºier",// Românã
+    "",// TODO Magyar
+    "",// TODO Català
+    "",// TODO Russian
+    "",// TODO Croatian
+  },
+  {
+    "Image",
+    "Bild",
+    "",// TODO Slovenski
+    "Immagine",// Italiano
+    "",// TODO Nederlands
+    "",// TODO Português
+    "Image",
+    "",// TODO Norsk
+    "Kuvat",// Suomi
+    "",// TODO Polski
+    "",// TODO Español
+    "",// TODO Ellinika
+    "",// TODO Svenska
+    "Imagine",// Românã
+    "",// TODO Magyar
+    "",// TODO Català
+    "",// TODO Russian
+    "",// TODO Croatian
+  },
+  {
+    "CD",
+    "CD",
+    "",// TODO Slovenski
+    "CD",// Italiano
+    "",// TODO Nederlands
+    "",// TODO Português
+    "CD",
+    "",// TODO Norsk
+    "CD",// Suomi
+    "",// TODO Polski
+    "",// TODO Español
+    "",// TODO Ellinika
+    "",// TODO Svenska
+    "CD",// Românã
+    "",// TODO Magyar
+    "",// TODO Català
+    "",// TODO Russian
+    "",// TODO Croatian
+  },
+  {
+    "Unknown title",
+    "Unbekannter Titel",
+    "",// TODO Slovenski
+    "Titolo sconosciuto",// Italiano
+    "",// TODO Nederlands
+    "",// TODO Português
+    "Titre inconnu",
+    "",// TODO Norsk
+    "Tuntematon nimi",// Suomi
+    "",// TODO Polski
+    "",// TODO Español
+    "",// TODO Ellinika
+    "",// TODO Svenska
+    "Titlu necunoscut",// Românã
+    "",// TODO Magyar
+    "",// TODO Català
+    "",// TODO Russian
+    "",// TODO Croatian
+  },
+#endif

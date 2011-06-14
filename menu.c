@@ -27,12 +27,17 @@
 
 #include "menu.h"
 
+#if APIVERSNUM < 10503
+  #define trNOOP(_s) (_s)
+  #define trVDR(_s) tr(_s)
+#endif
+
 
 cGraphLCDMenuSetup::cGraphLCDMenuSetup()
 {
 	static const char * showDateTimeValues[3];
-	showDateTimeValues[0] = tr("no");
-	showDateTimeValues[1] = tr("yes");
+	showDateTimeValues[0] = trVDR("no");
+	showDateTimeValues[1] = trVDR("yes");
 	showDateTimeValues[2] = tr("not in menu");
 	static const char * scrollModeValues[3];
 	scrollModeValues[0] = tr("never");
@@ -44,7 +49,7 @@ cGraphLCDMenuSetup::cGraphLCDMenuSetup()
 	Add(new cMenuEditBoolItem(tr("Plugin active"), &newGraphLCDSetup.PluginActive));
 	Add(new cMenuEditStraItem(tr("Show Date/Time"), &newGraphLCDSetup.ShowDateTime, 3, showDateTimeValues));
 	Add(new cMenuEditBoolItem(tr("Show Channel"), &newGraphLCDSetup.ShowChannel));
-	Add(new cMenuEditBoolItem(tr("Show Channel Logo"), &newGraphLCDSetup.ShowChannelLogo));
+	Add(new cMenuEditBoolItem(tr("Show Logo"), &newGraphLCDSetup.ShowChannelLogo));
 	Add(new cMenuEditBoolItem(tr("Show Symbols"), &newGraphLCDSetup.ShowSymbols));
 	Add(new cMenuEditBoolItem(tr("Show Program"), &newGraphLCDSetup.ShowProgram));
 	Add(new cMenuEditBoolItem(tr("Show Timebar"), &newGraphLCDSetup.ShowTimebar));

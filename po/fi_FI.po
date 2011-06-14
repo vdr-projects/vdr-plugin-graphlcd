@@ -10,49 +10,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VDR 1.5.7\n"
 "Report-Msgid-Bugs-To: <nobody@domain.com>\n"
-"POT-Creation-Date: 2008-07-09 13:15+0200\n"
+"POT-Creation-Date: 2011-06-14 20:35+0200\n"
 "PO-Revision-Date: 2008-07-09 13:14+0200\n"
 "Last-Translator: Rolf Ahrenberg <rahrenbe@cc.hut.fi>\n"
 "Language-Team: <vdr@linuxtv.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=ISO-8859-15\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid "JanFebMarAprMayJunJulAugSepOctNovDec"
-msgstr "TamHelMaaHuhTouKesHeiEloSyyLokMarJou"
-
-msgid "DVD"
-msgstr "DVD"
-
-msgid "Music"
-msgstr "Musiikki"
-
-msgid "File"
-msgstr "Tiedostot"
-
-msgid "Image"
-msgstr "Kuvat"
-
-msgid "CD"
-msgstr "CD"
-
-msgid "Replay"
-msgstr "Toistotila"
-
 msgid "not in menu"
 msgstr "ei valikossa"
-
-msgid "compressed"
-msgstr "pakattu"
-
-msgid "auto"
-msgstr "automaattinen"
-
-msgid "medium"
-msgstr "keskikokoinen"
-
-msgid "large"
-msgstr "suuri"
 
 msgid "never"
 msgstr "ei koskaan"
@@ -77,9 +45,6 @@ msgstr "Näytä logo"
 
 msgid "Show Symbols"
 msgstr "Näytä symbolit"
-
-msgid "Show ET Symbols"
-msgstr "Näytä ET-symbolit"
 
 msgid "Show Program"
 msgstr "Näytä ohjelma"
@@ -129,5 +94,5 @@ msgstr ""
 msgid "Brightness delay [s]"
 msgstr ""
 
-msgid "Unknown title"
-msgstr "Tuntematon nimi"
+msgid "Output to graphic LCD"
+msgstr "Ohjaa graafista LCD-näyttöä"

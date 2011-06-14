@@ -8,49 +8,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VDR 1.5.7\n"
 "Report-Msgid-Bugs-To: <nobody@domain.com>\n"
-"POT-Creation-Date: 2008-07-09 13:15+0200\n"
+"POT-Creation-Date: 2011-06-14 20:35+0200\n"
 "PO-Revision-Date: 2008-07-09 13:14+0200\n"
 "Last-Translator: Lucian Muresan <lucianm@users.sourceforge.net>\n"
 "Language-Team: <vdr@linuxtv.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=ISO-8859-2\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid "JanFebMarAprMayJunJulAugSepOctNovDec"
-msgstr "IanFebMarAprMaiIunIulAugSepOctNoiDec"
-
-msgid "DVD"
-msgstr "DVD"
-
-msgid "Music"
-msgstr "Muzicã"
-
-msgid "File"
-msgstr "Fiºier"
-
-msgid "Image"
-msgstr "Imagine"
-
-msgid "CD"
-msgstr "CD"
-
-msgid "Replay"
-msgstr "Redare"
-
 msgid "not in menu"
 msgstr "nu în meniu"
-
-msgid "compressed"
-msgstr "comprimat"
-
-msgid "auto"
-msgstr "auto"
-
-msgid "medium"
-msgstr "mediu"
-
-msgid "large"
-msgstr "mare"
 
 msgid "never"
 msgstr "niciodatã"
@@ -75,9 +43,6 @@ msgstr "Aratã logo"
 
 msgid "Show Symbols"
 msgstr "Aratã simboluri"
-
-msgid "Show ET Symbols"
-msgstr "Aratã simboluri externe"
 
 msgid "Show Program"
 msgstr "Aratã programul"
@@ -127,5 +92,5 @@ msgstr "Luminozitate la inactivitate"
 msgid "Brightness delay [s]"
 msgstr "Limita luminozitate"
 
-msgid "Unknown title"
-msgstr "Titlu necunoscut"
+msgid "Output to graphic LCD"
+msgstr "Ecran grafic LCD/VFD"
