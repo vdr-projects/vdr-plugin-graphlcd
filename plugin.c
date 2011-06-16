@@ -26,12 +26,13 @@
 
 #if APIVERSNUM < 10503
   #include "i18n.h"
+  #define trNOOP(_s) (_s)
 #endif
 
 
 static const char * kPluginName = "graphlcd";
 static const char *VERSION        = "0.2.0-touchcol-git";
-static const char *DESCRIPTION    = tr("Output to graphic LCD");
+static const char *DESCRIPTION    = trNOOP("Output to graphic LCD");
 static const char *MAINMENUENTRY  = NULL;
 
 static const char * kDefaultConfigFile = "/etc/graphlcd.conf";
@@ -52,7 +53,7 @@ public:
     cPluginGraphLCD();
     virtual ~cPluginGraphLCD();
     virtual const char * Version() { return VERSION; }
-    virtual const char * Description() { return DESCRIPTION; }
+    virtual const char * Description() { return tr(DESCRIPTION); }
     virtual const char * CommandLineHelp();
     virtual bool ProcessArgs(int argc, char * argv[]);
     virtual bool Initialize();
