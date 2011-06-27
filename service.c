@@ -12,6 +12,7 @@
 #include <limits>
 
 #include "service.h"
+#include "common.h"
 
 #include <vdr/plugin.h>
 
@@ -269,9 +270,9 @@ bool cGraphLCDService::NeedsUpdate(uint64_t CurrentTime)
                 if (
                         (currRTSData.rds_info != checkRTSData.rds_info) ||
                         (currRTSData.rds_pty != checkRTSData.rds_pty) ||
-                        (checkRTSData.rds_text   && (strcmp(currRTSData.rds_text, checkRTSData.rds_text) != 0)) ||
-                        (checkRTSData.rds_title  && (strcmp(currRTSData.rds_title, checkRTSData.rds_title) != 0)) ||
-                        (checkRTSData.rds_artist && (strcmp(currRTSData.rds_artist, checkRTSData.rds_artist) != 0))
+                        (ParanoiaStrcmp(currRTSData.rds_text, checkRTSData.rds_text) != 0) ||
+                        (ParanoiaStrcmp(currRTSData.rds_title, checkRTSData.rds_title) != 0) ||
+                        (ParanoiaStrcmp(currRTSData.rds_artist, checkRTSData.rds_artist) != 0)
                   )
                 {
                     currRTSData.rds_info   = checkRTSData.rds_info;
@@ -300,9 +301,9 @@ bool cGraphLCDService::NeedsUpdate(uint64_t CurrentTime)
             if (cPluginManager::CallFirstService("LcrService-v1.0", &checkLcrData)) {
                 lcrActive = true;
                 if (
-                        (((const char*)checkLcrData.destination) && (strcmp(currLcrData.destination, checkLcrData.destination) != 0)) ||
-                        (((const char*)checkLcrData.price)       && (strcmp(currLcrData.price, checkLcrData.price) != 0)) ||
-                        (((const char*)checkLcrData.pulse)       && (strcmp(currLcrData.pulse, checkLcrData.pulse) != 0))
+                        (ParanoiaStrcmp(currLcrData.destination, checkLcrData.destination) != 0) ||
+                        (ParanoiaStrcmp(currLcrData.price, checkLcrData.price) != 0) ||
+                        (ParanoiaStrcmp(currLcrData.pulse, checkLcrData.pulse) != 0)
                   )
                 {
                     currLcrData.destination = checkLcrData.destination;
