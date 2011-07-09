@@ -49,6 +49,23 @@ struct FemonService_v1_0 {
   double dolby_bitrate;
 };
 
+// Span
+struct Span_GetBarHeights_v1_0 {
+  // all heights are normalized to 100(%)
+  unsigned int bands;                     // number of bands to compute
+  unsigned int *barHeights;               // the heights of the bars of the two channels combined
+  unsigned int *barHeightsLeftChannel;    // the heights of the bars of the left channel
+  unsigned int *barHeightsRightChannel;   // the heights of the bars of the right channel
+  unsigned int *volumeLeftChannel;        // the volume of the left channels
+  unsigned int *volumeRightChannel;       // the volume of the right channels
+  unsigned int *volumeBothChannels;       // the combined volume of the two channels
+  const char *name;                       // name of the plugin that wants to get the data
+                                          // (must be unique for each client!)
+  unsigned int falloff;                   // bar falloff value
+  unsigned int *barPeaksBothChannels;     // bar peaks of the two channels combined
+  unsigned int *barPeaksLeftChannel;      // bar peaks of the left channel
+  unsigned int *barPeaksRightChannel;     // bar peaks of the right channel
+};
 
 
 class cGraphLCDService
@@ -60,6 +77,7 @@ private:
     RadioTextService_v1_0               checkRTSData,            currRTSData;
     LcrService_v1_0                     checkLcrData,            currLcrData;
     FemonService_v1_0                   checkFemonData,          currFemonData;
+    Span_GetBarHeights_v1_0             checkSpanData,           currSpanData;
     bool                                checkMailboxNewData,     currMailboxNewData;
     unsigned long                       checkMailboxUnseenData,  currMailboxUnseenData;
     /*  __Changed = data has been changed */
@@ -69,21 +87,21 @@ private:
     bool                   lcrChanged,     lcrActive,      lcrUse;
     bool                   femonChanged,   femonActive,    femonUse;
     bool                   mailboxChanged, mailboxActive,  mailboxUse;
+    bool                   spanChanged,    spanActive,     spanUse;
     // timestamp of last service update request
-    uint64_t               radioLastChange, lcrLastChange, femonLastChange, mailboxLastChange;
+    uint64_t               radioLastChange, lcrLastChange, femonLastChange, mailboxLastChange, spanLastChange;
     // min. delay between two service update requests
-    int                    radioUpdateDelay, lcrUpdateDelay, femonUpdateDelay, mailboxUpdateDelay;
+    int                    radioUpdateDelay, lcrUpdateDelay, femonUpdateDelay, mailboxUpdateDelay, spanUpdateDelay;
 
     // check if femon version <= 1.7.7
     bool                   femonVersionChecked, femonVersionValid;
-
 //protected:
 
 public:
     cGraphLCDService(cGraphLCDState * state);
     virtual ~cGraphLCDService();
 
-    bool ServiceIsAvailable(const std::string & Name);
+    bool ServiceIsAvailable(const std::string & Name, const std::string & Options = NULL);
     void SetServiceUpdateDelay(const std::string & Name, int delay);
     bool NeedsUpdate(uint64_t CurrentTime);
     GLCD::cType GetItem(const std::string & ServiceName, const std::string & Item);

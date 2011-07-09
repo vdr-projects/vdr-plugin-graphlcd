@@ -16,6 +16,10 @@
 
 #include <vdr/plugin.h>
 
+#include <map>
+
+
+const char* pluginName = "graphlcd"; // for span
 
 cGraphLCDService::cGraphLCDService(cGraphLCDState * state)
 {
@@ -26,8 +30,9 @@ cGraphLCDService::cGraphLCDService(cGraphLCDState * state)
     lcrActive      = false;    lcrChanged     = false;    lcrUse       = false;
     femonActive    = false;    femonChanged   = false;    femonUse     = false;
     mailboxActive  = false;    mailboxChanged = false;    mailboxUse   = false;
+    spanActive     = false;    spanChanged    = false;    spanUse      = false;
 
-    radioLastChange = lcrLastChange = femonLastChange = mailboxLastChange = 0;
+    radioLastChange = lcrLastChange = femonLastChange = mailboxLastChange = spanLastChange = 0;
 
     femonVersionChecked = femonVersionValid = false;
 
@@ -36,6 +41,7 @@ cGraphLCDService::cGraphLCDService(cGraphLCDState * state)
     lcrUpdateDelay     = 60000; // 60 sec
     femonUpdateDelay   = 2000;  // 2 sec
     mailboxUpdateDelay = 10000; // 10 sec
+    spanUpdateDelay    = 500;   // 1/2 sec
 
     // pre-init strings
     checkRTSData.rds_text    = (char*)"";
@@ -50,6 +56,24 @@ cGraphLCDService::cGraphLCDService(cGraphLCDState * state)
     currFemonData.fe_name    = (char*)"";
     currFemonData.fe_status  = (char*)"";
 #endif
+
+    // pre-init span stuff (real initialisation will happen at 1st call of ServiceIsAvailable())
+    checkSpanData.bands                      = 0;
+    checkSpanData.barHeights                 = NULL;
+    checkSpanData.barHeightsLeftChannel      = NULL;
+    checkSpanData.barHeightsRightChannel     = NULL;
+    checkSpanData.volumeLeftChannel          = new unsigned int[1];
+    checkSpanData.volumeRightChannel         = new unsigned int[1];
+    checkSpanData.volumeBothChannels         = new unsigned int[1];
+    checkSpanData.name                       = pluginName;
+    checkSpanData.falloff                    = 8;
+    checkSpanData.barPeaksBothChannels       = NULL;
+    checkSpanData.barPeaksLeftChannel        = NULL;
+    checkSpanData.barPeaksRightChannel       = NULL;
+
+    currSpanData.volumeLeftChannel           = new unsigned int[1];
+    currSpanData.volumeRightChannel          = new unsigned int[1];
+    currSpanData.volumeBothChannels          = new unsigned int[1];
 }
 
 cGraphLCDService::~cGraphLCDService()
@@ -57,21 +81,111 @@ cGraphLCDService::~cGraphLCDService()
 }
 
 
-bool cGraphLCDService::ServiceIsAvailable(const std::string & Name) {
+bool cGraphLCDService::ServiceIsAvailable(const std::string & Name, const std::string & Options) {
+    bool rvAvail = false;
+    bool firstTime = false;
+
     if (Name == "RadioTextService-v1.0" || Name == "radio") {
-        radioUse = true;
-        return (mState->GetChannelInfo().isRadio) ? radioActive : false;
+        if (!radioUse) {
+            firstTime = true;
+            radioUse = true;
+        }
+        rvAvail = (mState->GetChannelInfo().isRadio) ? radioActive : false;
     } else if (Name == "LcrService-v1.0" || Name == "lcr") {
-        lcrUse = true;
-        return lcrActive;
+        if (!lcrUse) {
+            firstTime = true;
+            lcrUse = true;
+        }
+        rvAvail = lcrActive;
     } else if (Name == "FemonService-v1.0" || Name == "femon") {
-        femonUse = true;
-        return femonActive;
+        if (!femonUse) {
+            firstTime = true;
+            femonUse = true;
+        }
+        rvAvail = femonActive;
     } else if (Name == "MailBox-1.0" || Name == "mailbox") {
-        mailboxUse = true;
-        return mailboxActive;
+        if (!mailboxUse) {
+            firstTime = true;
+            mailboxUse = true;
+        }
+        rvAvail = mailboxActive;
+    } else if (Name == "span") {
+        if (!spanUse) {
+            firstTime = true;
+            spanUse = true;
+        }
+        //spanUse = true;
+        rvAvail = spanActive;
     }
-    return false;
+
+
+    if (firstTime) {
+        std::map<std::string, std::string> opts;
+        std::map<std::string, std::string>::iterator it;
+    
+        if (Options.length() > 0) {
+            size_t pos = 0;
+            while (pos < Options.length() && pos != std::string::npos) {
+                size_t start = pos;
+                pos = Options.find(",", start);
+
+                std::string curropt = (pos != std::string::npos) ? Options.substr(start, pos-start) : Options.substr(start);
+                size_t delim = curropt.find("=");
+                if ( (delim != std::string::npos) && (delim < curropt.length()-1) ) {
+                    opts[curropt.substr(0, delim)] = curropt.substr(delim+1);
+                }
+
+                if (pos != std::string::npos)
+                    pos++;
+            }
+        }
+
+        // options valid for all services
+        it = opts.find("delay");
+        if (it != opts.end()) {
+            int delay = atoi( (*it).second.c_str() );
+            if (delay > 100) {
+                SetServiceUpdateDelay(Name, delay);
+            }
+        }
+
+        // indiv. options
+        if (Name == "span") {
+            int bands = 0; // default: no bands, only volume
+            it = opts.find("bands");
+            if (it != opts.end()) {
+                bands = atoi( (*it).second.c_str() );
+            }
+            if (bands < 0 || bands > 100)
+                bands = 0;
+
+            if (bands != 0) {
+                checkSpanData.bands                      = bands;
+                checkSpanData.barHeights                 = new unsigned int[bands];
+                checkSpanData.barHeightsLeftChannel      = new unsigned int[bands];
+                checkSpanData.barHeightsRightChannel     = new unsigned int[bands];
+                checkSpanData.barPeaksBothChannels       = new unsigned int[bands];
+                checkSpanData.barPeaksLeftChannel        = new unsigned int[bands];
+                checkSpanData.barPeaksRightChannel       = new unsigned int[bands];                
+
+                currSpanData.barHeights                  = new unsigned int[bands];
+                currSpanData.barHeightsLeftChannel       = new unsigned int[bands];
+                currSpanData.barHeightsRightChannel      = new unsigned int[bands];
+                currSpanData.barPeaksBothChannels        = new unsigned int[bands];
+                currSpanData.barPeaksLeftChannel         = new unsigned int[bands];
+                currSpanData.barPeaksRightChannel        = new unsigned int[bands];
+            }
+
+            it = opts.find("falloff");
+            if (it != opts.end()) {  // if no option 'falloff': use preset value
+                int falloff = atoi( (*it).second.c_str() );
+                if (falloff > 0 && falloff < 100)
+                    checkSpanData.falloff = falloff;
+            }
+        }
+    }
+
+    return rvAvail;
 }
 
 
@@ -87,6 +201,8 @@ void cGraphLCDService::SetServiceUpdateDelay(const std::string & Name, int delay
         femonUpdateDelay = delay;
     } else if (Name == "MailBox-1.0" || Name == "mailbox") {
         mailboxUpdateDelay = delay;
+    } else if (Name == "span") {
+        spanUpdateDelay = delay;
     }
 }
 
@@ -235,6 +351,37 @@ GLCD::cType cGraphLCDService::GetItem(const std::string & ServiceName, const std
                 }
             }
         }
+    } else if (ServiceName == "span") {
+        spanUse = true;
+        if (spanActive) {
+            int index = 0;
+            if (ItemFormat != "") {
+               index = atoi(ItemFormat.c_str());
+            }
+            if (ItemName == "" || ItemName == "default" || ItemName == "VolumeBoth" || ItemName == "volume") {
+                return (int)checkSpanData.volumeBothChannels[0];
+            } else if (ItemName == "VolumeLeft" || ItemName == "volumel") {
+                return (int)checkSpanData.volumeLeftChannel[0];
+            } else if (ItemName == "VolumeRight" || ItemName == "volumer") {
+                return (int)checkSpanData.volumeRightChannel[0];
+            } else if (ItemName == "Bands" || ItemName == "bands") {
+                return (int)checkSpanData.bands;
+            } else if (ItemName == "Falloff" || ItemName == "falloff") {
+                return (int)checkSpanData.falloff;
+            } else if (ItemName == "BarHeight" || ItemName == "height") {
+                return (int)checkSpanData.barHeights[index];
+            } else if (ItemName == "BarHeightLeft" || ItemName == "heightl") {
+                return (int)checkSpanData.barHeightsLeftChannel[index];
+            } else if (ItemName == "BarHeightRight" || ItemName == "heightr") {
+                return (int)checkSpanData.barHeightsRightChannel[index];
+            } else if (ItemName == "BarPeak" || ItemName == "peak") {
+                return (int)checkSpanData.barPeaksBothChannels[index];
+            } else if (ItemName == "BarPeakLeft" || ItemName == "peakl") {
+                return (int)checkSpanData.barPeaksLeftChannel[index];
+            } else if (ItemName == "BarPeakRight" || ItemName == "peakr") {
+                return (int)checkSpanData.barPeaksRightChannel[index];
+            }
+        }
     }
 
     return "";
@@ -252,6 +399,7 @@ bool cGraphLCDService::NeedsUpdate(uint64_t CurrentTime)
     /*lcrActive    = false;*/    lcrChanged     = false;
     /*femonActive  = false;*/    femonChanged   = false;
                                  mailboxChanged = false;
+                                 spanChanged    = false;
 
     cPlugin *p = NULL;
 
@@ -423,6 +571,51 @@ bool cGraphLCDService::NeedsUpdate(uint64_t CurrentTime)
         }
     }
 
+    // span
+    // only ask if span-services are defined in the skin and min. request delay exceeded
+    if (checkSpanData.bands > 0 && spanUse && ((CurrentTime-spanLastChange) >= (uint64_t)spanUpdateDelay)) {
+        spanLastChange = CurrentTime;
+        spanActive = false;
+        p = cPluginManager::CallFirstService("Span-ClientCheck-v1.0", NULL);
+        if (p) {
+            cControl* c = cControl::Control(); // workaround a bug somewhere in music or span-plugin
+            if (c != NULL && cPluginManager::CallFirstService("Span-GetBarHeights-v1.0", &checkSpanData)) {
+                spanActive = true;
+                bool chg = false;
+
+                if ( (currSpanData.volumeLeftChannel[0]  != checkSpanData.volumeLeftChannel[0])  ||
+                     (currSpanData.volumeRightChannel[0] != checkSpanData.volumeRightChannel[0])  ||
+                     (currSpanData.volumeBothChannels[0] != checkSpanData.volumeBothChannels[0])
+                   )
+                {
+                    chg = true;
+                    currSpanData.volumeLeftChannel[0]  = checkSpanData.volumeLeftChannel[0];
+                    currSpanData.volumeRightChannel[0] = checkSpanData.volumeRightChannel[0];
+                    currSpanData.volumeBothChannels[0] = checkSpanData.volumeBothChannels[0];
+                }
+                for (unsigned int i = 0; i < checkSpanData.bands; i++) {
+                    if ( (currSpanData.barHeights[i]             != checkSpanData.barHeights[i]) ||
+                         (currSpanData.barHeightsLeftChannel[i]  != checkSpanData.barHeightsLeftChannel[i]) ||
+                         (currSpanData.barHeightsRightChannel[i] != checkSpanData.barHeightsRightChannel[i]) ||
+                         (currSpanData.barPeaksBothChannels[i]   != checkSpanData.barPeaksBothChannels[i]) ||
+                         (currSpanData.barPeaksLeftChannel[i]    != checkSpanData.barPeaksLeftChannel[i]) ||
+                         (currSpanData.barPeaksRightChannel[i]   != checkSpanData.barPeaksRightChannel[i])
+                       )
+                    {
+                        chg = true;
+                        currSpanData.barHeights[i]             = checkSpanData.barHeights[i];
+                        currSpanData.barHeightsLeftChannel[i]  = checkSpanData.barHeightsLeftChannel[i];
+                        currSpanData.barHeightsRightChannel[i] = checkSpanData.barHeightsRightChannel[i];
+                        currSpanData.barPeaksBothChannels[i]   = checkSpanData.barPeaksBothChannels[i];
+                        currSpanData.barPeaksLeftChannel[i]    = checkSpanData.barPeaksLeftChannel[i];
+                        currSpanData.barPeaksRightChannel[i]   = checkSpanData.barPeaksRightChannel[i];
+                    }
+                }
+                spanChanged = chg;
+            }
+        }
+    }
+
     //mutex.Unlock();
-    return (radioChanged || lcrChanged || femonChanged || mailboxChanged);
+    return (radioChanged || lcrChanged || femonChanged || mailboxChanged || spanChanged);
 }

@@ -688,7 +688,17 @@ GLCD::cType cGraphLCDSkinConfig::GetToken(const GLCD::tSkinToken & Token)
                 if (Token.Attrib.Text == "")
                     return false;
 
-                return s->ServiceIsAvailable(Token.Attrib.Text);
+                size_t found = Token.Attrib.Text.find(",");
+                std::string ServiceName = "";
+                std::string Options = "";
+
+                if (found != std::string::npos) {
+                    ServiceName = Token.Attrib.Text.substr(0, found);
+                    Options = Token.Attrib.Text.substr(found+1);
+                } else {
+                    ServiceName = Token.Attrib.Text;
+                }
+                return s->ServiceIsAvailable(ServiceName, Options);
             }
             break;
             case tokServiceItem: {
