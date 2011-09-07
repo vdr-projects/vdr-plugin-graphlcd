@@ -9,6 +9,11 @@
  * (c) 2001-2004 Carsten Siebholz <c.siebholz AT t-online.de>
  * (c) 2004-2010 Andreas Regel <andreas.regel AT powarman.de>
  * (c) 2010-2011 Wolfgang Astleitner <mrwastl AT users sourceforge net>
+ *
+ * Contributions:
+ * CONNECT / DISCONNect:
+ * (c) 2011      Lutz Neumann <superelchi AT wolke7.net>
+ *
  */
 
 #include <getopt.h>
@@ -49,6 +54,10 @@ private:
     GLCD::cDriver * mLcd;
     cGraphLCDDisplay * mDisplay;
 
+    uint64_t to_timestamp;
+    bool ConnectDisplay();
+    void DisconnectDisplay();
+
 public:
     cPluginGraphLCD();
     virtual ~cPluginGraphLCD();
@@ -80,10 +89,7 @@ cPluginGraphLCD::cPluginGraphLCD()
 
 cPluginGraphLCD::~cPluginGraphLCD()
 {
-    delete mDisplay;
-    if (mLcd)
-        mLcd->DeInit();
-    delete mLcd;
+    DisconnectDisplay();
 }
 
 const char * cPluginGraphLCD::CommandLineHelp()
@@ -137,8 +143,6 @@ bool cPluginGraphLCD::ProcessArgs(int argc, char * argv[])
 
 bool cPluginGraphLCD::Initialize()
 {
-    unsigned int displayNumber = 0;
-    const char * cfgDir;
 
 #if APIVERSNUM < 10503
     RegisterI18n(Phrases);
@@ -154,6 +158,19 @@ bool cPluginGraphLCD::Initialize()
         esyslog("graphlcd plugin: Error loading config file!\n");
         return false;
     }
+    return ConnectDisplay();
+}
+
+bool cPluginGraphLCD::Start()
+{
+    return true;
+}
+
+bool cPluginGraphLCD::ConnectDisplay()
+{
+    unsigned int displayNumber = 0;
+    const char* cfgDir;
+
     if (GLCD::Config.driverConfigs.size() > 0)
     {
         if (mDisplayName.length() > 0)
@@ -201,28 +218,20 @@ bool cPluginGraphLCD::Initialize()
     if (!mDisplay->Initialise(mLcd, cfgDir, mSkinsPath, mSkinName))
         return false;
 
+    dsyslog("graphlcd plugin: init timeout waiting for display thread to get ready");
+    to_timestamp = cTimeMs::Now();
+
     return true;
 }
 
-bool cPluginGraphLCD::Start()
+void cPluginGraphLCD::DisconnectDisplay()
 {
-    int count;
-
-    dsyslog("graphlcd plugin: waiting for display thread to get ready");
-    for (count = 0; count < 100 /*1200*/; count++)
-    {
-        if (mDisplay->Active())
-        {
-            dsyslog ("graphlcd plugin: display thread ready");
-            return true;
-        }
-        cCondWait::SleepMs(100);
-    }
-    dsyslog ("graphlcd plugin: timeout while waiting for display thread");
-    /* no activity after 10 secs: display is unusable */
-    GraphLCDSetup.PluginActive = 0;
-    /* don't return false, else VDR would restart itself */
-    return true /*false*/;
+    delete mDisplay;
+    mDisplay = NULL;
+    if (mLcd)
+        mLcd->DeInit();
+    delete mLcd;
+    mLcd = NULL;
 }
 
 void cPluginGraphLCD::Housekeeping()
@@ -232,7 +241,31 @@ void cPluginGraphLCD::Housekeeping()
 void cPluginGraphLCD::MainThreadHook()
 {
     if (mDisplay)
-        mDisplay->Tick();
+    {
+        if (mDisplay->Active())
+        {
+            if (to_timestamp != (uint64_t)0)
+            {
+                dsyslog("graphlcd plugin: display thread is ready");
+                to_timestamp = (uint64_t)0;
+            }
+            mDisplay->Tick();
+        }
+        else 
+        {
+            if (to_timestamp != (uint64_t)0)
+            {
+                if ( (cTimeMs::Now() - to_timestamp) > (uint64_t)10000)
+                {
+                    dsyslog ("graphlcd plugin: timeout while waiting for display thread");
+                    /* no activity after 10 secs: display is unusable */
+                    GraphLCDSetup.PluginActive = 0;
+                    to_timestamp = (uint64_t)0;
+                    DisconnectDisplay();
+                }
+            }
+        }
+    }
 }
 
 const char **cPluginGraphLCD::SVDRPHelpPages(void)
@@ -246,6 +279,8 @@ const char **cPluginGraphLCD::SVDRPHelpPages(void)
         "SETEXP <exp> <key> <value>   Set a key=value entry which expires after <exp> secs.",
         "UNSET <key>   Unset (clear) entry <key>.",
         "GET <key>   Get value assigned to key.",
+        "CONNECT <displayname> [<skin>]   Connect given display.",
+        "DISCONN    Disconnect currently connected display.",
         NULL
     };
     return HelpPages;
@@ -272,76 +307,103 @@ cString cPluginGraphLCD::SVDRPCommand(const char *Command, const char *Option, i
     }
     
 
-    if (strcasecmp(Command, "CLS") == 0) {
-        if (GraphLCDSetup.PluginActive == 1) {
-            return "Error: Plugin is active.";
-        } else {
-            mDisplay->Clear();
-            return "GraphLCD cleared.";
-        };
-    } else
-    if (strcasecmp(Command, "UPD") == 0) {
-        if (GraphLCDSetup.PluginActive == 0) {
-            return "Error: Plugin is not active.";
-        } else {
-            mDisplay->Update();
-            return "GraphLCD updated.";
-        };
-    } else
     if (strcasecmp(Command, "OFF") == 0) {
         GraphLCDSetup.PluginActive = 0;
         return "GraphLCD Plugin switched off.";
     } else
     if (strcasecmp(Command, "ON") == 0) {
         GraphLCDSetup.PluginActive = 1;
-        mDisplay->Update();
+        if (mDisplay != NULL)
+            mDisplay->Update();
         return "GraphLCD Plugin switched on.";
     } else
-    if (strcasecmp(Command, "SET") == 0) {
-        if (firstpos != std::string::npos) {
-            std::string key = option.substr(0, firstpos);
-            if ( isalpha(key[0]) ) { 
-                mDisplay->GetExtData()->Set(key, option.substr(firstpos+1));
-                return "SET ok";
-            }
-        }
-        return "SET requires two parameters: SET <key> <value>.";
-    } else
-    if (strcasecmp(Command, "SETEXP") == 0) {
-        if (secondpos != std::string::npos) {
-            std::string key = option.substr(firstpos+1, secondpos-firstpos-1);
-            std::string value = option.substr(secondpos+1);
-            if ( isalpha(key[0]) && isdigit(option[0]) ) { 
-                uint32_t expsec = (uint32_t)strtoul( option.substr(0, firstpos).c_str(), NULL, 10);
-                mDisplay->GetExtData()->Set( key, value, expsec );
-                return "SETEXP ok";
-            }
-        }
-        return "SETEXP requires three parameters: SETEXP <exp> <key> <value>.";
-    } else
-    if (strcasecmp(Command, "UNSET") == 0) {
-        if (firstpos == std::string::npos) {
-            mDisplay->GetExtData()->Unset( option );
-            return "UNSET ok";
+    if (strcasecmp(Command, "CONNECT") == 0) {        
+        if (option.size() == 0) {
+            return "CONNECT requires at least one parameter: CONNECT <displayname> [<skin>].";
+        } else if (firstpos == std::string::npos && option.size() > 0) {
+            mDisplayName = option;
         } else {
-            return "UNSET requires exactly one parameter: UNSET <key>.";
+            mDisplayName = option.substr(0, firstpos);
+            mSkinName = option.substr(firstpos+1);
         }
+          
+        if (mDisplay != NULL)
+            DisconnectDisplay();
+        std::string retval = "Display "; retval.append(mDisplayName);
+        retval.append(ConnectDisplay() ? ": CONNECT ok." : ": CONNECT error");
+        return retval.c_str();
     } else
-    if (strcasecmp(Command, "GET") == 0) {
-        if (firstpos == std::string::npos) {
-            std::string res = mDisplay->GetExtData()->Get( option );
-            std::string retval = "GET "; retval.append(option); retval.append(": "); 
-            if (res != "" ) {
-                retval.append(res);
+    if (strcasecmp(Command, "DISCONN") == 0 || strcasecmp(Command, "DISCONNECT") == 0 ) {
+        if (mDisplay != NULL)
+            DisconnectDisplay();
+        return "DISCONNect ok";
+    } else // following commands are valid only if mDisplay is valid
+    if (mDisplay != NULL) {
+        if (strcasecmp(Command, "CLS") == 0) {
+            if (GraphLCDSetup.PluginActive == 1) {
+                return "Error: Plugin is active.";
             } else {
-                retval.append("(null)");
+                mDisplay->Clear();
+                return "GraphLCD cleared.";
+            };
+        } else
+        if (strcasecmp(Command, "UPD") == 0) {
+            if (GraphLCDSetup.PluginActive == 0) {
+                return "Error: Plugin is not active.";
+            } else {
+                mDisplay->Update();
+                return "GraphLCD updated.";
+            };
+        } else
+        if (strcasecmp(Command, "SET") == 0) {
+            if (firstpos != std::string::npos) {
+                std::string key = option.substr(0, firstpos);
+                if ( isalpha(key[0]) ) { 
+                    mDisplay->GetExtData()->Set(key, option.substr(firstpos+1));
+                    return "SET ok";
+                }
             }
-            return retval.c_str();
-        } else {
-            return "GET requires exactly one parameter: GET <key>.";
+            return "SET requires two parameters: SET <key> <value>.";
+        } else
+        if (strcasecmp(Command, "SETEXP") == 0) {
+            if (secondpos != std::string::npos) {
+                std::string key = option.substr(firstpos+1, secondpos-firstpos-1);
+                std::string value = option.substr(secondpos+1);
+                if ( isalpha(key[0]) && isdigit(option[0]) ) { 
+                    uint32_t expsec = (uint32_t)strtoul( option.substr(0, firstpos).c_str(), NULL, 10);
+                    mDisplay->GetExtData()->Set( key, value, expsec );
+                    return "SETEXP ok";
+                }
+            }
+            return "SETEXP requires three parameters: SETEXP <exp> <key> <value>.";
+        } else
+        if (strcasecmp(Command, "UNSET") == 0) {
+            if (firstpos == std::string::npos) {
+                mDisplay->GetExtData()->Unset( option );
+                return "UNSET ok";
+            } else {
+                return "UNSET requires exactly one parameter: UNSET <key>.";
+            }
+        } else
+        if (strcasecmp(Command, "GET") == 0) {
+            if (firstpos == std::string::npos) {
+                std::string res = mDisplay->GetExtData()->Get( option );
+                std::string retval = "GET "; retval.append(option); retval.append(": "); 
+                if (res != "" ) {
+                    retval.append(res);
+                } else {
+                    retval.append("(null)");
+                }
+                return retval.c_str();
+            } else {
+                return "GET requires exactly one parameter: GET <key>.";
+            }
+        } else {  // command not supported
+          return NULL;
         }
+    } else {
+        return "Error: no display connected";
     }
-    return NULL;
 }
 
 cOsdObject * cPluginGraphLCD::MainMenuAction()

@@ -117,6 +117,8 @@ void cGraphLCDDisplay::Action(void)
     if (mLcd->Init() != 0)
     {
         esyslog("graphlcd plugin: ERROR: Failed initializing display\n");
+        GraphLCDSetup.PluginActive = 0;
+        Cancel(-1); // cancel display thread
         return;
     }
 
