@@ -218,6 +218,8 @@ bool cPluginGraphLCD::ConnectDisplay()
     if (!mDisplay->Initialise(mLcd, cfgDir, mSkinsPath, mSkinName))
         return false;
 
+    /* if plugin was deactivated -> reactivate */
+    GraphLCDSetup.PluginActive = 1;
     dsyslog("graphlcd plugin: init timeout waiting for display thread to get ready");
     to_timestamp = cTimeMs::Now();
 
