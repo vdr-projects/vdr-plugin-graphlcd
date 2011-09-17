@@ -73,6 +73,8 @@ cGraphLCDState::cGraphLCDState(cGraphLCDDisplay * Display)
     mOsd.message = "";
     mOsd.textItem = "";
     mOsd.currentItemIndex = -1;
+    mOsd.currentTextItemScroll = 0;
+    mOsd.currentTextItemScrollReset = false;
 
     mVolume.value = -1;
     mVolume.lastChange = 0;
@@ -364,6 +366,11 @@ void cGraphLCDState::Tick()
     {
         mutex.Lock();
 
+        if (mOsd.currentTextItemScrollReset) { // mOsd.currentTextItemScroll has been read since last update? -> reset to 0
+            mOsd.currentTextItemScroll = 0;
+            mOsd.currentTextItemScrollReset = false;
+        }
+
         tickUsed = true;
 
         if (mReplay.control)
@@ -400,6 +407,8 @@ void cGraphLCDState::OsdClear()
         mOsd.blueButton = "";
         mOsd.message = "";
         mOsd.textItem = "";
+        mOsd.currentTextItemScroll = 0;
+        mOsd.currentTextItemScrollReset = false;
 
         mutex.Unlock();
         mDisplay->SetMenuClear();
@@ -556,9 +565,14 @@ void cGraphLCDState::OsdTextItem(const char * Text, bool Scroll)
     if (GraphLCDSetup.PluginActive)
     {
         mutex.Lock();
+
         if (Text)
         {
             mOsd.textItem = trim(Text);
+            mOsd.currentTextItemScroll = 0;
+            mOsd.currentTextItemScrollReset = false;
+        } else {
+            mOsd.currentTextItemScroll += (Scroll) ? -1 : 1;
         }
         mutex.Unlock();
         //mDisplay->SetOsdTextItem(Text, Scroll);
@@ -861,6 +875,10 @@ tOsdState cGraphLCDState::GetOsdState()
     mutex.Unlock();
 
     return ret;
+}
+
+void cGraphLCDState::ResetOsdStateScroll() {
+    mOsd.currentTextItemScrollReset = true;
 }
 
 tVolumeState cGraphLCDState::GetVolumeState()

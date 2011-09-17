@@ -19,6 +19,7 @@
 #include "state.h"
 #include "skinconfig.h"
 #include "service.h"
+#include "extdata.h"
 
 typedef enum _eTokenId
 {
@@ -113,6 +114,9 @@ typedef enum _eTokenId
     tokMenuItem,
     tokMenuCurrent,
     tokIsMenuCurrent,
+    tokIsMenuList,
+    tokMenuText,
+    tokMenuTextScroll,
     tokButtonRed,
     tokButtonGreen,
     tokButtonYellow,
@@ -245,6 +249,9 @@ static const std::string Tokens[tokCountToken] =
     "MenuItem",
     "MenuCurrent",
     "IsMenuCurrent",
+    "IsMenuList",
+    "MenuText",
+    "MenuTextScroll",
     "ButtonRed",
     "ButtonGreen",
     "ButtonYellow",
@@ -329,7 +336,7 @@ std::string cGraphLCDSkinConfig::CharSet(void)
 
 std::string cGraphLCDSkinConfig::Translate(const std::string & Text)
 {
-    return Text;
+    return I18nTranslate(Text.c_str());
 }
 
 GLCD::cType cGraphLCDSkinConfig::GetToken(const GLCD::tSkinToken & Token)
@@ -580,7 +587,7 @@ GLCD::cType cGraphLCDSkinConfig::GetToken(const GLCD::tSkinToken & Token)
             case tokMessage:
                 return osd.message;
             case tokMenuTitle:
-                return osd.title;
+                return SplitToken(osd.title, Token.Attrib);
             case tokMenuItem:
             case tokMenuCurrent:
             case tokIsMenuCurrent:
@@ -610,7 +617,9 @@ GLCD::cType cGraphLCDSkinConfig::GetToken(const GLCD::tSkinToken & Token)
                 else if (Token.Id == tokMenuCurrent)
                 {
                     if (Token.Index < maxItems && Token.Index == currentIndex)
-                        return osd.items[topIndex + Token.Index];
+                        return SplitToken(osd.items[topIndex + Token.Index], Token.Attrib);
+                    else if (Token.Index < 0) // outside of <list/>: return last MenuCurrent
+                        return SplitToken(osd.items[topIndex], Token.Attrib, true);
                 }
                 else if (Token.Id == tokIsMenuCurrent)
                 {
@@ -618,6 +627,15 @@ GLCD::cType cGraphLCDSkinConfig::GetToken(const GLCD::tSkinToken & Token)
                         return true;
                 }
                 return false;
+            }
+            case tokIsMenuList:
+                return (osd.items.size() == 0) ? false : true;
+            case tokMenuText:
+                return SplitToken(osd.textItem, Token.Attrib);
+            case tokMenuTextScroll: {
+                int curr_scroll = osd.currentTextItemScroll;
+                mState->ResetOsdStateScroll();
+                return curr_scroll;
             }
             case tokButtonRed:
                 return osd.redButton;
@@ -719,14 +737,20 @@ GLCD::cType cGraphLCDSkinConfig::GetToken(const GLCD::tSkinToken & Token)
                 if (Token.Attrib.Text == "")
                     return false;
 
-                return mDisplay->GetExtData()->IsSet( Token.Attrib.Text );
+                cExtData * extData = cExtData::GetExtData();
+                if (extData)
+                    return extData->IsSet( Token.Attrib.Text );
+                return false;
             }
             break;
             case tokExtDataItem: {
                 if (Token.Attrib.Text == "")
                     return false;
 
-                return mDisplay->GetExtData()->Get( Token.Attrib.Text );
+                cExtData * extData = cExtData::GetExtData();
+                if (extData)
+                    return extData->Get( Token.Attrib.Text );
+                return false;
             }
             break;
             default:

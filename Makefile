@@ -78,7 +78,7 @@ endif
 ### The object files (add further files here):
 
 #OBJS = alias.o common.o display.o i18n.o menu.o plugin.o setup.o skinconfig.o state.o strfct.o
-OBJS = alias.o common.o display.o menu.o plugin.o setup.o skinconfig.o state.o strfct.o service.o
+OBJS = alias.o common.o display.o menu.o plugin.o setup.o skinconfig.o state.o strfct.o service.o extdata.o
 
 ### The main target:
 TARGETS = libvdr-$(PLUGIN).so

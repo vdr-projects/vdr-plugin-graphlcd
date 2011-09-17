@@ -48,25 +48,6 @@ enum eDisplayMode
     DisplayModeInteractive
 };
 
-// external data set via SVDRP
-class cExtData
-{
-private:
-    std::map<std::string,std::string>           data;
-    std::map<std::string,std::string>::iterator it;
-    std::map<std::string,uint64_t>              expData;
-    std::map<std::string,uint64_t>::iterator    expDataIt;
-public:
-    cExtData(void) {}
-    ~cExtData(void) { data.clear(); expData.clear(); }
-    
-    bool Set(std::string key, std::string value, uint32_t expire = 0);
-    bool Unset(std::string key);
-    bool IsSet(std::string key);
-    std::string Get(std::string key);
-};
-
-
 // Display update Thread
 class cGraphLCDDisplay : public cThread
 {
@@ -91,7 +72,6 @@ public:
     GLCD::cDriver * GetDriver() const { return mLcd; }
 
     const eDisplayMode GetDisplayMode() const { return mDisplayMode; }
-    cExtData * GetExtData() const { return mExtData; }
 protected:
     virtual void Action();
 
@@ -125,7 +105,6 @@ private:
     /* display mode (normal or interactive) */
     eDisplayMode mDisplayMode;
     uint64_t LastTimeDisplayMode;
-    cExtData * mExtData;
 };
 
 #endif

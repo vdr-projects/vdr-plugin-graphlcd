@@ -56,8 +56,6 @@ cGraphLCDDisplay::cGraphLCDDisplay()
     bBrightnessActive = true;
 
     mService = NULL; /* cannot be initialised here (mGraphLCDState not yet available) */
-    
-    mExtData = new cExtData();
 }
 
 cGraphLCDDisplay::~cGraphLCDDisplay()
@@ -70,8 +68,6 @@ cGraphLCDDisplay::~cGraphLCDDisplay()
     delete mGraphLCDState;
 
     delete mService;
-    
-    delete mExtData;
 }
 
 bool cGraphLCDDisplay::Initialise(GLCD::cDriver * Lcd, const std::string & CfgPath, const std::string & SkinsPath, const std::string & SkinName)
@@ -501,51 +497,4 @@ void cGraphLCDDisplay::Clear() {
   mLcd->SetScreen(mScreen->Data(), mScreen->Width(), mScreen->Height(), mScreen->LineSize());
 #endif
   mLcd->Refresh(false);
-}
-
-
-
-bool cExtData::Set(std::string key, std::string value, uint32_t expire) {
-    data[key] = value;
-    
-    if (expire > 0) {
-        expData[key] = cTimeMs::Now() + (expire * 1000);
-    } else {
-        expData.erase(key); // just in case of an old expiration entry for key         
-    }
-    return true;
-}
-
-
-bool cExtData::Unset(std::string key) {
-    expData.erase(key); // ignore result;
-    return ( (data.erase(key) > 0) ? true : false );
-}
-
-
-bool cExtData::IsSet(std::string key) {
-    std::string ret = Get(key);
-    return ( (ret != "") ? true : false );
-}
-
-
-std::string cExtData::Get(std::string key) {
-    it = data.find(key);
-    if ( it != data.end() ) {
-        expDataIt = expData.find(key);
-        if ( expDataIt != expData.end() ) {
-            uint64_t expts = (*expDataIt).second;
-            if ( cTimeMs::Now() > expts ) {
-                expData.erase(key);
-                data.erase(key);
-                return "";
-            } else {
-                return (*it).second;
-            }
-        } else {
-            return (*it).second;
-        }
-    } else {
-        return "";
-    }
 }

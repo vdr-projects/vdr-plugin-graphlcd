@@ -85,6 +85,8 @@ struct tOsdState
     std::string textItem;
     std::string message;
     int currentItemIndex;
+    int currentTextItemScroll;
+    bool currentTextItemScrollReset;
 };
 
 struct tVolumeState
@@ -144,6 +146,7 @@ public:
     bool IsRecording(int CardNumber);
     std::string Recordings(int CardNumber);
     tOsdState GetOsdState();
+    void ResetOsdStateScroll();
     tVolumeState GetVolumeState();
     bool ShowMessage();
 };

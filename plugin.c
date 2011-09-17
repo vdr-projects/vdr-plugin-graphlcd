@@ -24,6 +24,7 @@
 #include "display.h"
 #include "global.h"
 #include "menu.h"
+#include "extdata.h"
 
 #include <vdr/plugin.h>
 
@@ -53,6 +54,7 @@ private:
     std::string mSkinName;
     GLCD::cDriver * mLcd;
     cGraphLCDDisplay * mDisplay;
+    cExtData * mExtData;
 
     uint64_t to_timestamp;
     bool ConnectDisplay();
@@ -85,11 +87,14 @@ cPluginGraphLCD::cPluginGraphLCD()
     mLcd(NULL),
     mDisplay(NULL)
 {
+    mExtData = cExtData::GetExtData();
 }
 
 cPluginGraphLCD::~cPluginGraphLCD()
 {
     DisconnectDisplay();
+    mExtData->ReleaseExtData();
+    mExtData = NULL;
 }
 
 const char * cPluginGraphLCD::CommandLineHelp()
@@ -361,7 +366,7 @@ cString cPluginGraphLCD::SVDRPCommand(const char *Command, const char *Option, i
             if (firstpos != std::string::npos) {
                 std::string key = option.substr(0, firstpos);
                 if ( isalpha(key[0]) ) { 
-                    mDisplay->GetExtData()->Set(key, option.substr(firstpos+1));
+                    mExtData->Set(key, option.substr(firstpos+1));
                     return "SET ok";
                 }
             }
@@ -373,7 +378,7 @@ cString cPluginGraphLCD::SVDRPCommand(const char *Command, const char *Option, i
                 std::string value = option.substr(secondpos+1);
                 if ( isalpha(key[0]) && isdigit(option[0]) ) { 
                     uint32_t expsec = (uint32_t)strtoul( option.substr(0, firstpos).c_str(), NULL, 10);
-                    mDisplay->GetExtData()->Set( key, value, expsec );
+                    mExtData->Set( key, value, expsec );
                     return "SETEXP ok";
                 }
             }
@@ -381,7 +386,7 @@ cString cPluginGraphLCD::SVDRPCommand(const char *Command, const char *Option, i
         } else
         if (strcasecmp(Command, "UNSET") == 0) {
             if (firstpos == std::string::npos) {
-                mDisplay->GetExtData()->Unset( option );
+                mExtData->Unset( option );
                 return "UNSET ok";
             } else {
                 return "UNSET requires exactly one parameter: UNSET <key>.";
@@ -389,7 +394,7 @@ cString cPluginGraphLCD::SVDRPCommand(const char *Command, const char *Option, i
         } else
         if (strcasecmp(Command, "GET") == 0) {
             if (firstpos == std::string::npos) {
-                std::string res = mDisplay->GetExtData()->Get( option );
+                std::string res = mExtData->Get( option );
                 std::string retval = "GET "; retval.append(option); retval.append(": "); 
                 if (res != "" ) {
                     retval.append(res);

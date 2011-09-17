@@ -1,9 +1,12 @@
 #include <time.h>
 
 #include <glcdskin/type.h>
+#include <glcdskin/string.h>
 
 #include <vdr/plugin.h>
 #include <string.h>
+
+#include "strfct.h"
 
 #if APIVERSNUM < 10503
 #include <locale.h>
@@ -156,4 +159,62 @@ int ParanoiaStrcmp(const char *s1, const char *s2)
         return (s2[n] == '\0') ? 0 : -1;
     else
         return rv;
+}
+
+const std::string SplitText(const std::string &Text, const std::string &Delim, bool firstPart = true) {
+    size_t found = Text.find(Delim);
+
+    if (found != std::string::npos) {
+        return (firstPart) ? Text.substr(0, found) : Text.substr(found + Delim.size());
+    }
+    return (firstPart) ? Text : NULL;
+}
+
+const std::string SplitToken(const std::string &Token, const struct GLCD::tSkinAttrib Attrib, bool extSplit) {
+    if (Attrib.Type == GLCD::aClean) {
+        if (extSplit) {
+            std::string Text = SplitText(Token, " - ", true);
+
+            // also cut leading index numbers, eg: "1  Menu" -> "Menu"
+            size_t pos = 0;
+            bool exitw = false;
+            bool valid = true;
+
+            while (!exitw && valid && pos < Text.size()-1) {
+                if (Text[pos] == ' ') {
+                    pos++;
+                } else {
+                    valid = (isdigit(Text[pos]) || Text[pos] == ' ' || Text[pos] == '\t') ? true : false;
+                    exitw = true;
+                }
+            }
+
+            exitw = false;
+            while (!exitw && valid && pos < Text.size()-1) {
+                if (isdigit(Text[pos])) {
+                    pos++;
+                } else {
+                    valid = (Text[pos] == ' ' || Text[pos] == '\t') ? true : false;
+                    exitw = true;
+                }
+            }
+
+            exitw = false;
+            while (!exitw && valid && pos < Text.size()-1) {
+                if (Text[pos] == ' ') {
+                    pos++;
+                } else {
+                    exitw = true;
+                }
+            }
+
+            if (valid && Text[pos] == '\t')
+                pos++;
+            return trim( (valid) ? Text.substr(pos) : Text );
+        }
+        return SplitText(Token, " - ", true);
+    } else if (Attrib.Type == GLCD::aRest) {
+        return SplitText(Token, " - ", false);
+    }
+    return Token;
 }
