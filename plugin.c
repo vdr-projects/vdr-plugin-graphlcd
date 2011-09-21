@@ -9,9 +9,9 @@
  * (c) 2001-2004 Carsten Siebholz <c.siebholz AT t-online.de>
  * (c) 2004-2010 Andreas Regel <andreas.regel AT powarman.de>
  * (c) 2010-2011 Wolfgang Astleitner <mrwastl AT users sourceforge net>
- *
+ * 
  * Contributions:
- * CONNECT / DISCONNect:
+ * CONNECT / DISCONNect, multi-display support:
  * (c) 2011      Lutz Neumann <superelchi AT wolke7.net>
  *
  */
@@ -25,10 +25,12 @@
 #include "global.h"
 #include "menu.h"
 #include "extdata.h"
+#include "strfct.h"
 
 #include <vdr/plugin.h>
 
 #include <ctype.h>
+#include <vector>
 
 #if APIVERSNUM < 10503
   #include "i18n.h"
@@ -41,24 +43,45 @@ static const char *VERSION        = "0.3.0";
 static const char *DESCRIPTION    = trNOOP("Output to graphic LCD");
 static const char *MAINMENUENTRY  = NULL;
 
-static const char * kDefaultConfigFile = "/etc/graphlcd.conf";
+#ifndef PLUGIN_GRAPHLCDCONF
+  #define PLUGIN_GRAPHLCDCONF  "/etc/graphlcd.conf"
+#endif
 
+
+enum eDisplayStatus {
+    EMPTY,
+    DEAD,
+    CONNECTED,
+    DISCONNECTED,
+    CONNECT_PENDING,
+    CONNECTING
+};
+
+struct tDisplayData {
+    eDisplayStatus     Status;
+    std::string        Name;
+    std::string        Skin;
+    GLCD::cDriver    * Driver;
+    cGraphLCDDisplay * Disp;
+    uint64_t           to_timestamp;
+};
+
+#define GRAPHLCD_MAX_DISPLAYS 4
 
 class cPluginGraphLCD : public cPlugin
 {
 private:
     // Add any member variables or functions you may need here.
+    std::string mDisplayNames;
+    std::string mSkinNames;
     std::string mConfigName;
-    std::string mDisplayName;
     std::string mSkinsPath;
-    std::string mSkinName;
-    GLCD::cDriver * mLcd;
-    cGraphLCDDisplay * mDisplay;
+    tDisplayData mDisplay[GRAPHLCD_MAX_DISPLAYS];
     cExtData * mExtData;
 
-    uint64_t to_timestamp;
-    bool ConnectDisplay();
-    void DisconnectDisplay();
+    int DisplayIndex(std::string);
+    bool ConnectDisplay(unsigned int, unsigned int);
+    void DisconnectDisplay(unsigned int);
 
 public:
     cPluginGraphLCD();
@@ -81,28 +104,33 @@ public:
 
 cPluginGraphLCD::cPluginGraphLCD()
 :   mConfigName(""),
-    mDisplayName(""),
-    mSkinsPath(""),
-    mSkinName(""),
-    mLcd(NULL),
-    mDisplay(NULL)
+    mSkinsPath("")
 {
+    for (unsigned int i = 0; i < GRAPHLCD_MAX_DISPLAYS; i++)
+    {
+        mDisplay[i].Status = EMPTY;
+        mDisplay[i].Name = "";
+        mDisplay[i].Skin = "";
+        mDisplay[i].Driver = NULL;
+        mDisplay[i].Disp = NULL;
+    }
     mExtData = cExtData::GetExtData();
 }
 
 cPluginGraphLCD::~cPluginGraphLCD()
 {
-    DisconnectDisplay();
+    for (unsigned int index = 0; index < GRAPHLCD_MAX_DISPLAYS; index++)
+        DisconnectDisplay(index);
     mExtData->ReleaseExtData();
     mExtData = NULL;
 }
 
 const char * cPluginGraphLCD::CommandLineHelp()
 {
-    return "  -c CFG,   --config=CFG   use CFG as driver config file (default is \"/etc/graphlcd.conf\")\n"
-           "  -d DISP,  --display=DISP use display DISP for output\n"
-           "  -s SKIN,  --skin=SKIN    use skin SKIN (default is \"default\")\n"
-           "  -p PATH,  --skinspath=PATH  use path PATH for skins (default is \"<plugin_config>/skins/\")\n";
+    return "  -c, --config=CFG             use CFG as driver config file (default is \""PLUGIN_GRAPHLCDCONF"\")\n"
+           "  -d, --display=DISP[,DISP]... use display DISP for output or if DISP=none: start w/o any display\n"
+           "  -s, --skin=SKIN[,SKIN]...    use skin SKIN (default is \"default\")\n"
+           "  -p, --skinspath=PATH         use path PATH for skins (default is \"<plugin_config>/skins/\")\n";
 }
 
 bool cPluginGraphLCD::ProcessArgs(int argc, char * argv[])
@@ -127,7 +155,7 @@ bool cPluginGraphLCD::ProcessArgs(int argc, char * argv[])
                 break;
 
             case 'd':
-                mDisplayName = optarg;
+                mDisplayNames = optarg;
                 break;
 
             case 'p':
@@ -135,7 +163,7 @@ bool cPluginGraphLCD::ProcessArgs(int argc, char * argv[])
                 break;
 
             case 's':
-                mSkinName = optarg;
+                mSkinNames = optarg;
                 break;
 
             default:
@@ -155,7 +183,7 @@ bool cPluginGraphLCD::Initialize()
 
     if (mConfigName.length() == 0)
     {
-        mConfigName = kDefaultConfigFile;
+        mConfigName = PLUGIN_GRAPHLCDCONF;
         isyslog("graphlcd plugin: No config file specified, using default (%s).\n", mConfigName.c_str());
     }
     if (GLCD::Config.Load(mConfigName) == false)
@@ -163,82 +191,137 @@ bool cPluginGraphLCD::Initialize()
         esyslog("graphlcd plugin: Error loading config file!\n");
         return false;
     }
-    return ConnectDisplay();
-}
+    if (GLCD::Config.driverConfigs.size() == 0)
+    {
+        esyslog("graphlcd plugin: ERROR: No displays specified in config file!\n");
+        return false;
+    }
+
+    if (mDisplayNames == "none")
+    {
+        isyslog("graphlcd plugin: WARNING: displayname = none, starting with no display connected.\n");
+        return true;
+    }
+
+    if (mDisplayNames.length() == 0)
+    {
+        isyslog("graphlcd plugin: WARNING: No display specified, using first one (%s).\n", GLCD::Config.driverConfigs[0].name.c_str());
+        mDisplayNames = GLCD::Config.driverConfigs[0].name;
+    }
+    
+    size_t pos1, pos2 = -1;
+    unsigned int index = 0;
+    do
+    {
+        pos1 = pos2 + 1;
+        pos2 = mDisplayNames.find(',', pos1);
+        mDisplay[index].Name = mDisplayNames.substr(pos1, (pos2 == std::string::npos) ? pos2 : pos2 - pos1); 
+        mDisplay[index].Status = CONNECT_PENDING;
+        index++;
+    }
+    while (pos2 != std::string::npos && index < GRAPHLCD_MAX_DISPLAYS);
+    
+    pos2 = -1;
+    index = 0;
+    do
+    {
+        pos1 = pos2 + 1;
+        pos2 = mSkinNames.find(',', pos1);
+        mDisplay[index].Skin = mSkinNames.substr(pos1, (pos2 == std::string::npos) ? pos2 : pos2 - pos1); 
+        index++;
+    }
+    while (pos2 != std::string::npos && index < GRAPHLCD_MAX_DISPLAYS);
+    
+    
+    bool connecting = false;
+    for (unsigned int i = 0; i < GRAPHLCD_MAX_DISPLAYS; i++)
+    {
+        if (mDisplay[i].Name.size() > 0)
+        {
+            int displayNumber = DisplayIndex(mDisplay[i].Name);
+            if (displayNumber == -1)
+            {
+                esyslog("graphlcd plugin: ERROR: Specified display %s not found in config file!\n", mDisplay[i].Name.c_str());
+                return false;
+            }
+            
+            if (!connecting)
+            {
+                if (ConnectDisplay(i, (unsigned int) displayNumber) == false)
+                    return false;
+                connecting = true;
+            }
+        }
+    }
+    return true;
+}   
 
 bool cPluginGraphLCD::Start()
 {
     return true;
 }
 
-bool cPluginGraphLCD::ConnectDisplay()
+int cPluginGraphLCD::DisplayIndex(std::string displayName)
 {
-    unsigned int displayNumber = 0;
-    const char* cfgDir;
-
-    if (GLCD::Config.driverConfigs.size() > 0)
+    unsigned int displayNumber;
+    for (displayNumber = 0; displayNumber < GLCD::Config.driverConfigs.size(); displayNumber++)
     {
-        if (mDisplayName.length() > 0)
-        {
-            for (displayNumber = 0; displayNumber < GLCD::Config.driverConfigs.size(); displayNumber++)
-            {
-                if (GLCD::Config.driverConfigs[displayNumber].name == mDisplayName)
-                    break;
-            }
-            if (displayNumber == GLCD::Config.driverConfigs.size())
-            {
-                esyslog("graphlcd plugin: ERROR: Specified display %s not found in config file!\n", mDisplayName.c_str());
-                return false;
-            }
-        }
-        else
-        {
-            isyslog("graphlcd plugin: WARNING: No display specified, using first one (%s).\n", GLCD::Config.driverConfigs[0].name.c_str());
-            displayNumber = 0;
-            mDisplayName = GLCD::Config.driverConfigs[0].name;
-        }
+        if (GLCD::Config.driverConfigs[displayNumber].name == displayName)
+            break;
     }
-    else
-    {
-        esyslog("graphlcd plugin: ERROR: No displays specified in config file!\n");
-        return false;
-    }
+    return (displayNumber == GLCD::Config.driverConfigs.size()) ? -1 : (int) displayNumber;
+}
 
-    mLcd = GLCD::CreateDriver(GLCD::Config.driverConfigs[displayNumber].id, &GLCD::Config.driverConfigs[displayNumber]);
-    if (!mLcd)
+bool cPluginGraphLCD::ConnectDisplay(unsigned int index, unsigned int displayNumber)
+{
+    const char *cfgDir;
+
+    mDisplay[index].Driver = GLCD::CreateDriver(GLCD::Config.driverConfigs[displayNumber].id, &GLCD::Config.driverConfigs[displayNumber]);
+    if (!mDisplay[index].Driver)
     {
-        esyslog("graphlcd plugin: ERROR: Failed creating display object %s\n", mDisplayName.c_str());
+        esyslog("graphlcd plugin: ERROR: Failed creating display object %s\n", mDisplay[index].Name.c_str());
+        mDisplay[index].Status = DEAD;
         return false;
     }
 
     cfgDir = ConfigDirectory(kPluginName);
-    if (!cfgDir)
+    if (!cfgDir) {
+        mDisplay[index].Status = DEAD;
         return false;
+    }
 
-    mDisplay = new cGraphLCDDisplay();
-    if (!mDisplay)
+    mDisplay[index].Disp = new cGraphLCDDisplay();
+    if (!mDisplay[index].Disp) {
+        mDisplay[index].Status = DEAD;
         return false;
-    if (mSkinName == "")
-        mSkinName = "default";
-    if (!mDisplay->Initialise(mLcd, cfgDir, mSkinsPath, mSkinName))
+    }
+    if (mDisplay[index].Skin == "")
+        mDisplay[index].Skin = "default";
+    if (!mDisplay[index].Disp->Initialise(mDisplay[index].Driver, cfgDir, mSkinsPath, mDisplay[index].Skin)) {
+        mDisplay[index].Status = DEAD;
         return false;
+    }
 
     /* if plugin was deactivated -> reactivate */
     GraphLCDSetup.PluginActive = 1;
-    dsyslog("graphlcd plugin: init timeout waiting for display thread to get ready");
-    to_timestamp = cTimeMs::Now();
-
-    return true;
+    dsyslog("graphlcd plugin: init timeout waiting for display %s thread to get ready", mDisplay[index].Name.c_str());
+    mDisplay[index].to_timestamp = cTimeMs::Now();
+    mDisplay[index].Status = CONNECTING;
+    
+    return true;    
 }
 
-void cPluginGraphLCD::DisconnectDisplay()
+void cPluginGraphLCD::DisconnectDisplay(unsigned int index)
 {
-    delete mDisplay;
-    mDisplay = NULL;
-    if (mLcd)
-        mLcd->DeInit();
-    delete mLcd;
-    mLcd = NULL;
+    if (mDisplay[index].Disp != NULL)
+        delete mDisplay[index].Disp;
+    mDisplay[index].Disp = NULL;
+    if (mDisplay[index].Driver != NULL) {
+        mDisplay[index].Driver->DeInit();
+        delete mDisplay[index].Driver;
+    }
+    mDisplay[index].Driver = NULL;
+    mDisplay[index].Status = DISCONNECTED;
 }
 
 void cPluginGraphLCD::Housekeeping()
@@ -247,32 +330,40 @@ void cPluginGraphLCD::Housekeeping()
 
 void cPluginGraphLCD::MainThreadHook()
 {
-    if (mDisplay)
+    bool wait = false;
+    int nextconnect = -1;
+    for (unsigned int index = 0; index < GRAPHLCD_MAX_DISPLAYS; index++)
     {
-        if (mDisplay->Active())
+        if (mDisplay[index].Status == CONNECTING)
         {
-            if (to_timestamp != (uint64_t)0)
+            if (mDisplay[index].Disp->Active())
             {
-                dsyslog("graphlcd plugin: display thread is ready");
-                to_timestamp = (uint64_t)0;
+                dsyslog("graphlcd plugin: display thread for %s is ready", mDisplay[index].Name.c_str());
+                mDisplay[index].Status = CONNECTED;
             }
-            mDisplay->Tick();
-        }
-        else 
-        {
-            if (to_timestamp != (uint64_t)0)
+            else
             {
-                if ( (cTimeMs::Now() - to_timestamp) > (uint64_t)10000)
+                if ( (cTimeMs::Now() - mDisplay[index].to_timestamp) > (uint64_t) 10000)
                 {
-                    dsyslog ("graphlcd plugin: timeout while waiting for display thread");
+                    dsyslog ("graphlcd plugin: timeout while waiting for display thread %s", mDisplay[index].Name.c_str());
                     /* no activity after 10 secs: display is unusable */
-                    GraphLCDSetup.PluginActive = 0;
-                    to_timestamp = (uint64_t)0;
-                    DisconnectDisplay();
+                    //GraphLCDSetup.PluginActive = 0;
+                    DisconnectDisplay(index);
                 }
+                else
+                    wait = true;
             }
         }
+        if (nextconnect == -1 && mDisplay[index].Status == CONNECT_PENDING)
+            nextconnect = index;
+            
+        if (mDisplay[index].Status == CONNECTED)
+            mDisplay[index].Disp->Tick();
     }
+    
+    if (nextconnect != -1 && !wait)
+        if (ConnectDisplay(nextconnect, (unsigned int) DisplayIndex(mDisplay[nextconnect].Name)) == false)
+            esyslog("graphlcd plugin: ERROR: failed connecting display %s\n", mDisplay[nextconnect].Name.c_str());
 }
 
 const char **cPluginGraphLCD::SVDRPHelpPages(void)
@@ -282,12 +373,12 @@ const char **cPluginGraphLCD::SVDRPHelpPages(void)
         "UPD   Update Display.",
         "OFF   Switch Plugin off.",
         "ON   Switch Plugin on.",
-        "SET <key> <value>   Set a key=value entry.",
-        "SETEXP <exp> <key> <value>   Set a key=value entry which expires after <exp> secs.",
-        "UNSET <key>   Unset (clear) entry <key>.",
-        "GET <key>   Get value assigned to key.",
-        "CONNECT <displayname> [<skin>]   Connect given display.",
-        "DISCONN    Disconnect currently connected display.",
+        "SET <key> <value> [<display>]  Set a key=value entry.",
+        "SETEXP <exp> <key> <value> [<display>]  Set a key=value entry which expires after <exp> secs.",
+        "UNSET <key> [<display>]  Unset (clear) entry <key>.",
+        "GET <key> [<display>]  Get value assigned to key.",
+        "CONNECT [<display> [<skin>]]   Connect given display or reconnect all displays if called w/o parameter.",
+        "DISCONN [<display>]   Disconnect given display or all displays if called w/o parameter.",
         NULL
     };
     return HelpPages;
@@ -295,24 +386,19 @@ const char **cPluginGraphLCD::SVDRPHelpPages(void)
 
 cString cPluginGraphLCD::SVDRPCommand(const char *Command, const char *Option, int &ReplyCode)
 {
-    std::string option = Option;
-    size_t firstpos = std::string::npos;
-    size_t secondpos = std::string::npos;
-    firstpos = option.find_first_of(' ');
-    if (firstpos != std::string::npos) {
-        // remove extra spaces
-        while ( ((firstpos+1) < option.length()) && (option[firstpos+1] == ' ') ) {
-            option.erase(firstpos+1, 1);
+    std::vector <std::string> options;
+
+    // split option-string
+    if (trim(Option).size() > 0) {
+        std::string options_raw = trim(Option);
+        size_t firstpos = std::string::npos;
+        while ( (firstpos = options_raw.find_first_of(' ')) != std::string::npos  ) {
+            options.push_back( trim(options_raw.substr(0, firstpos)) );
+            options_raw = trim(options_raw.substr(firstpos+1));
         }
-        secondpos = option.find_first_of(' ', firstpos+1);
-        if (firstpos != std::string::npos) {
-            // remove extra spaces
-            while ( ((secondpos+1) < option.length()) && (option[secondpos+1] == ' ') ) {
-                option.erase(secondpos+1, 1);
-           }
-        }
+        if (trim(options_raw).size() > 0)
+            options.push_back( trim(options_raw) );
     }
-    
 
     if (strcasecmp(Command, "OFF") == 0) {
         GraphLCDSetup.PluginActive = 0;
@@ -320,96 +406,211 @@ cString cPluginGraphLCD::SVDRPCommand(const char *Command, const char *Option, i
     } else
     if (strcasecmp(Command, "ON") == 0) {
         GraphLCDSetup.PluginActive = 1;
-        if (mDisplay != NULL)
-            mDisplay->Update();
+        for (unsigned int index = 0; index < GRAPHLCD_MAX_DISPLAYS; index++)
+        {
+            if (mDisplay[index].Status == CONNECTED)
+                mDisplay[index].Disp->Update();
+        }
         return "GraphLCD Plugin switched on.";
     } else
-    if (strcasecmp(Command, "CONNECT") == 0) {        
-        if (option.size() == 0) {
-            return "CONNECT requires at least one parameter: CONNECT <displayname> [<skin>].";
-        } else if (firstpos == std::string::npos && option.size() > 0) {
-            mDisplayName = option;
-        } else {
-            mDisplayName = option.substr(0, firstpos);
-            mSkinName = option.substr(firstpos+1);
+    if (strcasecmp(Command, "CONNECT") == 0) {
+        if (options.size() >= 1 && options.size() <= 2) {
+            std::string name;
+            
+            name = options[0];
+            
+            int index = -1;
+            for (unsigned int i = 0; i < GRAPHLCD_MAX_DISPLAYS; i++) {
+                if (mDisplay[i].Name == name) {
+                    index = i;
+                    break;
+                }
+                if (index == -1 && mDisplay[i].Disp == NULL)
+                    index = i;
+            }
+
+            if (index == -1)
+                return "CONNECT error: max number of displays already connected.";
+
+            int displayNumber = DisplayIndex(name);
+            if (displayNumber < 0)
+                return "CONNECT errror: display not in config file.";
+
+            mDisplay[index].Name = name;
+            mDisplay[index].Skin = (options.size() == 2)
+                                   ? options[1]
+                                   : ( 
+                                       (mDisplay[index].Skin != "")
+                                       ? mDisplay[index].Skin
+                                       : "default"
+                                     );
+            
+            std::string retval = "Display "; retval.append(name); retval.append(": ");
+            if (mDisplay[index].Status == CONNECTED) {
+                DisconnectDisplay(index);
+                retval.append("RE");
+            }
+            
+            if (ConnectDisplay(index, (unsigned int) displayNumber) == true) {
+                for (unsigned int count = 0; count < 100; count++) {
+                    cCondWait::SleepMs(100);
+                    if (mDisplay[index].Disp->Active()) {
+                        dsyslog ("graphlcd plugin: display thread ready");
+                        mDisplay[index].Status = CONNECTED;
+                        break;
+                    }
+                }
+                if (mDisplay[index].Status != CONNECTED)
+                    dsyslog ("graphlcd plugin: timeout while waiting for display thread");
+            }
+
+            retval.append((mDisplay[index].Status == CONNECTED) ? "CONNECT ok." : "CONNECT error.");
+            return retval.c_str();
+        } else if (options.size() == 0) {
+            int count_ok = 0;
+            int count_fail = 0;
+
+            for (unsigned int i = 0; i < GRAPHLCD_MAX_DISPLAYS; i++) {
+                if (mDisplay[i].Name != "") {
+
+                    if (mDisplay[i].Skin == "") // should never occur, only for paranoia ...
+                        mDisplay[i].Skin = "default";
+
+                    int displayNumber = DisplayIndex(mDisplay[i].Name);
+                    if (mDisplay[i].Status == CONNECTED) {
+                        DisconnectDisplay(i);
+                    }
+                    
+                    if (ConnectDisplay(i, (unsigned int) displayNumber) == true) {
+                        for (unsigned int count = 0; count < 100; count++) {
+                            cCondWait::SleepMs(100);
+                            if (mDisplay[i].Disp->Active()) {
+                                dsyslog ("graphlcd plugin: display thread ready for '%s'", mDisplay[i].Name.c_str());
+                                mDisplay[i].Status = CONNECTED;
+                                break;
+                            }
+                        }
+                        if (mDisplay[i].Status != CONNECTED)
+                            dsyslog ("graphlcd plugin: timeout while waiting for display thread '%s'", mDisplay[i].Name.c_str());
+                    }
+
+                    if (mDisplay[i].Status != CONNECTED) {
+                        dsyslog ("graphlcd plugin: timeout while waiting for display thread");
+                        count_fail ++;
+                    } else {
+                        count_ok ++;
+                    }     
+                }
+            }
+            char buf[25];
+            std::string retval = "RECONNECT status: ";
+            snprintf(buf, 24, "OK = %1d, FAILED = %1d", count_ok, count_fail);
+            retval += buf;
+            return retval.c_str();
         }
-          
-        if (mDisplay != NULL)
-            DisconnectDisplay();
-        std::string retval = "Display "; retval.append(mDisplayName);
-        retval.append(ConnectDisplay() ? ": CONNECT ok." : ": CONNECT error");
-        return retval.c_str();
+        return "CONNECT requires up to three parameters: CONNECT [<display> [<skin>]].";
     } else
     if (strcasecmp(Command, "DISCONN") == 0 || strcasecmp(Command, "DISCONNECT") == 0 ) {
-        if (mDisplay != NULL)
-            DisconnectDisplay();
-        return "DISCONNect ok";
-    } else // following commands are valid only if mDisplay is valid
-    if (mDisplay != NULL) {
-        if (strcasecmp(Command, "CLS") == 0) {
-            if (GraphLCDSetup.PluginActive == 1) {
-                return "Error: Plugin is active.";
-            } else {
-                mDisplay->Clear();
-                return "GraphLCD cleared.";
-            };
-        } else
-        if (strcasecmp(Command, "UPD") == 0) {
-            if (GraphLCDSetup.PluginActive == 0) {
-                return "Error: Plugin is not active.";
-            } else {
-                mDisplay->Update();
-                return "GraphLCD updated.";
-            };
-        } else
-        if (strcasecmp(Command, "SET") == 0) {
-            if (firstpos != std::string::npos) {
-                std::string key = option.substr(0, firstpos);
-                if ( isalpha(key[0]) ) { 
-                    mExtData->Set(key, option.substr(firstpos+1));
-                    return "SET ok";
-                }
+        if ( options.size() >= 0 && options.size() < 2 ) {
+            std::string name = "";
+            bool disconn_all = true;
+            if (options.size() != 0) {
+                disconn_all = false;
+                name = options[0];
             }
-            return "SET requires two parameters: SET <key> <value>.";
-        } else
-        if (strcasecmp(Command, "SETEXP") == 0) {
-            if (secondpos != std::string::npos) {
-                std::string key = option.substr(firstpos+1, secondpos-firstpos-1);
-                std::string value = option.substr(secondpos+1);
-                if ( isalpha(key[0]) && isdigit(option[0]) ) { 
-                    uint32_t expsec = (uint32_t)strtoul( option.substr(0, firstpos).c_str(), NULL, 10);
-                    mExtData->Set( key, value, expsec );
-                    return "SETEXP ok";
-                }
+
+            for (unsigned int index = 0; index < GRAPHLCD_MAX_DISPLAYS; index++) {
+                if (mDisplay[index].Status == CONNECTED && (disconn_all || name == mDisplay[index].Name))
+                    DisconnectDisplay(index);
             }
-            return "SETEXP requires three parameters: SETEXP <exp> <key> <value>.";
-        } else
-        if (strcasecmp(Command, "UNSET") == 0) {
-            if (firstpos == std::string::npos) {
-                mExtData->Unset( option );
-                return "UNSET ok";
-            } else {
-                return "UNSET requires exactly one parameter: UNSET <key>.";
-            }
-        } else
-        if (strcasecmp(Command, "GET") == 0) {
-            if (firstpos == std::string::npos) {
-                std::string res = mExtData->Get( option );
-                std::string retval = "GET "; retval.append(option); retval.append(": "); 
-                if (res != "" ) {
-                    retval.append(res);
-                } else {
-                    retval.append("(null)");
-                }
-                return retval.c_str();
-            } else {
-                return "GET requires exactly one parameter: GET <key>.";
-            }
-        } else {  // command not supported
-          return NULL;
+            return "DISCONNect ok.";
         }
-    } else {
-        return "Error: no display connected";
+        return "DISCONNect requires zero or one parameters: DISCONNect [<display>].";
+    } else { // following commands are valid only if at least one display is connected
+        unsigned int index;
+        for (index = 0; index < GRAPHLCD_MAX_DISPLAYS; index++)
+            if (mDisplay[index].Status == CONNECTED)
+                break;
+        if (index == GRAPHLCD_MAX_DISPLAYS) {
+            return "Error: no display connected";
+        } else {
+            if (strcasecmp(Command, "CLS") == 0) {
+                if (GraphLCDSetup.PluginActive == 1) {
+                    return "Error: Plugin is active.";
+                } else {
+                    for (unsigned int index = 0; index < GRAPHLCD_MAX_DISPLAYS; index++)
+                        if (mDisplay[index].Status == CONNECTED)
+                            mDisplay[index].Disp->Clear();
+                    return "GraphLCD cleared.";
+                };
+            } else
+            if (strcasecmp(Command, "UPD") == 0) {
+                if (GraphLCDSetup.PluginActive == 0) {
+                    return "Error: Plugin is not active.";
+                } else {
+                    for (unsigned int index = 0; index < GRAPHLCD_MAX_DISPLAYS; index++)
+                        if (mDisplay[index].Status == CONNECTED)
+                            mDisplay[index].Disp->Update();
+                    return "GraphLCD updated.";
+                };
+            } else
+            if (strcasecmp(Command, "SET") == 0) {
+                if (options.size() == 2 || options.size() == 3) {
+                    std::string key = options[0];
+                    if ( isalpha(key[0]) ) {
+                        for (unsigned int index = 0; index < GRAPHLCD_MAX_DISPLAYS; index++)
+                            if (mDisplay[index].Status == CONNECTED)
+                                mExtData->Set(key, options[1], ((options.size() == 3) ? options[2] : "") );
+                        return "SET ok";
+                    }
+                    return "SET not ok";
+                }
+                return "SET requires two or three parameters: SET <key> <value> [<display>].";
+            } else
+            if (strcasecmp(Command, "SETEXP") == 0) {
+                if (options.size() == 3 || options.size() == 4) {
+                    std::string exp = options[0];
+                    std::string key = options[1];
+                    std::string value = options[2];
+                    if ( isalpha(key[0]) && isdigit(exp[0]) ) { 
+                        uint32_t expsec = (uint32_t)strtoul( exp.c_str(), NULL, 10);
+                        for (unsigned int index = 0; index < GRAPHLCD_MAX_DISPLAYS; index++)
+                            if (mDisplay[index].Status == CONNECTED)
+                                mExtData->Set( key, value, ((options.size() == 4) ? options[3] : ""), expsec );
+                        return "SETEXP ok";
+                    }
+                    return "SETEXP not ok";
+                }
+                return "SETEXP requires three or four parameters: SETEXP <exp> <key> <value> [<display>].";
+            } else
+            if (strcasecmp(Command, "UNSET") == 0) {
+                if (options.size() == 1 || options.size() == 2) {
+                    for (unsigned int index = 0; index < GRAPHLCD_MAX_DISPLAYS; index++)
+                        if (mDisplay[index].Status == CONNECTED)
+                            mExtData->Unset( options[0], ((options.size() == 2) ? options[1] : "") );
+                    return "UNSET ok";
+                }
+                return "UNSET requires exactly one parameter: UNSET <key> [<display>].";
+            } else
+            if (strcasecmp(Command, "GET") == 0) {
+                if (options.size() == 1 || options.size() == 2) {
+                    std::string res = "";
+                    for (unsigned int index = 0; res == "" && index < GRAPHLCD_MAX_DISPLAYS; index++)
+                        if (mDisplay[index].Status == CONNECTED)
+                            res = mExtData->Get( options[0], ((options.size() == 2) ? options[1] : "") );
+                    std::string retval = "GET "; retval.append(options[0]); retval.append(": "); 
+                    if (res != "" ) {
+                        retval.append(res);
+                    } else {
+                        retval.append("(null)");
+                    }
+                    return retval.c_str();
+                }
+                return "GET requires exactly one or two parameters: GET <key> [<display>].";
+            } else {  // command not supported
+                return NULL;
+            }
+        }
     }
 }
 

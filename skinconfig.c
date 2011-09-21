@@ -739,7 +739,7 @@ GLCD::cType cGraphLCDSkinConfig::GetToken(const GLCD::tSkinToken & Token)
 
                 cExtData * extData = cExtData::GetExtData();
                 if (extData)
-                    return extData->IsSet( Token.Attrib.Text );
+                    return extData->IsSet( Token.Attrib.Text, mDisplay->GetDriver()->ConfigName() );
                 return false;
             }
             break;
@@ -749,7 +749,7 @@ GLCD::cType cGraphLCDSkinConfig::GetToken(const GLCD::tSkinToken & Token)
 
                 cExtData * extData = cExtData::GetExtData();
                 if (extData)
-                    return extData->Get( Token.Attrib.Text );
+                    return extData->Get( Token.Attrib.Text, mDisplay->GetDriver()->ConfigName() );
                 return false;
             }
             break;

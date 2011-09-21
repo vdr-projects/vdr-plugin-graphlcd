@@ -37,10 +37,10 @@ protected:
     static void ReleaseExtData(void);
 
 public:    
-    bool Set(std::string key, std::string value, uint32_t expire = 0);
-    bool Unset(std::string key);
-    bool IsSet(std::string key);
-    std::string Get(std::string key);
+    bool Set(const std::string & key, const std::string & value, const std::string & scope, uint32_t expire = 0 );
+    bool Unset(const std::string & key, const std::string & scope);
+    bool IsSet(const std::string & key, const std::string & scope);
+    std::string Get(const std::string & key, const std::string & scope);
 };
 
 #endif

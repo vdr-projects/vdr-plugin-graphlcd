@@ -269,7 +269,6 @@ void cGraphLCDDisplay::Action(void)
                 mUpdate = true;
             }
 
-
             // external service changed (check each 1/10th second)
             if ( (currTimeMs/100 != mLastTimeMs/100) && mService->NeedsUpdate(currTimeMs))
             {

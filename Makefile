@@ -16,6 +16,9 @@ HAVE_FREETYPE2 = 1
 # either define this setting here or in $VDRDIR/Make.config or in $VDRDIR/Make.global
 # HAVE_VALID_FEMON = 1
 
+# defines the location of the graphlcd.conf file. if not defined, location = "/etc/graphlcd.conf"
+#PLUGIN_GRAPHLCDCONF = "/usr/local/etc/graphlcd.conf"
+
 ### The version number of this plugin (taken from the main source file):
 
 VERSION = $(shell grep 'static const char \*VERSION *=' plugin.c | awk '{ print $$6 }' | sed -e 's/[";]//g')
@@ -72,6 +75,11 @@ endif
 # if a valid and/or fixed femon-plugin is available
 ifdef HAVE_VALID_FEMON
     DEFINES += -DGRAPHLCD_SERVICE_FEMON_VALID
+endif
+
+# if a valid and/or fixed femon-plugin is available
+ifdef PLUGIN_GRAPHLCDCONF
+    DEFINES += -DPLUGIN_GRAPHLCDCONF='${PLUGIN_GRAPHLCDCONF}'
 endif
 
 
