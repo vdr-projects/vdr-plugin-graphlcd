@@ -76,6 +76,7 @@ private:
     std::string mSkinNames;
     std::string mConfigName;
     std::string mSkinsPath;
+    std::string mConfigDir;
     tDisplayData mDisplay[GRAPHLCD_MAX_DISPLAYS];
     cExtData * mExtData;
 
@@ -230,9 +231,15 @@ bool cPluginGraphLCD::Initialize()
         mDisplay[index].Skin = mSkinNames.substr(pos1, (pos2 == std::string::npos) ? pos2 : pos2 - pos1); 
         index++;
     }
-    while (pos2 != std::string::npos && index < GRAPHLCD_MAX_DISPLAYS);
-    
-    
+    while (pos2 != std::string::npos && index < GRAPHLCD_MAX_DISPLAYS);    
+
+    const char* tempConfigDir = ConfigDirectory(kPluginName);
+    if (!tempConfigDir) {
+        return false;
+    } else {
+        mConfigDir = tempConfigDir;
+    }
+
     bool connecting = false;
     for (unsigned int i = 0; i < GRAPHLCD_MAX_DISPLAYS; i++)
     {
@@ -274,18 +281,10 @@ int cPluginGraphLCD::DisplayIndex(std::string displayName)
 
 bool cPluginGraphLCD::ConnectDisplay(unsigned int index, unsigned int displayNumber)
 {
-    const char *cfgDir;
-
     mDisplay[index].Driver = GLCD::CreateDriver(GLCD::Config.driverConfigs[displayNumber].id, &GLCD::Config.driverConfigs[displayNumber]);
     if (!mDisplay[index].Driver)
     {
         esyslog("graphlcd plugin: ERROR: Failed creating display object %s\n", mDisplay[index].Name.c_str());
-        mDisplay[index].Status = DEAD;
-        return false;
-    }
-
-    cfgDir = ConfigDirectory(kPluginName);
-    if (!cfgDir) {
         mDisplay[index].Status = DEAD;
         return false;
     }
@@ -297,7 +296,7 @@ bool cPluginGraphLCD::ConnectDisplay(unsigned int index, unsigned int displayNum
     }
     if (mDisplay[index].Skin == "")
         mDisplay[index].Skin = "default";
-    if (!mDisplay[index].Disp->Initialise(mDisplay[index].Driver, cfgDir, mSkinsPath, mDisplay[index].Skin)) {
+    if (!mDisplay[index].Disp->Initialise(mDisplay[index].Driver, mConfigDir.c_str(), mSkinsPath, mDisplay[index].Skin)) {
         mDisplay[index].Status = DEAD;
         return false;
     }
@@ -508,7 +507,7 @@ cString cPluginGraphLCD::SVDRPCommand(const char *Command, const char *Option, i
             retval += buf;
             return retval.c_str();
         }
-        return "CONNECT requires up to three parameters: CONNECT [<display> [<skin>]].";
+        return "CONNECT requires up to two parameters: CONNECT [<display> [<skin>]].";
     } else
     if (strcasecmp(Command, "DISCONN") == 0 || strcasecmp(Command, "DISCONNECT") == 0 ) {
         if ( options.size() >= 0 && options.size() < 2 ) {
