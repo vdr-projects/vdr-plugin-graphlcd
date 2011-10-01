@@ -92,6 +92,7 @@ private:
     cGraphLCDState * mGraphLCDState;
 
     bool mShowVolume;
+    bool mShowAudio;
 
     void UpdateIn(uint64_t msec);
 

@@ -84,6 +84,14 @@ typedef enum _eTokenId
     tokVolumeIsMute,
     tokPrivateVolumeEnd,
 
+    // audio display
+    tokPrivateAudioStart,
+    tokAudioTrackItem,
+    tokAudioTrackCurrent,
+    tokIsAudioTrackCurrent,
+    tokAudioChannel,
+    tokPrivateAudioEnd,
+
     tokPrivateReplayStart,
     tokReplayTitle,
     tokReplayPositionIndex,
@@ -218,6 +226,13 @@ static const std::string Tokens[tokCountToken] =
     "IsMute",
     "VolumeIsMute",
     "privateVolumeEnd",
+
+    "privateAudioStart",
+    "AudioTrackItem",
+    "AudioTrackCurrent",
+    "IsAudioTrackCurrent",
+    "AudioChannel",
+    "privateAudioEnd",
 
     "privateReplayStart",
     "ReplayTitle",
@@ -494,6 +509,57 @@ GLCD::cType cGraphLCDSkinConfig::GetToken(const GLCD::tSkinToken & Token)
             case tokIsMute:
             case tokVolumeIsMute:
                 return volume.value == 0;
+            default:
+                break;
+        }
+    }
+    else if (Token.Id > tokPrivateAudioStart && Token.Id < tokPrivateAudioEnd)
+    {
+        tAudioState audio = mState->GetAudioState();
+        switch (Token.Id)
+        {
+            case tokAudioTrackItem:
+            case tokAudioTrackCurrent:
+            case tokIsAudioTrackCurrent:
+            {
+                if (audio.tracks.size() == 0
+                  || audio.currentTrack == -1)
+                {
+                    return false;
+                }
+                int maxItems = Token.MaxItems;
+                if (maxItems > (int) audio.tracks.size())
+                    maxItems = audio.tracks.size();
+                int currentIndex = maxItems / 2;
+                if (audio.currentTrack < currentIndex)
+                    currentIndex = audio.currentTrack;
+                int topIndex = audio.currentTrack - currentIndex;
+                if ((topIndex + maxItems) > (int) audio.tracks.size())
+                {
+                    currentIndex += (topIndex + maxItems) - audio.tracks.size();
+                    topIndex = audio.currentTrack - currentIndex;
+                }
+                if (Token.Id == tokAudioTrackItem)
+                {
+                    if (Token.Index < maxItems && Token.Index != currentIndex)
+                        return audio.tracks[topIndex + Token.Index];
+                }
+                else if (Token.Id == tokAudioTrackCurrent)
+                {
+                    if (Token.Index < maxItems && Token.Index == currentIndex)
+                        return audio.tracks[topIndex + Token.Index];
+                    else if (Token.Index < 0) // outside of <list/>: return last MenuCurrent
+                        return audio.tracks[topIndex];
+                }
+                else if (Token.Id == tokIsAudioTrackCurrent)
+                {
+                    if (Token.Index < maxItems && Token.Index == currentIndex)
+                        return true;
+                }
+                return false;
+            }
+            case tokAudioChannel:
+                return audio.currentChannel;
             default:
                 break;
         }

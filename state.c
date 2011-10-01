@@ -79,6 +79,10 @@ cGraphLCDState::cGraphLCDState(cGraphLCDDisplay * Display)
     mVolume.value = -1;
     mVolume.lastChange = 0;
 
+    mAudio.currentTrack = -1;
+    mAudio.currentChannel = -1;
+    mAudio.lastChange = 0;
+
     SetChannel(cDevice::CurrentChannel());
 }
 
@@ -359,6 +363,32 @@ void cGraphLCDState::SetVolume(int Volume, bool Absolute)
     }
 }
 
+void cGraphLCDState::SetAudioTrack(int Index, const char * const *Tracks) {
+    if (GraphLCDSetup.PluginActive) {
+        mutex.Lock();
+        mAudio.currentTrack = Index;
+        mAudio.tracks.clear();
+        int i = 0;
+        while (Tracks[i]) {
+            mAudio.tracks.push_back(Tracks[i]);
+            i++;
+        }
+        mAudio.lastChange = cTimeMs::Now();
+        mutex.Unlock();
+        //mDisplay->Update();  -> will be done in SetAudioChannel
+    }
+}
+
+void cGraphLCDState::SetAudioChannel(int AudioChannel) {
+    if (GraphLCDSetup.PluginActive) {
+        mutex.Lock();
+        mAudio.currentChannel = AudioChannel;
+        mAudio.lastChange = cTimeMs::Now();
+        mutex.Unlock();
+        mDisplay->Update();
+    }
+}
+
 void cGraphLCDState::Tick()
 {
     //printf("graphlcd plugin: cGraphLCDState::Tick\n");
@@ -409,6 +439,11 @@ void cGraphLCDState::OsdClear()
         mOsd.textItem = "";
         mOsd.currentTextItemScroll = 0;
         mOsd.currentTextItemScrollReset = false;
+
+        mAudio.currentTrack = -1;
+        mAudio.currentChannel = -1;
+        mAudio.tracks.clear();
+        mAudio.lastChange = 0;
 
         mutex.Unlock();
         mDisplay->SetMenuClear();
@@ -887,6 +922,17 @@ tVolumeState cGraphLCDState::GetVolumeState()
 
     mutex.Lock();
     ret = mVolume;
+    mutex.Unlock();
+
+    return ret;
+}
+
+tAudioState cGraphLCDState::GetAudioState()
+{
+    tAudioState ret;
+
+    mutex.Lock();
+    ret = mAudio;
     mutex.Unlock();
 
     return ret;

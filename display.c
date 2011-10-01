@@ -50,6 +50,7 @@ cGraphLCDDisplay::cGraphLCDDisplay()
     LastTimeDisplayMode = 0;
 
     mShowVolume = false;
+    mShowAudio = false;
 
     nCurrentBrightness = -1;
     LastTimeBrightness = 0;
@@ -226,6 +227,35 @@ void cGraphLCDDisplay::Action(void)
                 }
             }
 
+            if (GraphLCDSetup.ShowMenu)
+            {
+                tAudioState audio;
+                audio = mGraphLCDState->GetAudioState();
+
+                if (audio.tracks.size() == 0) {
+                    mShowAudio = false;
+                } else
+                if (audio.lastChange > 0)
+                {
+                    if (!mShowAudio)
+                    {
+                        if (currTimeMs - audio.lastChange < 5000)
+                        {
+                            mShowAudio = true;
+                            mUpdate = true;
+                        }
+                    }
+                    else
+                    {
+                        if (currTimeMs - audio.lastChange > 5000)
+                        {
+                            mShowAudio = false;
+                            mUpdate = true;
+                        }
+                    }
+                }
+            }
+
             /* display mode (normal or interactive): reset after 10 secs if not normal */
             if ( (mDisplayMode != DisplayModeNormal) && ( (uint32_t)(currTimeMs - LastTimeDisplayMode) > (uint32_t)(10000)) ) {
                 mDisplayMode = DisplayModeNormal;
@@ -259,6 +289,7 @@ void cGraphLCDDisplay::Action(void)
             bool bActive = bBrightnessActive
                    || (mState != StateNormal)
                    || (GraphLCDSetup.ShowVolume && mShowVolume)
+                   || (GraphLCDSetup.ShowMenu && mShowAudio)
                    || (GraphLCDSetup.ShowMessages && mGraphLCDState->ShowMessage())
                    || (GraphLCDSetup.BrightnessDelay == 900);
 
@@ -321,6 +352,12 @@ void cGraphLCDDisplay::Action(void)
                 if (mShowVolume)
                 {
                     display = mSkin->GetDisplay("volume");
+                    if (display)
+                        display->Render(mScreen);
+                }
+                if (mShowAudio)
+                {
+                    display = mSkin->GetDisplay("audio");
                     if (display)
                         display->Render(mScreen);
                 }
@@ -455,6 +492,7 @@ void cGraphLCDDisplay::SetBrightness()
     bool bActive = bBrightnessActive
                    || (mState != StateNormal)
                    || (GraphLCDSetup.ShowVolume && mShowVolume)
+                   || (GraphLCDSetup.ShowMenu && mShowAudio)
                    || (GraphLCDSetup.ShowMessages && mGraphLCDState->ShowMessage())
                    || (GraphLCDSetup.BrightnessDelay == 900);
     if (bActive)

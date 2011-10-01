@@ -24,7 +24,7 @@
   <font id="FontMenuButton"    url="ft2:VeraBd.ttf:9"/>
   <font id="FontTitle"         url="ft2:VeraBd.ttf:20" />
   <font id="FontTitleSmall"    url="ft2:Vera.ttf:14" />
-  <font id="FontInfoSmall"     url="ft2:VeraBd.ttf:12"/>
+  <font id="FontInfoSmall"     url="ft2:VeraBd.ttf:10"/>
   <font id="FontInfoSmall2"    url="ft2:Vera.ttf:10"/>
   <font id="FontTimes"         url="ft2:Vera.ttf:14"/>
 
@@ -63,6 +63,13 @@
     <variable id="ColVolumeBG"        value="'black'"            default="#ColMonoBG" />
     <variable id="ColVolumeFG"        value="'white'"            default="#ColMonoFG" />
     <variable id="ColVolumeBar"       value="'green'"            default="#ColMonoFG" />
+    <!-- display id audio -->
+    <variable id="ColAudioBG"         value="'0x77300060'"       default="#ColMonoBG" />
+    <variable id="ColAudioHeaderBG"   value="'green'"            default="#ColMonoFG" />
+    <variable id="ColAudioHeaderFG"   value="'black'"            default="#ColMonoBG" />
+    <variable id="ColAudioEntry"      value="'white'"            default="#ColMonoFG" />
+    <variable id="ColAudioEntryCurr"  value="'black'"            default="#ColMonoBG" />
+    <variable id="ColAudioSelected"   value="'cyan'"             default="#ColMonoFG" />
     <!-- display id message -->
     <variable id="ColMessageBG"       value="'0xAA000000'"       default="#ColMonoBG" />
     <variable id="ColMessageFG"       value="'red'"              default="#ColMonoFG" />
@@ -192,8 +199,8 @@
                                      default="add(#LogoSymbY,#LogoSymbH,#PaddingH)" />
     <!--variable id="PresentTextY"        value="sub(sub(#RecordingsLineY,FontLineHeight('FontInfo')),2)"/-->
     
-    <variable id="ProginfoLines"       value="5" condition="gt(sub({ScreenHeight},#ProginfoPlaceY,1),add(FontLineHeight('FontTitle'),FontLineHeight('FontTitleSmall'),FontLineHeight('FontInfoSmall'),FontLineHeight('FontInfoSmall2'),FontLineHeight('FontInfoSmall2')))" />
-    <variable id="ProginfoLines"       value="4" condition="gt(sub({ScreenHeight},#ProginfoPlaceY,1),add(FontLineHeight('FontTitle'),FontLineHeight('FontTitleSmall'),FontLineHeight('FontInfoSmall'),FontLineHeight('FontSmall2')))" />
+    <variable id="ProginfoLines"       value="5" condition="gt(sub({ScreenHeight},#ProginfoPlaceY,1),add(FontLineHeight('FontTitle'),FontLineHeight('FontTitleSmall'),FontLineHeight('FontInfoSmall'),FontLineHeight('FontInfoSmall2'),#LineThickness,1,FontLineHeight('FontInfoSmall2')))" />
+    <variable id="ProginfoLines"       value="4" condition="gt(sub({ScreenHeight},#ProginfoPlaceY,1),add(FontLineHeight('FontTitle'),FontLineHeight('FontTitleSmall'),FontLineHeight('FontInfoSmall'),#LineThickness,1,FontLineHeight('FontInfoSmall2')))" />
     <variable id="ProginfoLines"       value="3" condition="gt(sub({ScreenHeight},#ProginfoPlaceY,1),add(FontLineHeight('FontTitle'),FontLineHeight('FontTitleSmall'),FontLineHeight('FontInfoSmall')))" />
     <variable id="ProginfoLines"       value="2" condition="gt(sub({ScreenHeight},#ProginfoPlaceY,1),add(FontLineHeight('FontTitle'),FontLineHeight('FontInfoSmall')))" />
     <variable id="ProginfoLines"       value="1" />
@@ -203,13 +210,17 @@
     <variable id="ProginfoLine3YRaw"   value="add(#ProginfoPlaceY,FontLineHeight('FontTitle'),FontLineHeight('FontTitleSmall'))" />
     <variable id="ProginfoLine4YRaw"   value="add(#ProginfoPlaceY,FontLineHeight('FontTitle'),FontLineHeight('FontTitleSmall'),FontLineHeight('FontInfoSmall'))" />
     <variable id="ProginfoLine5YRaw"   value="add(#ProginfoPlaceY,FontLineHeight('FontTitle'),FontLineHeight('FontTitleSmall'),FontLineHeight('FontInfoSmall'),FontLineHeight('FontInfoSmall'))" />
-    
-    <!-- big displays: divide free space and add as gap(s) // TODO -->
-    <variable id="ProginfoLine1Y"      value="#ProginfoLine1YRaw" />
-    <variable id="ProginfoLine2Y"      value="#ProginfoLine2YRaw" />
-    <variable id="ProginfoLine3Y"      value="#ProginfoLine3YRaw" />
-    <variable id="ProginfoLine4Y"      value="#ProginfoLine4YRaw" />
-    <variable id="ProginfoLine5Y"      value="#ProginfoLine5YRaw" />
+
+    <variable id="ProginfoGapH"        value="sub(#ProginfoLine5YRaw,#ProginfoLine4YRaw)" condition="eq(#ProginfoLines,5)" />
+    <variable id="ProginfoGapH"        value="sub(#ProginfoLine4YRaw,#ProginfoLine3YRaw)" condition="eq(#ProginfoLines,4)" />
+    <variable id="ProginfoGapH"        value="0" />
+
+    <!-- big displays: divide free space and add as gap(s) -->
+    <variable id="ProginfoLine1Y"      value="add(#ProginfoLine1YRaw,div(#ProginfoGapH,2))" />
+    <variable id="ProginfoLine2Y"      value="add(#ProginfoLine2YRaw,div(#ProginfoGapH,2))" />
+    <variable id="ProginfoLine3Y"      value="add(#ProginfoLine3YRaw,#ProginfoGapH)" />
+    <variable id="ProginfoLine4Y"      value="add(#ProginfoLine4YRaw,#ProginfoGapH)" />
+    <variable id="ProginfoLine5Y"      value="add(#ProginfoLine5YRaw,#ProginfoGapH)" />
     
     <!-- Y starts for information lines -->
     <variable id="PresentTitleY"       value="#ProginfoLine1Y" />
@@ -220,7 +231,7 @@
     <variable id="RecordingsAreaY"     value="#ProginfoLine4Y" condition="eq(#ProginfoLines,4)" />
     <variable id="RecordingsAreaY"     value="#ProginfoLine3Y" condition="eq(#ProginfoLines,3)" default="#ProginfoLine2Y" />
 
-    <!-- width for information lines (default: screenwidth, expect a line would overlap logo/symbol area -->
+    <!-- width for information lines (default: screenwidth, except a line would overlap logo/symbol area -->
     <variable id="PresentTitleW"       value="-1" condition="ge(#PresentTitleY,#ProginfoPlaceYLim)" default="sub(#LogoSymbX,1,#PaddingW)" />
     <variable id="PresentShortTextW"   value="-1" condition="ge(#PresentShortTextY,#ProginfoPlaceYLim)" default="sub(#LogoSymbX,1,#PaddingW)" />
     <variable id="FollowingTitleW"     value="-1" condition="ge(#FollowingTitleY,#ProginfoPlaceYLim)" default="sub(#LogoSymbX,1,#PaddingW)" />
@@ -240,24 +251,24 @@
       {PresentTitle}
     </text>
 
-    <text x="0" y="#PresentShortTextY" condition="gt(#ProginfoLines,3)" width="#PresentShortTextW" height="FontLineHeight('FontTitleSmall')" color="#ColPresentTitle" align="left" font="FontTitleSmall">
+    <text x="0" y="#PresentShortTextY" condition="gt(#ProginfoLines,2)" width="#PresentShortTextW" height="FontLineHeight('FontTitleSmall')" color="#ColPresentTitle" align="left" font="FontTitleSmall">
       {PresentShortText}
     </text>
     <block condition="{FollowingValid}">
-      <text x="0" y="#FollowingTitleY" condition="or(gt(#ProginfoLines,3),not({IsRecording}))" height="FontLineHeight('FontInfoSmall')" color="#ColPresentTitle" align="left" font="FontInfoSmall">
+      <text x="0" y="#FollowingTitleY" condition="or(gt(#ProginfoLines,3),and(ge(#ProginfoLines,2),not({IsRecording})))" height="FontLineHeight('FontInfoSmall')" color="#ColPresentTitle" align="left" font="FontInfoSmall">
         {FollowingStartDateTime:%H\:%M}
       </text>
-      <text x="FontTextWidth('FontInfoSmall','00:00  ')" condition="or(gt(#ProginfoLines,3),not({IsRecording}))" y="#FollowingTitleY" width="sub(#FollowingTitleW,FontTextWidth('FontInfoSmall','00:00  '))" height="FontLineHeight('FontInfoSmall')" color="#ColPresentTitle" align="left" font="FontInfoSmall">
+      <text x="FontTextWidth('FontInfoSmall','00:00  ')" condition="or(gt(#ProginfoLines,3),and(ge(#ProginfoLines,2),not({IsRecording})))" y="#FollowingTitleY" width="sub(#FollowingTitleW,FontTextWidth('FontInfoSmall','00:00  '))" height="FontLineHeight('FontInfoSmall')" color="#ColPresentTitle" align="left" font="FontInfoSmall">
         {FollowingTitle}
       </text>
-      <text x="FontTextWidth('FontInfoSmall','00:00  ')" condition="or(gt(#ProginfoLines,4),not({IsRecording}))" y="#FollowingShortTextY" width="sub(#FollowingShortTextW,FontTextWidth('FontInfoSmall','00:00  '))" height="FontLineHeight('FontInfoSmall2')" color="#ColPresentTitle" align="left" font="FontInfoSmall2">
+      <text x="FontTextWidth('FontInfoSmall','00:00  ')" condition="or(gt(#ProginfoLines,4),and(eq(#ProginfoLines,4),not({IsRecording})))" y="#FollowingShortTextY" width="sub(#FollowingShortTextW,FontTextWidth('FontInfoSmall','00:00  '))" height="FontLineHeight('FontInfoSmall2')" color="#ColPresentTitle" align="left" font="FontInfoSmall2">
         {FollowingShortText}
       </text>
     </block>
 
-    <rectangle x1="0" x2="-1" y1="#RecordingsLineY" height="#LineThickness" condition="{IsRecording}" color="#ColBorder" filled="yes"/>
+    <rectangle x1="0" x2="-1" y="#RecordingsLineY" height="#LineThickness" condition="{IsRecording}" color="#ColBorder" filled="yes"/>
     <image x="0" y="#RecordingsSymbolY" color="#ColSymbol" path="#SymbolRecording" condition="{IsRecording}"/>
-    <text x1="add(#SymbolW,2)" x2="-1" y1="#RecordingsTextY" height="FontLineHeight('FontInfoSmall2')" color="#ColRecText" align="left" font="FontInfoSmall2">
+    <text x1="add(#SymbolW,2)" x2="-1" y="#RecordingsTextY" height="FontLineHeight('FontInfoSmall2')" color="#ColRecText" align="left" font="FontInfoSmall2">
       {Recordings}
     </text>
   </display>
@@ -278,6 +289,28 @@
     <block condition="{VolumeIsMute}">
       <image x="div(sub({ScreenWidth},#MuteImageW),2)" y="div(sub({ScreenHeight},#MuteImageH),2)" color="#ColVolumeBar" path="#MuteImage"/>
     </block>
+  </display>
+
+  <display id="audio">
+    <variable id="AudioX" value="10"/>
+    <variable id="AudioW" value="sub({ScreenWidth},mul(4,#AudioX))"/>
+    <variable id="AudioH" value="sub(div({ScreenHeight},2),4)"/>
+    <variable id="AudioY" value="sub({ScreenHeight},div({ScreenHeight},2))"/>
+    <variable id="AudioHeaderH" value="add(FontLineHeight('FontMenuTitle'),1,#PaddingH,#PaddingH)"/>
+
+    <rectangle x="#AudioX" y="#AudioY" width="#AudioW" height="#AudioHeaderH" color="#ColAudioHeaderBG" filled="yes"/>
+    <text x="add(#PaddingW,#AudioX)" y="add(#PaddingH,#AudioY)" width="sub(#AudioW,#PaddingW,#PaddingW)" height="FontLineHeight('FontMenuTitle')" color="#ColAudioHeaderFG" font="FontMenuTitle">Audio</text>
+    <!--rectangle x1="0" y1="add(FontLineHeight('FontMenuTitle'),2)" x2="-1" height="#LineThickness" color="#ColMenuBorder" filled="yes"/-->
+    <rectangle x="#AudioX" y="add(#AudioY,#AudioHeaderH)" width="#AudioW" height="sub(#AudioH,#AudioHeaderH)" color="#ColAudioBG" filled="yes"/>
+    <list x="#AudioX" y="add(#AudioY,#AudioHeaderH)" width="#AudioW" height="sub(#AudioH,#AudioHeaderH)">
+      <item height="#ItemHeight"/>
+      <rectangle x="0" y="0" width="#AudioW" height="add(#ItemHeight,1)" color="#ColAudioSelected" condition="{IsAudioTrackCurrent}" filled="yes"/>
+      <text x1="#PaddingW" x2="-1" y1="0" height="#ItemHeight" color="#ColAudioEntryCurr" font="FontMenuItem">{AudioTrackCurrent}</text>
+      <text x1="#PaddingW" x2="-1" y1="0" height="#ItemHeight" color="#ColAudioEntry" font="FontMenuItem">{AudioTrackItem}</text>
+      <!--text x1="#ArrowWidth" x2="-1" y1="0" height="#ItemHeight" color="#ColMenuEntryCurr" font="FontMenuItem">{MenuCurrent}</text-->
+      <!--image x="0" y="#ArrowY" color="#ColMenuEntryMarker" path="#ArrowBitmap" condition="{IsMenuCurrent}"/-->
+      <!--text x1="#ArrowWidth" x2="-1" y1="0" height="#ItemHeight" color="#ColMenuEntry" font="FontMenuItem">{MenuItem}</text-->
+    </list>
   </display>
 
   <display id="message">

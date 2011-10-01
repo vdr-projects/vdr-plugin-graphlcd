@@ -95,6 +95,14 @@ struct tVolumeState
     uint64_t lastChange;
 };
 
+struct tAudioState
+{
+    int currentTrack;
+    std::vector <std::string> tracks;
+    int currentChannel;
+    uint64_t lastChange;
+};
+
 class cGraphLCDDisplay;
 
 class cGraphLCDState : public cStatus
@@ -113,6 +121,7 @@ private:
     std::vector <tRecording> mRecordings;
     tOsdState mOsd;
     tVolumeState mVolume;
+    tAudioState  mAudio;
 
     void SetChannel(int ChannelNumber);
     void UpdateChannelInfo(void);
@@ -123,6 +132,8 @@ protected:
     virtual void Recording(const cDevice *Device, const char *Name, const char *FileName, bool On);
     virtual void Replaying(const cControl *Control, const char *Name, const char *FileName, bool On);
     virtual void SetVolume(int Volume, bool Absolute);
+    virtual void SetAudioTrack(int Index, const char * const *Tracks);
+    virtual void SetAudioChannel(int AudioChannel);
     virtual void OsdClear();
     virtual void OsdTitle(const char *Title);
     virtual void OsdStatusMessage(const char *Message);
@@ -148,6 +159,7 @@ public:
     tOsdState GetOsdState();
     void ResetOsdStateScroll();
     tVolumeState GetVolumeState();
+    tAudioState  GetAudioState();
     bool ShowMessage();
 };
 
