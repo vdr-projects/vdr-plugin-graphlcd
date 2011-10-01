@@ -306,9 +306,9 @@
     <list x="#AudioX" y="add(#AudioY,#AudioHeaderH)" width="#AudioW" height="sub(#AudioH,#AudioHeaderH)">
       <item height="#ItemHeight"/>
       <rectangle x="0" y="0" width="#AudioW" height="add(#ItemHeight,1)" color="#ColAudioSelected" condition="{IsAudioTrackCurrent}" filled="yes"/>
-      <text x="#PaddingW" width="#AudioChannelW" y="0" height="#ItemHeight" condition="eq({AudioChannel},0)" color="#ColAudioEntryCurr" scrollmode="never" align="center" font="FontMenuItem">L|R</text>
-      <text x="#PaddingW" width="#AudioChannelW" y="0" height="#ItemHeight" condition="eq({AudioChannel},1)" color="#ColAudioEntryCurr" scrollmode="never" align="left"   font="FontMenuItem">L| </text>
-      <text x="#PaddingW" width="#AudioChannelW" y="0" height="#ItemHeight" condition="eq({AudioChannel},2)" color="#ColAudioEntryCurr" scrollmode="never" align="right"  font="FontMenuItem"> |R</text>
+      <text x="#PaddingW" width="#AudioChannelW" y="0" height="#ItemHeight" condition="and({IsAudioTrackCurrent},eq({AudioChannel},0))" color="#ColAudioEntryCurr" scrollmode="never" align="center" font="FontMenuItem">L|R</text>
+      <text x="#PaddingW" width="#AudioChannelW" y="0" height="#ItemHeight" condition="and({IsAudioTrackCurrent},eq({AudioChannel},1))" color="#ColAudioEntryCurr" scrollmode="never" align="left"   font="FontMenuItem">L| </text>
+      <text x="#PaddingW" width="#AudioChannelW" y="0" height="#ItemHeight" condition="and({IsAudioTrackCurrent},eq({AudioChannel},2))" color="#ColAudioEntryCurr" scrollmode="never" align="right"  font="FontMenuItem"> |R</text>
       <text x1="add(#PaddingW,#AudioChannelW,FontTextWidth('FontMenuItem',' '))" x2="-1" y="0" height="#ItemHeight" color="#ColAudioEntryCurr" font="FontMenuItem">{AudioTrackCurrent}</text>
       <text x1="add(#PaddingW,#AudioChannelW,FontTextWidth('FontMenuItem',' '))" x2="-1" y="0" height="#ItemHeight" color="#ColAudioEntry" font="FontMenuItem">{AudioTrackItem}</text>
       <!--text x1="#ArrowWidth" x2="-1" y1="0" height="#ItemHeight" color="#ColMenuEntryCurr" font="FontMenuItem">{MenuCurrent}</text-->
