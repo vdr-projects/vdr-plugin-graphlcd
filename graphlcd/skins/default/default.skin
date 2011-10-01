@@ -297,6 +297,7 @@
     <variable id="AudioH" value="sub(div({ScreenHeight},2),4)"/>
     <variable id="AudioY" value="sub({ScreenHeight},div({ScreenHeight},2))"/>
     <variable id="AudioHeaderH" value="add(FontLineHeight('FontMenuTitle'),1,#PaddingH,#PaddingH)"/>
+    <variable id="AudioChannelW" value="FontTextWidth('FontMenuItem','L|R')" />
 
     <rectangle x="#AudioX" y="#AudioY" width="#AudioW" height="#AudioHeaderH" color="#ColAudioHeaderBG" filled="yes"/>
     <text x="add(#PaddingW,#AudioX)" y="add(#PaddingH,#AudioY)" width="sub(#AudioW,#PaddingW,#PaddingW)" height="FontLineHeight('FontMenuTitle')" color="#ColAudioHeaderFG" font="FontMenuTitle">Audio</text>
@@ -305,8 +306,11 @@
     <list x="#AudioX" y="add(#AudioY,#AudioHeaderH)" width="#AudioW" height="sub(#AudioH,#AudioHeaderH)">
       <item height="#ItemHeight"/>
       <rectangle x="0" y="0" width="#AudioW" height="add(#ItemHeight,1)" color="#ColAudioSelected" condition="{IsAudioTrackCurrent}" filled="yes"/>
-      <text x1="#PaddingW" x2="-1" y1="0" height="#ItemHeight" color="#ColAudioEntryCurr" font="FontMenuItem">{AudioTrackCurrent}</text>
-      <text x1="#PaddingW" x2="-1" y1="0" height="#ItemHeight" color="#ColAudioEntry" font="FontMenuItem">{AudioTrackItem}</text>
+      <text x="#PaddingW" width="#AudioChannelW" y="0" height="#ItemHeight" condition="eq({AudioChannel},0)" color="#ColAudioEntryCurr" scrollmode="never" align="center" font="FontMenuItem">L|R</text>
+      <text x="#PaddingW" width="#AudioChannelW" y="0" height="#ItemHeight" condition="eq({AudioChannel},1)" color="#ColAudioEntryCurr" scrollmode="never" align="left"   font="FontMenuItem">L| </text>
+      <text x="#PaddingW" width="#AudioChannelW" y="0" height="#ItemHeight" condition="eq({AudioChannel},2)" color="#ColAudioEntryCurr" scrollmode="never" align="right"  font="FontMenuItem"> |R</text>
+      <text x1="add(#PaddingW,#AudioChannelW,FontTextWidth('FontMenuItem',' '))" x2="-1" y="0" height="#ItemHeight" color="#ColAudioEntryCurr" font="FontMenuItem">{AudioTrackCurrent}</text>
+      <text x1="add(#PaddingW,#AudioChannelW,FontTextWidth('FontMenuItem',' '))" x2="-1" y="0" height="#ItemHeight" color="#ColAudioEntry" font="FontMenuItem">{AudioTrackItem}</text>
       <!--text x1="#ArrowWidth" x2="-1" y1="0" height="#ItemHeight" color="#ColMenuEntryCurr" font="FontMenuItem">{MenuCurrent}</text-->
       <!--image x="0" y="#ArrowY" color="#ColMenuEntryMarker" path="#ArrowBitmap" condition="{IsMenuCurrent}"/-->
       <!--text x1="#ArrowWidth" x2="-1" y1="0" height="#ItemHeight" color="#ColMenuEntry" font="FontMenuItem">{MenuItem}</text-->
