@@ -349,12 +349,15 @@
     <variable id="ReplayProgressY" value="sub(#ReplayTimeY,#ReplayProgressH,#ReplayProgressGap)"/>
     <variable id="ReplayLogo" value="'{ConfigPath}/logos/replay/replay-{ReplayMode}_m.glcd'" condition="le({ScreenHeight},64)"/>
     <variable id="ReplayLogo" value="'{ConfigPath}/logos/replay/replay-{ReplayMode}_l.glcd'"/>
+    <variable id="ReplayLogoW" value="ImageWidth(#ReplayLogo)" />
+    <variable id="ReplayLogoH" value="ImageHeight(#ReplayLogo)" />
+    <variable id="ReplayLogoX" value="sub({ScreenWidth},#ReplayLogoW)" />
 
     <block condition="{SettingShowReplayLogo}">
-      <image x="#LogoX" y="0" color="#ColReplayLogo" path="#ReplayLogo"/>
-      <rectangle x1="sub(#LogoX,#LineThickness)" width="#LineThickness" y1="0" height="#LogoH" color="#ColReplayBorder" filled="yes"/>
-      <rectangle x1="sub(#LogoX,#LineThickness)" x2="-1" y1="#LogoH" height="#LineThickness" color="#ColReplayBorder" filled="yes"/>
-      <text x1="0" x2="sub(#LogoX,#LineThickness,2)" y1="0" y2="#ReplayProgressY" color="#ColReplayText" align="left" multiline="yes" font="FontInfo">
+      <image x="#ReplayLogoX" y="0" color="#ColReplayLogo" path="#ReplayLogo"/>
+      <rectangle x="sub(#ReplayLogoX,#LineThickness)" width="#LineThickness" y="0" height="#LogoH" color="#ColReplayBorder" filled="yes"/>
+      <rectangle x1="sub(#ReplayLogoX,#LineThickness)" x2="-1" y="#ReplayLogoH" height="#LineThickness" color="#ColReplayBorder" filled="yes"/>
+      <text x1="0" x2="sub(#ReplayLogoX,#LineThickness,2)" y1="0" y2="#ReplayProgressY" color="#ColReplayText" align="left" multiline="yes" font="FontInfo">
       {ReplayTitle}
       </text>
     </block>
