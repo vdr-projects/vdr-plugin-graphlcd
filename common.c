@@ -61,7 +61,7 @@ GLCD::cType TimeType(time_t Time, const std::string &Format)
     return false;
 }
 
-GLCD::cType DurationType(int Index, const std::string &Format)
+GLCD::cType DurationType(int Index, const std::string &Format, double framesPerSecFactor = 1.0)
 {
     static char result[1000];
     if (Index > 0)
@@ -73,13 +73,10 @@ GLCD::cType DurationType(int Index, const std::string &Format)
             char *res = result;
             enum { normal, format } state = normal;
             int n = 0;
-#if VDRVERSNUM >= 10701
-            int f = (Index % (int)DEFAULTFRAMESPERSECOND) + 1;
-            int s = (Index / (int)DEFAULTFRAMESPERSECOND);
-#else
-            int f = (Index % FRAMESPERSEC) + 1;
-            int s = (Index / FRAMESPERSEC);
-#endif
+
+            int f = (Index % (int)framesPerSecFactor) + 1;
+            int s = (Index / (int)framesPerSecFactor);
+
             int m = s / 60 % 60;
             int h = s / 3600;
             s %= 60;
