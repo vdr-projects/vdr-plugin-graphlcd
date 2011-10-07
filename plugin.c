@@ -368,14 +368,13 @@ void cPluginGraphLCD::MainThreadHook()
 const char **cPluginGraphLCD::SVDRPHelpPages(void)
 {
     static const char *HelpPages[] = {
-        "CLS   Clear Display.",
-        "UPD   Update Display.",
-        "OFF   Switch Plugin off.",
-        "ON   Switch Plugin on.",
-        "SET <key> <value> [<display>]  Set a key=value entry.",
-        "SETEXP <exp> <key> <value> [<display>]  Set a key=value entry which expires after <exp> secs.",
-        "UNSET <key> [<display>]  Unset (clear) entry <key>.",
-        "GET <key> [<display>]  Get value assigned to key.",
+        "CLS     Clear display.",
+        "UPD     Update display.",
+        "OFF     Switch plugin off.",
+        "ON      Switch plugin on.",
+        "SET     <key>[,expire=<expire>][,display=<display>] <value>  Set entry <key> to value <value>. optionally expire after <expire> seconds.",
+        "UNSET   <key>[,display=<display>]  Unset (clear) entry <key>.",
+        "GET     <key>[,display=<display>]  Get value assigned to entry <key>.",
         "CONNECT [<display> [<skin>]]   Connect given display or reconnect all displays if called w/o parameter.",
         "DISCONN [<display>]   Disconnect given display or all displays if called w/o parameter.",
         NULL
@@ -392,8 +391,14 @@ cString cPluginGraphLCD::SVDRPCommand(const char *Command, const char *Option, i
         std::string options_raw = trim(Option);
         size_t firstpos = std::string::npos;
         while ( (firstpos = options_raw.find_first_of(' ')) != std::string::npos  ) {
-            options.push_back( trim(options_raw.substr(0, firstpos)) );
-            options_raw = trim(options_raw.substr(firstpos+1));
+            // special treatment for SET <key> <value>:  option <value> is the rest of the cmd line, including spaces
+            if ( (strcasecmp(Command, "SET") == 0) && (options.size() == 1) ) {
+                options.push_back( trim(options_raw) );
+                options_raw = "";
+            } else {
+                options.push_back( trim(options_raw.substr(0, firstpos)) );
+                options_raw = trim(options_raw.substr(firstpos+1));
+            }
         }
         if (trim(options_raw).size() > 0)
             options.push_back( trim(options_raw) );
@@ -553,59 +558,88 @@ cString cPluginGraphLCD::SVDRPCommand(const char *Command, const char *Option, i
                     return "GraphLCD updated.";
                 };
             } else
-            if (strcasecmp(Command, "SET") == 0) {
-                if (options.size() == 2 || options.size() == 3) {
-                    std::string key = options[0];
-                    if ( isalpha(key[0]) ) {
-                        for (unsigned int index = 0; index < GRAPHLCD_MAX_DISPLAYS; index++)
-                            if (mDisplay[index].Status == CONNECTED)
-                                mExtData->Set(key, options[1], ((options.size() == 3) ? options[2] : "") );
-                        return "SET ok";
-                    }
-                    return "SET not ok";
-                }
-                return "SET requires two or three parameters: SET <key> <value> [<display>].";
-            } else
-            if (strcasecmp(Command, "SETEXP") == 0) {
-                if (options.size() == 3 || options.size() == 4) {
-                    std::string exp = options[0];
-                    std::string key = options[1];
-                    std::string value = options[2];
-                    if ( isalpha(key[0]) && isdigit(exp[0]) ) { 
-                        uint32_t expsec = (uint32_t)strtoul( exp.c_str(), NULL, 10);
-                        for (unsigned int index = 0; index < GRAPHLCD_MAX_DISPLAYS; index++)
-                            if (mDisplay[index].Status == CONNECTED)
-                                mExtData->Set( key, value, ((options.size() == 4) ? options[3] : ""), expsec );
-                        return "SETEXP ok";
-                    }
-                    return "SETEXP not ok";
-                }
-                return "SETEXP requires three or four parameters: SETEXP <exp> <key> <value> [<display>].";
-            } else
-            if (strcasecmp(Command, "UNSET") == 0) {
-                if (options.size() == 1 || options.size() == 2) {
-                    for (unsigned int index = 0; index < GRAPHLCD_MAX_DISPLAYS; index++)
-                        if (mDisplay[index].Status == CONNECTED)
-                            mExtData->Unset( options[0], ((options.size() == 2) ? options[1] : "") );
-                    return "UNSET ok";
-                }
-                return "UNSET requires exactly one parameter: UNSET <key> [<display>].";
-            } else
-            if (strcasecmp(Command, "GET") == 0) {
-                if (options.size() == 1 || options.size() == 2) {
-                    std::string res = "";
-                    for (unsigned int index = 0; res == "" && index < GRAPHLCD_MAX_DISPLAYS; index++)
-                        if (mDisplay[index].Status == CONNECTED)
-                            res = mExtData->Get( options[0], ((options.size() == 2) ? options[1] : "") );
-                    std::string retval = "GET "; retval.append(options[0]); retval.append(": "); 
-                    if (res != "" ) {
-                        retval.append(res);
+            if ( (strcasecmp(Command, "SET") == 0) || (strcasecmp(Command, "UNSET") == 0) || (strcasecmp(Command, "GET") == 0) ) {
+                std::string key = "";
+                std::string display = "";
+                std::string expire = "";
+
+                if (options.size() > 0) {
+                    // split key parameter
+                    std::string key_raw = options[0];
+                    size_t commapos = key_raw.find_first_of(',');
+                    if (commapos == std::string::npos) {
+                        key = key_raw;
                     } else {
-                        retval.append("(null)");
+                        key = key_raw.substr(0,commapos);
+                        do {
+                            key_raw = key_raw.substr(commapos+1);
+                            size_t delimpos = key_raw.find_first_of('=');
+                            if (delimpos != std::string::npos) {
+                                std::string paramkey = key_raw.substr(0, delimpos);
+                                size_t nextpos = key_raw.find_first_of(',');
+                                std::string paramval = (nextpos == std::string::npos)
+                                                       ? key_raw.substr(delimpos+1)
+                                                       : key_raw.substr(delimpos+1, nextpos-delimpos-1);
+
+                                if ( paramkey == "d" || paramkey == "display") {
+                                    display = paramval;
+                                } else if ( (strcasecmp(Command, "SET") == 0) && 
+                                            ( paramkey == "e" || paramkey == "expire" || paramkey == "expires" )
+                                          )
+                                {
+                                    expire = paramval;
+                                } else {
+                                    return "SET: invalid refining parameter(s) for option '<key>'.";
+                                }
+                            } else {
+                                return "SET: invalid refining parameter(s) for option '<key>'.";
+                            }
+                        } while ( (commapos = key_raw.find_first_of(',')) != std::string::npos );
                     }
-                    return retval.c_str();
                 }
-                return "GET requires exactly one or two parameters: GET <key> [<display>].";
+
+                if (strcasecmp(Command, "SET") == 0) {
+                    if (options.size() == 2) {
+                        uint32_t expsecs = 0;
+                        if (expire != "") {
+                            expsecs = (uint32_t)strtoul(expire.c_str(), NULL, 10);
+                        }
+
+                        if ( isalpha(key[0]) ) {
+                            for (unsigned int index = 0; index < GRAPHLCD_MAX_DISPLAYS; index++)
+                                if (mDisplay[index].Status == CONNECTED)
+                                    mExtData->Set(key, options[1], display, expsecs );
+                            return "SET ok";
+                        }
+                        return "SET not ok";
+                    }
+                    return "SET requires exactly two parameters: SET <key>[,expire=<expire>][,display=<display>] <value>.";
+                } else
+                if (strcasecmp(Command, "UNSET") == 0) {
+                    if (options.size() == 1) {
+                        for (unsigned int index = 0; index < GRAPHLCD_MAX_DISPLAYS; index++)
+                            if (mDisplay[index].Status == CONNECTED)
+                                mExtData->Unset( key, display );
+                        return "UNSET ok";
+                    }
+                    return "UNSET requires exactly one parameter: UNSET <key>[,display=<display>].";
+                } else
+                if (strcasecmp(Command, "GET") == 0) {
+                    if (options.size() == 1) {
+                        std::string res = "";
+                        for (unsigned int index = 0; res == "" && index < GRAPHLCD_MAX_DISPLAYS; index++)
+                            if (mDisplay[index].Status == CONNECTED)
+                                res = mExtData->Get( key, display );
+                        std::string retval = "GET "; retval.append(key); retval.append(": "); 
+                        if (res != "" ) {
+                            retval.append(res);
+                        } else {
+                            retval.append("(null)");
+                        }
+                        return retval.c_str();
+                    }
+                    return "GET requires exactly one parameter: GET <key>[,display=<display>].";
+                }
             } else {  // command not supported
                 return NULL;
             }
