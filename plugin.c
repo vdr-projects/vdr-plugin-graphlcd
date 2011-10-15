@@ -645,6 +645,7 @@ cString cPluginGraphLCD::SVDRPCommand(const char *Command, const char *Option, i
             }
         }
     }
+    return NULL;  /* make gcc happy */
 }
 
 cOsdObject * cPluginGraphLCD::MainMenuAction()
