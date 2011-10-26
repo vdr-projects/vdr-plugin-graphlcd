@@ -879,7 +879,7 @@ int cGraphLCDSkinConfig::GetTokenId(const std::string & Name)
         if (Name == Tokens[i])
             return i;
     }
-    esyslog("graphlcd: unknown token %s", Name.c_str());
+    esyslog("graphlcd plugin: ERROR: Unknown token %s", Name.c_str());
     return tokCountToken;
 }
 

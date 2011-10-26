@@ -7,7 +7,8 @@
  * to the COPYING file distributed with this package.
  *
  * (c) 2001-2004 Carsten Siebholz <c.siebholz AT t-online.de>
- * (c) 2004 Andreas Regel <andreas.regel AT powarman.de>
+ * (c) 2004      Andreas Regel <andreas.regel AT powarman.de>
+ * (c) 2011      Wolfgang Astleitner <mrwastl AT users sourceforge net>
  */
 
 #include <fstream>
@@ -38,7 +39,7 @@ bool cChannelAliasList::Load(const std::string & CfgPath)
 #endif
     if (!file.is_open())
     {
-        esyslog("graphlcd: Error opening channel alias file %s!", aliasFileName.c_str());
+        esyslog("graphlcd plugin: ERROR opening channel alias file '%s'", aliasFileName.c_str());
         return false;
     }
 

@@ -490,14 +490,14 @@ bool cGraphLCDService::NeedsUpdate(uint64_t CurrentTime)
                         if ((mend = version.find(".", mstart)) != std::string::npos) {
                             numval = atoi(version.substr(mstart, mend-mstart).c_str());
                             if (numval <= 6) { // version <= 1.6.x
-                                isyslog("graphlcd plugin: femon <= 1.7.7 requires a patch prior to be usable with graphlcd.\n");
-                                isyslog("graphlcd plugin: see README for further instructions.\n");
+                                isyslog("graphlcd plugin: INFO: femon <= 1.7.7 requires a patch prior to be usable with graphlcd\n");
+                                isyslog("graphlcd plugin: INFO: see README for further instructions\n");
                             } else if (numval == 7) {
                                 mstart = mend + 1;
                                 numval = atoi(version.substr(mstart).c_str());  // ignore trailing characters
                                 if (numval <= 7) {
-                                    isyslog("graphlcd plugin: femon <= 1.7.7 requires a patch prior to be usable with graphlcd.\n");
-                                    isyslog("graphlcd plugin: see README for further instructions.\n");
+                                    isyslog("graphlcd plugin: INFO: femon <= 1.7.7 requires a patch prior to be usable with graphlcd\n");
+                                    isyslog("graphlcd plugin: INFO: see README for further instructions\n");
                                 } else { // version >= 1.7.8: ok
                                     femonVersionValid = true;
                                 }
@@ -505,10 +505,10 @@ bool cGraphLCDService::NeedsUpdate(uint64_t CurrentTime)
                                 femonVersionValid = true;
                             }
                         } else {
-                            isyslog("graphlcd plugin: unable to decode version information of femon.\n");
+                            isyslog("graphlcd plugin: INFO: Unable to decode version information of femon\n");
                         }
                     } else {
-                        isyslog("graphlcd plugin: unable to decode version information of femon.\n");
+                        isyslog("graphlcd plugin: INFO: Unable to decode version information of femon\n");
                     }
                 }
                 femonVersionChecked = true;

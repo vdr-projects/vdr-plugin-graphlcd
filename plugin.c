@@ -185,11 +185,11 @@ bool cPluginGraphLCD::Initialize()
     if (mConfigName.length() == 0)
     {
         mConfigName = PLUGIN_GRAPHLCDCONF;
-        isyslog("graphlcd plugin: No config file specified, using default (%s).\n", mConfigName.c_str());
+        isyslog("graphlcd plugin: INFO: No config file specified, using default (%s).\n", mConfigName.c_str());
     }
     if (GLCD::Config.Load(mConfigName) == false)
     {
-        esyslog("graphlcd plugin: Error loading config file!\n");
+        esyslog("graphlcd plugin: ERROR loading config file!\n");
         return false;
     }
     if (GLCD::Config.driverConfigs.size() == 0)
@@ -200,13 +200,13 @@ bool cPluginGraphLCD::Initialize()
 
     if (mDisplayNames == "none")
     {
-        isyslog("graphlcd plugin: WARNING: displayname = none, starting with no display connected.\n");
+        isyslog("graphlcd plugin: INFO: displayname = none, starting with no display connected.\n");
         return true;
     }
 
     if (mDisplayNames.length() == 0)
     {
-        isyslog("graphlcd plugin: WARNING: No display specified, using first one (%s).\n", GLCD::Config.driverConfigs[0].name.c_str());
+        isyslog("graphlcd plugin: INFO: No display specified, using first one (%s).\n", GLCD::Config.driverConfigs[0].name.c_str());
         mDisplayNames = GLCD::Config.driverConfigs[0].name;
     }
     
@@ -303,7 +303,7 @@ bool cPluginGraphLCD::ConnectDisplay(unsigned int index, unsigned int displayNum
 
     /* if plugin was deactivated -> reactivate */
     GraphLCDSetup.PluginActive = 1;
-    dsyslog("graphlcd plugin: init timeout waiting for display %s thread to get ready", mDisplay[index].Name.c_str());
+    dsyslog("graphlcd plugin: DEBUG: Init timeout waiting for display %s thread to get ready", mDisplay[index].Name.c_str());
     mDisplay[index].to_timestamp = cTimeMs::Now();
     mDisplay[index].Status = CONNECTING;
     
@@ -337,14 +337,14 @@ void cPluginGraphLCD::MainThreadHook()
         {
             if (mDisplay[index].Disp->Active())
             {
-                dsyslog("graphlcd plugin: display thread for %s is ready", mDisplay[index].Name.c_str());
+                dsyslog("graphlcd plugin: DEBUG: Display thread for %s is ready", mDisplay[index].Name.c_str());
                 mDisplay[index].Status = CONNECTED;
             }
             else
             {
                 if ( (cTimeMs::Now() - mDisplay[index].to_timestamp) > (uint64_t) 10000)
                 {
-                    dsyslog ("graphlcd plugin: timeout while waiting for display thread %s", mDisplay[index].Name.c_str());
+                    dsyslog ("graphlcd plugin: DEBUG: Timeout while waiting for display thread %s", mDisplay[index].Name.c_str());
                     /* no activity after 10 secs: display is unusable */
                     //GraphLCDSetup.PluginActive = 0;
                     DisconnectDisplay(index);
@@ -459,13 +459,13 @@ cString cPluginGraphLCD::SVDRPCommand(const char *Command, const char *Option, i
                 for (unsigned int count = 0; count < 100; count++) {
                     cCondWait::SleepMs(100);
                     if (mDisplay[index].Disp->Active()) {
-                        dsyslog ("graphlcd plugin: display thread ready");
+                        dsyslog ("graphlcd plugin: DEBUG: Display thread for '%s' ready", mDisplay[index].Name.c_str());
                         mDisplay[index].Status = CONNECTED;
                         break;
                     }
                 }
                 if (mDisplay[index].Status != CONNECTED)
-                    dsyslog ("graphlcd plugin: timeout while waiting for display thread");
+                    dsyslog ("graphlcd plugin: DEBUG: Timeout while waiting for display thread '%s'", mDisplay[index].Name.c_str());
             }
 
             retval.append((mDisplay[index].Status == CONNECTED) ? "CONNECT ok." : "CONNECT error.");
@@ -489,17 +489,17 @@ cString cPluginGraphLCD::SVDRPCommand(const char *Command, const char *Option, i
                         for (unsigned int count = 0; count < 100; count++) {
                             cCondWait::SleepMs(100);
                             if (mDisplay[i].Disp->Active()) {
-                                dsyslog ("graphlcd plugin: display thread ready for '%s'", mDisplay[i].Name.c_str());
+                                dsyslog ("graphlcd plugin: DEBUG: Display thread ready for '%s'", mDisplay[i].Name.c_str());
                                 mDisplay[i].Status = CONNECTED;
                                 break;
                             }
                         }
                         if (mDisplay[i].Status != CONNECTED)
-                            dsyslog ("graphlcd plugin: timeout while waiting for display thread '%s'", mDisplay[i].Name.c_str());
+                            dsyslog ("graphlcd plugin: DEBUG: Timeout while waiting for display thread '%s'", mDisplay[i].Name.c_str());
                     }
 
                     if (mDisplay[i].Status != CONNECTED) {
-                        dsyslog ("graphlcd plugin: timeout while waiting for display thread");
+                        dsyslog ("graphlcd plugin: DEBUG: Timeout while waiting for display thread '%s'", mDisplay[i].Name.c_str());
                         count_fail ++;
                     } else {
                         count_ok ++;

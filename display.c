@@ -134,7 +134,7 @@ void cGraphLCDDisplay::Action(void)
         int skipx = mLcd->Width() >> 3;
         int skipy = mLcd->Height() >> 3;
 
-        esyslog("graphlcd plugin: ERROR loading skin\n");
+        esyslog("graphlcd plugin: ERROR loading skin '%s'\n", mSkinConfig->SkinName().c_str());
 
         mLcd->Clear();
         // clear the screen with a filled rectangle using a defined colour to guarantee visible text or 'X'
