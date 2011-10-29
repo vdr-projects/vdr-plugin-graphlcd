@@ -295,7 +295,7 @@ void cGraphLCDDisplay::Action(void)
 
             // update display if BrightnessDelay is exceeded
             if (bActive && (nCurrentBrightness == GraphLCDSetup.BrightnessActive) && 
-                ((uint32_t)((cTimeMs::Now() - LastTimeBrightness)) > (uint32_t)(GraphLCDSetup.BrightnessDelay*1000))) 
+                ((uint32_t)((/*cTimeMs::Now()*/currTimeMs - LastTimeBrightness)) > (uint32_t)(GraphLCDSetup.BrightnessDelay*1000))) 
             {
                 mUpdate = true;
             }
@@ -338,6 +338,8 @@ void cGraphLCDDisplay::Action(void)
                 mGraphLCDState->Update();
 
                 mScreen->Clear(mSkin->GetBackgroundColor());
+
+                mSkin->SetTSEvalTick(currTimeMs);
 
                 GLCD::cSkinDisplay * display = NULL;
 
@@ -453,6 +455,9 @@ void cGraphLCDDisplay::Replaying(bool Starting)
 
 void cGraphLCDDisplay::SetMenuClear()
 {
+    if (mSkin)
+        mSkin->SetTSEvalSwitch(cTimeMs::Now());
+
     mSkinConfig->SetMenuClear();
     if (mState == StateMenu)
     {

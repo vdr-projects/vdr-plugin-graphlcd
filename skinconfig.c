@@ -45,6 +45,14 @@ typedef enum _eTokenId
     tokChannelAlias,
     tokPrivateChannelEnd,
 
+    // current device
+    tokPrivateDeviceStart,
+    tokActualDevice,
+    tokSignalStrength,
+    tokSignalQuality,
+    tokSupportsSignalInfo,
+    tokPrivateDeviceEnd,
+
     tokPrivateRecordingStart,
     tokIsRecording,
     tokRecordings,
@@ -190,6 +198,13 @@ static const std::string Tokens[tokCountToken] =
     "ChannelIsRadio",
     "ChannelAlias",
     "privateChannelEnd",
+
+    "privatePrivateDeviceStart",
+    "ActualDevice",
+    "SignalStrength",
+    "SignalQuality",
+    "SupportsSignalInfo",
+    "privateDeviceEnd",
 
     "privateRecordingStart",
     "IsRecording",
@@ -402,6 +417,47 @@ GLCD::cType cGraphLCDSkinConfig::GetToken(const GLCD::tSkinToken & Token)
             default:
                 break;
         }
+    }
+    else if (Token.Id > tokPrivateDeviceStart && Token.Id < tokPrivateDeviceEnd)
+    {
+        cDevice * currDev = cDevice::ActualDevice();
+        if (currDev)
+        {
+            switch (Token.Id)
+            {
+                case tokActualDevice:
+                {
+                    return currDev->DeviceNumber()+1;  // DeviceNumber() starts with 0 but let output start w/ 1
+                }
+                case tokSignalStrength:
+                {
+#if VDRVERSNUM >= 10719
+                    return currDev->SignalStrength();
+#else
+                    return false;
+#endif
+                }
+                case tokSignalQuality:
+                {
+#if VDRVERSNUM >= 10719
+                    return currDev->SignalQuality();
+#else
+                    return false;
+#endif
+                }
+                case tokSupportsSignalInfo:
+                {
+#if VDRVERSNUM >= 10719
+                    return true;
+#else
+                    return false;
+#endif
+                }
+                default:
+                    break;
+            }
+        }
+        return false;
     }
     else if (Token.Id > tokPrivateRecordingStart && Token.Id < tokPrivateRecordingEnd)
     {

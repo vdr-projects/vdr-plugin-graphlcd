@@ -83,11 +83,12 @@ private:
     /*  __Changed = data has been changed */
     /*  __Active  = plugin/service is available and active */
     /*  __Use     = service is requested in skin (don't call services that wouldn't be used anyway) */
-    bool                   radioChanged,   radioActive,    radioUse;
-    bool                   lcrChanged,     lcrActive,      lcrUse;
-    bool                   femonChanged,   femonActive,    femonUse;
-    bool                   mailboxChanged, mailboxActive,  mailboxUse;
-    bool                   spanChanged,    spanActive,     spanUse;
+    /*  __Init    = ServiceIsAvailable() has been called at least one for this service */
+    bool                   radioChanged,   radioActive,    radioUse,     radioInit;
+    bool                   lcrChanged,     lcrActive,      lcrUse,       lcrInit;
+    bool                   femonChanged,   femonActive,    femonUse,     femonInit;
+    bool                   mailboxChanged, mailboxActive,  mailboxUse,   mailboxInit;
+    bool                   spanChanged,    spanActive,     spanUse,      spanInit;
     // timestamp of last service update request
     uint64_t               radioLastChange, lcrLastChange, femonLastChange, mailboxLastChange, spanLastChange;
     // min. delay between two service update requests

@@ -70,6 +70,7 @@ public:
     const cGraphLCDService * GetServiceObject() const { return mService; }
 
     GLCD::cDriver * GetDriver() const { return mLcd; }
+    GLCD::cSkin * GetSkin() const { return mSkin; }
 
     const eDisplayMode GetDisplayMode() const { return mDisplayMode; }
 protected:

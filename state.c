@@ -651,6 +651,9 @@ void cGraphLCDState::SetChannel(int ChannelNumber)
 
     mutex.Unlock();
 
+    if (mDisplay->GetSkin())
+        mDisplay->GetSkin()->SetTSEvalSwitch(cTimeMs::Now());
+
     mDisplay->Update();
 }
 

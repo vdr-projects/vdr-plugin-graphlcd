@@ -26,11 +26,11 @@ cGraphLCDService::cGraphLCDService(cGraphLCDState * state)
     mState = state;
 
     /* initialise flags for services */
-    radioActive    = false;    radioChanged   = false;    radioUse     = false;
-    lcrActive      = false;    lcrChanged     = false;    lcrUse       = false;
-    femonActive    = false;    femonChanged   = false;    femonUse     = false;
-    mailboxActive  = false;    mailboxChanged = false;    mailboxUse   = false;
-    spanActive     = false;    spanChanged    = false;    spanUse      = false;
+    radioActive    = false;    radioChanged   = false;    radioUse     = false;   radioInit   = false;
+    lcrActive      = false;    lcrChanged     = false;    lcrUse       = false;   lcrInit     = false;
+    femonActive    = false;    femonChanged   = false;    femonUse     = false;   femonInit   = false;
+    mailboxActive  = false;    mailboxChanged = false;    mailboxUse   = false;   mailboxInit = false;
+    spanActive     = false;    spanChanged    = false;    spanUse      = false;   spanInit    = false;
 
     radioLastChange = lcrLastChange = femonLastChange = mailboxLastChange = spanLastChange = 0;
 
@@ -86,33 +86,38 @@ bool cGraphLCDService::ServiceIsAvailable(const std::string & Name, const std::s
     bool firstTime = false;
 
     if (Name == "RadioTextService-v1.0" || Name == "radio") {
-        if (!radioUse) {
+        if (!radioInit) {
+            radioInit = true;
             firstTime = true;
             radioUse = true;
         }
         rvAvail = (mState->GetChannelInfo().isRadio) ? radioActive : false;
     } else if (Name == "LcrService-v1.0" || Name == "lcr") {
-        if (!lcrUse) {
+        if (!lcrInit) {
+            lcrInit = true;
             firstTime = true;
-            lcrUse = true;
+            //lcrUse = true;
         }
         rvAvail = lcrActive;
     } else if (Name == "FemonService-v1.0" || Name == "femon") {
-        if (!femonUse) {
+        if (!femonInit) {
+            femonInit = true;
             firstTime = true;
-            femonUse = true;
+            //femonUse = true;
         }
         rvAvail = femonActive;
     } else if (Name == "MailBox-1.0" || Name == "mailbox") {
-        if (!mailboxUse) {
+        if (!mailboxInit) {
+            mailboxInit = true;
             firstTime = true;
-            mailboxUse = true;
+            //mailboxUse = true;
         }
         rvAvail = mailboxActive;
     } else if (Name == "span") {
-        if (!spanUse) {
+        if (!spanInit) {
+            spanInit = true;
             firstTime = true;
-            spanUse = true;
+            //spanUse = true;
         }
         //spanUse = true;
         rvAvail = spanActive;
@@ -144,7 +149,7 @@ bool cGraphLCDService::ServiceIsAvailable(const std::string & Name, const std::s
         it = opts.find("delay");
         if (it != opts.end()) {
             int delay = atoi( (*it).second.c_str() );
-            if (delay > 100) {
+            if (delay >= 100) {
                 SetServiceUpdateDelay(Name, delay);
             }
         }
