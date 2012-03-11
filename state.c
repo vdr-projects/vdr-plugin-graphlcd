@@ -90,12 +90,16 @@ cGraphLCDState::~cGraphLCDState()
 {
 }
 
-void cGraphLCDState::ChannelSwitch(const cDevice * Device, int ChannelNumber)
-{
+#if VDRVERSNUM >= 10726
+void cGraphLCDState::ChannelSwitch(const cDevice * Device, int ChannelNumber, bool LiveView) {
+#else
+void cGraphLCDState::ChannelSwitch(const cDevice * Device, int ChannelNumber) {
+    bool LiveView = Device->IsPrimaryDevice() && !EITScanner.UsesDevice(Device);
+#endif
     //printf("graphlcd plugin: cGraphLCDState::ChannelSwitch %d %d\n", Device->CardIndex(), ChannelNumber);
     if (GraphLCDSetup.PluginActive)
     {
-        if (ChannelNumber > 0 && Device->IsPrimaryDevice() && !EITScanner.UsesDevice(Device))
+        if (ChannelNumber > 0 && LiveView)
         {
             if (ChannelNumber == cDevice::CurrentChannel())
             {

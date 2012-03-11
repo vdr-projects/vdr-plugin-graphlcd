@@ -4,7 +4,7 @@
  *  state.h  -  status monitor class
  *
  *  (c) 2001-2004 Carsten Siebholz <c.siebholz AT t-online de>
- *  (c)      2010 Wolfgang Astleitner <mrwastl AT users sourceforge net>
+ *  (c) 2010-2012 Wolfgang Astleitner <mrwastl AT users sourceforge net>
  **/
 
 #ifndef _GRAPHLCD_STATE_H_
@@ -128,7 +128,11 @@ private:
     void UpdateEventInfo(void);
     void UpdateReplayInfo(void);
 protected:
+#if VDRVERSNUM >= 10726
+    virtual void ChannelSwitch(const cDevice *Device, int ChannelNumber, bool LiveView);
+#else  
     virtual void ChannelSwitch(const cDevice *Device, int ChannelNumber);
+#endif
     virtual void Recording(const cDevice *Device, const char *Name, const char *FileName, bool On);
     virtual void Replaying(const cControl *Control, const char *Name, const char *FileName, bool On);
     virtual void SetVolume(int Volume, bool Absolute);
