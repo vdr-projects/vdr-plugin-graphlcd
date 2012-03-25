@@ -8,7 +8,7 @@
  *
  * (c) 2001-2004 Carsten Siebholz <c.siebholz AT t-online.de>
  * (c) 2004-2010 Andreas Regel <andreas.regel AT powarman.de>
- * (c) 2010-2011 Wolfgang Astleitner <mrwastl AT users sourceforge net>
+ * (c) 2010-2012 Wolfgang Astleitner <mrwastl AT users sourceforge net>
  */
 
 #include <stdlib.h>
@@ -21,7 +21,6 @@
 
 #include "display.h"
 #include "global.h"
-#include "i18n.h"
 #include "setup.h"
 #include "state.h"
 #include "strfct.h"
