@@ -3,7 +3,7 @@
  *
  *  service.h  -  class for events from external services
  *
- *  (c) 2010-2011 Wolfgang Astleitner <mrwastl AT users sourceforge net>
+ *  (c) 2010-2012 Wolfgang Astleitner <mrwastl AT users sourceforge net>
  *
  *  mailbox-contribution: user 'Keine_Ahnung'
  **/
@@ -96,28 +96,28 @@ bool cGraphLCDService::ServiceIsAvailable(const std::string & Name, const std::s
         if (!lcrInit) {
             lcrInit = true;
             firstTime = true;
-            //lcrUse = true;
+            lcrUse = true;
         }
         rvAvail = lcrActive;
     } else if (Name == "FemonService-v1.0" || Name == "femon") {
         if (!femonInit) {
             femonInit = true;
             firstTime = true;
-            //femonUse = true;
+            femonUse = true;
         }
         rvAvail = femonActive;
     } else if (Name == "MailBox-1.0" || Name == "mailbox") {
         if (!mailboxInit) {
             mailboxInit = true;
             firstTime = true;
-            //mailboxUse = true;
+            mailboxUse = true;
         }
         rvAvail = mailboxActive;
     } else if (Name == "span") {
         if (!spanInit) {
             spanInit = true;
             firstTime = true;
-            //spanUse = true;
+            spanUse = true;
         }
         //spanUse = true;
         rvAvail = spanActive;
