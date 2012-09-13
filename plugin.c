@@ -8,7 +8,7 @@
  *
  * (c) 2001-2004 Carsten Siebholz <c.siebholz AT t-online.de>
  * (c) 2004-2010 Andreas Regel <andreas.regel AT powarman.de>
- * (c) 2010-2011 Wolfgang Astleitner <mrwastl AT users sourceforge net>
+ * (c) 2010-2012 Wolfgang Astleitner <mrwastl AT users sourceforge net>
  * 
  * Contributions:
  * CONNECT / DISCONNect, multi-display support:
@@ -233,7 +233,11 @@ bool cPluginGraphLCD::Initialize()
     }
     while (pos2 != std::string::npos && index < GRAPHLCD_MAX_DISPLAYS);    
 
+#if APIVERSNUM < 10730
     const char* tempConfigDir = ConfigDirectory(kPluginName);
+#else
+    const char* tempConfigDir = ResourceDirectory(kPluginName);
+#endif
     if (!tempConfigDir) {
         return false;
     } else {
