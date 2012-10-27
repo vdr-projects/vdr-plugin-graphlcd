@@ -286,7 +286,7 @@ void cGraphLCDDisplay::Action(void)
 
 
             bool bActive = bBrightnessActive
-                   || (mState != StateNormal)
+                   || (mState == StateMenu)
                    || (GraphLCDSetup.ShowVolume && mShowVolume)
                    || (GraphLCDSetup.ShowMenu && mShowAudio)
                    || (GraphLCDSetup.ShowMessages && mGraphLCDState->ShowMessage())
@@ -494,7 +494,7 @@ void cGraphLCDDisplay::SetBrightness()
 {
     //mutex.Lock();
     bool bActive = bBrightnessActive
-                   || (mState != StateNormal)
+                   || (mState == StateMenu)
                    || (GraphLCDSetup.ShowVolume && mShowVolume)
                    || (GraphLCDSetup.ShowMenu && mShowAudio)
                    || (GraphLCDSetup.ShowMessages && mGraphLCDState->ShowMessage())
