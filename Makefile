@@ -40,6 +40,13 @@ ifeq ($(PLGCFG),)
 endif
 -include $(PLGCFG)
 
+# fallback for building against old VDR versions (like 1.4.7) in the VDR source tree, where you should have Make.config
+ifeq ($(LIBDIR),)
+    LIBDIR = ../../lib
+endif
+INCDIR ?= $(VDRDIR)
+PREFIX ?= /usr
+
 # make sure to have a correct RESDIR
 MYRESDIR = $(call PKGCFG,resdir)
 ifeq ($(MYRESDIR),)
@@ -49,7 +56,7 @@ RESDIR := $(DESTDIR)$(MYRESDIR)/plugins/$(PLUGIN)
 
 # make sure to always have a correct APIVERSION
 ifeq ($(strip $(APIVERSION)),)
-  APIVERSION = $(shell grep 'define APIVERSION ' $(VDRDIR)/config.h | awk '{ print $$3 }' | sed -e 's/"//g')
+  APIVERSION = $(shell grep 'define APIVERSION ' $(VDRDIR)/config.h | cut -d'"' -f2)
 endif
 
 # define this if you built graphlcd-base with freetype:
@@ -59,8 +66,8 @@ HAVE_FREETYPE2 ?= 1
 # either define this setting here or in $VDRDIR/Make.config or in $VDRDIR/Make.global
 HAVE_VALID_FEMON ?= 0
 
-# defines the path to the graphlcd.conf file. if not defined, path = "< plugin cfg dir >/graphlcd.conf"
-PLUGIN_GRAPHLCDCONF ?= "$(CONFDIR)/plugins/$(PLUGIN)/graphlcd.conf"
+# define the path to the graphlcd.conf file. if not defined, path = "/etc/graphlcd.conf"
+#PLUGIN_GRAPHLCDCONF = "$(CONFDIR)/plugins/$(PLUGIN)/graphlcd.conf"
 
 # defines if installing of TTF should be omitted (default is to install)
 SKIP_INSTALL_TTF ?= 0
@@ -97,7 +104,7 @@ ifneq ($(HAVE_VALID_FEMON), 0)
     DEFINES += -DGRAPHLCD_SERVICE_FEMON_VALID
 endif
 
-# if a valid and/or fixed femon-plugin is available
+# if a graphlcd.conf different than the default one in /etc is provided
 ifdef PLUGIN_GRAPHLCDCONF
     DEFINES += -DPLUGIN_GRAPHLCDCONF='${PLUGIN_GRAPHLCDCONF}'
 endif
@@ -116,12 +123,11 @@ endif
 
 OBJS = alias.o common.o display.o menu.o plugin.o setup.o skinconfig.o state.o strfct.o service.o extdata.o
 
-GETTEXTSUPPORT := $(shell if [ "$(APIVERSION)" \< "1.6.0" ]; then echo true; fi)
-#ifdef GETTEXTSUPPORT
+ifneq ($(shell grep -l 'Phrases' $(VDRDIR)/i18n.c),$(VDRDIR)/i18n.c)
     I18NTARGET = i18n
-#else
-#    OBJS += i18n.o
-#endif
+else
+    OBJS += i18n.o
+endif
 
 ### The main target:
 
