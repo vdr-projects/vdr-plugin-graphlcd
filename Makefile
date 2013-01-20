@@ -34,8 +34,10 @@ APIVERSION = $(call PKGCFG,apiversion)
 
 ### Allow user defined options to overwrite defaults:
 
-ifeq ($(PLGCFG),)
+ifeq ($(VDRDIR),)
     VDRDIR ?= ../../..
+endif
+ifeq ($(PLGCFG),)
     PLGCFG = $(VDRDIR)/Make.config
 endif
 -include $(PLGCFG)
