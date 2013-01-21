@@ -37,8 +37,17 @@ APIVERSION = $(call PKGCFG,apiversion)
 ifeq ($(VDRDIR),)
     VDRDIR ?= ../../..
 endif
+
 ifeq ($(PLGCFG),)
     PLGCFG = $(VDRDIR)/Make.config
+
+    # test if plgcfg is given and set to an empty value in vdr.pc
+    # if so: assume that VDR >= 1.7.33 and disallow Make.config
+    ifneq ($(wildcard $(VDRDIR)/vdr.pc),)
+        ifneq ($(shell grep -e '^plgcfg' $(VDRDIR)/vdr.pc),)
+            PLGCFG = 
+        endif
+    endif
 endif
 -include $(PLGCFG)
 
