@@ -1,11 +1,12 @@
 #
 # Makefile for a Video Disk Recorder plugin
 #
+# Compliant with: VDR >= 1.7.34 (new Makefile style) but also VDR 1.4.x, VDR 1.6.x, up to VDR 1.7.33 ('old style Makefiles')
+#
 # $Id$
 
+
 # The official name of this plugin.
-# This name will be used in the '-P...' option of VDR to load the plugin.
-# By default the main source file also carries this name.
 
 PLUGIN = graphlcd
 
@@ -17,8 +18,8 @@ VERSION = $(shell grep 'static const char \*VERSION *=' plugin.c | awk '{ print 
 
 # Use package data if installed...otherwise assume we're under the VDR source directory:
 PKGCFG = $(if $(VDRDIR),$(shell pkg-config --variable=$(1) $(VDRDIR)/vdr.pc),$(shell pkg-config --variable=$(1) vdr || pkg-config --variable=$(1) ../../../vdr.pc))
-LIBDIR = $(DESTDIR)$(call PKGCFG,libdir)
-LOCDIR = $(DESTDIR)$(call PKGCFG,locdir)
+LIBDIR = $(call PKGCFG,libdir)
+LOCDIR = $(call PKGCFG,locdir)
 PLGCFG = $(call PKGCFG,plgcfg)
 #
 TMPDIR ?= /tmp
@@ -26,49 +27,105 @@ TMPDIR ?= /tmp
 ### The compiler options:
 
 export CFLAGS   = $(call PKGCFG,cflags)
-export CXXFLAGS = $(call PKGCFG,cxxflags) $(call PKGCFG,plugincflags)
+export CXXFLAGS = $(call PKGCFG,cxxflags)
 
 ### The version number of VDR's plugin API:
 
 APIVERSION = $(call PKGCFG,apiversion)
 
-### Allow user defined options to overwrite defaults:
 
-ifeq ($(VDRDIR),)
-    VDRDIR ?= ../../..
+# FLAG_PKGCFG: is pkg-config existing for vdr?
+#    'auto'    : via pkg-config vdr,
+#    'absolute': via pkg-config $(VDRDIR)/vdr.pc,
+#    'relative': via pkg-config ../../../vdr.pc,
+#    'no'      : compiling w/o pkg-config
+FLAG_PKGCFG=no
+ifneq ($(VDRDIR),)
+  ifeq ($(shell pkg-config --exists $(VDRDIR)/vdr.pc && echo yes),yes)
+    FLAG_PKGCFG=absolute
+  endif
+else
+  ifeq ($(shell pkg-config --exists vdr && echo yes),yes)
+    FLAG_PKGCFG=auto
+  else
+    ifeq ($(shell pkg-config --exists ../../../vdr.pc && echo yes),yes)
+      FLAG_PKGCFG=relative
+    endif
+  endif
 endif
 
-ifeq ($(PLGCFG),)
-    PLGCFG = $(VDRDIR)/Make.config
+ifeq ($(strip $(APIVERSION)),)
+  # APIVERSION is empty? either pkg-config was not successful or vdr is too old:
+  # assume in-vdr-tree compilation: set VDRDIR Makefile-wide
+  VDRDIR ?= ../../..
+  APIVERSION = $(shell grep 'define APIVERSION ' $(VDRDIR)/config.h | cut -d'"' -f2)
+endif
 
-    # test if plgcfg is given and set to an empty value in vdr.pc
-    # if so: assume that VDR >= 1.7.33 and disallow Make.config
-    ifneq ($(wildcard $(VDRDIR)/vdr.pc),)
-        ifneq ($(shell grep -e '^plgcfg' $(VDRDIR)/vdr.pc),)
-            PLGCFG = 
-        endif
+# still no APIVERSION? bail out
+ifeq ($(APIVERSION),)
+  $(error no APIVERSION found, bailing out ...)
+endif
+
+# get numeric VDR version number for numeric comparisons (eg: 1.7.47 -> 10747)
+APIVERSNUM = $(shell printf "%2d%02d%02d" $(subst ., ,$(APIVERSION)))
+
+# non-Makefile-wide VDRDIR only for internal use
+ifeq ($(VDRDIR),)
+  TEMP_VDRDIR = ../../..
+else
+  TEMP_VDRDIR = $(VDRDIR)
+endif
+
+# post 1.7.33 vdr?
+FLAG_NEWSTYLE=false
+$(shell [ $(APIVERSNUM) -gt 10733 ] && FLAG_NEWSTYLE=true)
+
+# do some adaptions and defaults for old vdr versions
+ifeq ($(FLAG_NEWSTYLE),false)
+  CXXFLAGS += $(call PKGCFG,plugincflags)
+  export CXXFLAGS
+
+  ifeq ($(LOCDIR),)
+    LOCDIR = $(call PKGCFG,localedir)
+    ifeq ($(LOCDIR),)
+      LOCDIR = $(TEMP_VDRDIR)/locale
     endif
+  endif
+  ifeq ($(LOCDIR),./locale)
+    LOCDIR = $(TEMP_VDRDIR)/locale
+  endif
+
+  ifeq ($(PLGCFG),)
+    PLGCFG = $(TEMP_VDRDIR)/Make.config
+  endif
+
+  # fallbacks
+  ifeq ($(LIBDIR),)
+    LIBDIR = $(TEMP_VDRDIR)/PLUGINS/lib
+  endif
 endif
 -include $(PLGCFG)
 
-# fallback for building against old VDR versions (like 1.4.7) in the VDR source tree, where you should have Make.config
+# some paranoia security checks
 ifeq ($(LIBDIR),)
-    LIBDIR = ../../lib
+  $(error LIBDIR not set, bailing out ...)
 endif
-INCDIR ?= $(VDRDIR)
-PREFIX ?= /usr
+ifeq ($(shell [ $(APIVERSNUM) -ge 10500 ] && echo yes),yes)
+  ifeq ($(LOCDIR),)
+    $(error LOCDIR not set, bailing out ...)
+  endif
+endif
+
+  
+### Allow user defined options to overwrite defaults:
 
 # make sure to have a correct RESDIR
 MYRESDIR = $(call PKGCFG,resdir)
 ifeq ($(MYRESDIR),)
     MYRESDIR = /usr/share/vdr
 endif
-RESDIR := $(DESTDIR)$(MYRESDIR)/plugins/$(PLUGIN)
+RESDIR := $(MYRESDIR)/plugins/$(PLUGIN)
 
-# make sure to always have a correct APIVERSION
-ifeq ($(strip $(APIVERSION)),)
-  APIVERSION = $(shell grep 'define APIVERSION ' $(VDRDIR)/config.h | cut -d'"' -f2)
-endif
 
 # define this if you built graphlcd-base with freetype:
 HAVE_FREETYPE2 ?= 1
@@ -86,8 +143,11 @@ SKIP_INSTALL_TTF ?= 0
 # defines if installing of documentation should be omitted (default is to install)
 SKIP_INSTALL_DOC ?= 0
 
+# if no prefix defined: use a default one
+PREFIX ?= /usr
+
 # if we install the documentation ourselves, do it here:
-export INSTALLDOCDIR = $(DESTDIR)$(PREFIX)/share/doc/vdr-$(PLUGIN)-$(VERSION)
+export INSTALLDOCDIR = $(PREFIX)/share/doc/vdr-$(PLUGIN)-$(VERSION)
 
 
 ### The name of the distribution archive:
@@ -101,12 +161,16 @@ SOFILE = libvdr-$(PLUGIN).so
 
 ### Includes and Defines (add further entries here):
 
-INCLUDES += -I./graphlcd-base/ -I$(INCDIR)/include -I$(PREFIX)/include
+#include $(VDRDIR)/include if vdr is not installed via package-systems or the like
+ifneq ($(FLAG_PKGCFG),auto)
+  INCLUDES += -I$(TEMP_VDRDIR)/include
+endif
+INCLUDES += -I./graphlcd-base/ -I$(PREFIX)/include
 
 DEFINES += -DPLUGIN_NAME_I18N='"$(PLUGIN)"'
 
 ifneq ($(HAVE_FREETYPE2), 0)
-    INCLUDES += -I$(PREFIX)/include/freetype2
+    INCLUDES += $(shell pkg-config --cflags freetype2 || echo "-I$(PREFIX)/include/freetype2")
     DEFINES += -DHAVE_FREETYPE2
 endif
 
@@ -134,7 +198,8 @@ endif
 
 OBJS = alias.o common.o display.o menu.o plugin.o setup.o skinconfig.o state.o strfct.o service.o extdata.o
 
-ifneq ($(shell grep -l 'Phrases' $(VDRDIR)/i18n.c),$(VDRDIR)/i18n.c)
+# internationalisation: check if new style (> vdr 1.4.x) or fall back to 1.4.x
+ifeq ($(shell [ $(APIVERSNUM) -ge 10500 ] && echo yes),yes)
     I18NTARGET = i18n
 else
     OBJS += i18n.o
@@ -147,14 +212,14 @@ all: $(SOFILE) $(I18NTARGET)
 ### Implicit rules:
 
 %.o: %.c
-	$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) $<
+	$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) -o $@ $<
 
 ### Dependencies:
 
 MAKEDEP = $(CXX) -MM -MG
 DEPFILE = .dependencies
 $(DEPFILE): Makefile
-	@$(MAKEDEP) $(DEFINES) $(INCLUDES) $(OBJS:%.o=%.c) > $@
+	@$(MAKEDEP) $(CXXFLAGS) $(DEFINES) $(INCLUDES) $(OBJS:%.o=%.c) > $@
 
 -include $(DEPFILE)
 
@@ -163,7 +228,7 @@ $(DEPFILE): Makefile
 PODIR     = po
 I18Npo    = $(wildcard $(PODIR)/*.po)
 I18Nmo    = $(addsuffix .mo, $(foreach file, $(I18Npo), $(basename $(file))))
-I18Nmsgs  = $(addprefix $(LOCDIR)/, $(addsuffix /LC_MESSAGES/vdr-$(PLUGIN).mo, $(notdir $(foreach file, $(I18Npo), $(basename $(file))))))
+I18Nmsgs  = $(addprefix $(DESTDIR)$(LOCDIR)/, $(addsuffix /LC_MESSAGES/vdr-$(PLUGIN).mo, $(notdir $(foreach file, $(I18Npo), $(basename $(file))))))
 I18Npot   = $(PODIR)/$(PLUGIN).pot
 
 %.mo: %.po
@@ -176,7 +241,7 @@ $(I18Npot): $(wildcard *.c)
 	msgmerge -U --no-wrap --no-location --backup=none -q -N $@ $<
 	@touch $@
 
-$(I18Nmsgs): $(LOCDIR)/%/LC_MESSAGES/vdr-$(PLUGIN).mo: $(PODIR)/%.mo
+$(I18Nmsgs): $(DESTDIR)$(LOCDIR)/%/LC_MESSAGES/vdr-$(PLUGIN).mo: $(PODIR)/%.mo
 	install -D -m644 $< $@
 
 .PHONY: i18n
@@ -190,25 +255,25 @@ $(SOFILE): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -shared $(OBJS) -lglcddrivers -lglcdgraphics -lglcdskin -lstdc++ -o $@
 
 install-lib: $(SOFILE)
-	install -D $^ $(LIBDIR)/$^.$(APIVERSION)
+	install -D $^ $(DESTDIR)$(LIBDIR)/$^.$(APIVERSION)
 
 install: install-lib install-i18n resources $(INS_TARGET_TTF) $(INS_TARGET_DOCS)
 
 docs:
-	@install -d $(INSTALLDOCDIR)
-	@install -m 644 README $(INSTALLDOCDIR)
-	@install -m 644 HISTORY $(INSTALLDOCDIR)
+	@install -d $(DESTDIR)$(INSTALLDOCDIR)
+	@install -m 644 README $(DESTDIR)$(INSTALLDOCDIR)
+	@install -m 644 HISTORY $(DESTDIR)$(INSTALLDOCDIR)
 
 ttf-fonts:
-	@install -d $(RESDIR)/fonts
-	@install -m 644 $(PLUGIN)/fonts/*.ttf $(RESDIR)/fonts
+	@install -d $(DESTDIR)$(RESDIR)/fonts
+	@install -m 644 $(PLUGIN)/fonts/*.ttf $(DESTDIR)$(RESDIR)/fonts
 
 resources:
-	@install -d $(RESDIR)/fonts
-	@install -m 644 $(PLUGIN)/channels.alias $(RESDIR)
-	@cp -a $(PLUGIN)/logos $(RESDIR)
-	@cp -a $(PLUGIN)/skins $(RESDIR)
-	@install -m 644 $(PLUGIN)/fonts/*.fnt $(RESDIR)/fonts
+	@install -d $(DESTDIR)$(RESDIR)/fonts
+	@install -m 644 $(PLUGIN)/channels.alias $(DESTDIR)$(RESDIR)
+	@cp -a $(PLUGIN)/logos $(DESTDIR)$(RESDIR)
+	@cp -a $(PLUGIN)/skins $(DESTDIR)$(RESDIR)
+	@install -m 644 $(PLUGIN)/fonts/*.fnt $(DESTDIR)$(RESDIR)/fonts
 
 dist: $(I18Npo) clean
 	@-rm -rf $(TMPDIR)/$(ARCHIVE)
@@ -223,5 +288,5 @@ clean:
 	@-rm -f $(OBJS) $(DEPFILE) *.so *.tgz core* *~
 
 uninstall:
-	@rm -rf $(INSTALLDOCDIR)
-	@rm -rf $(RESDIR)
+	@-rm -rf $(DESTDIR)$(INSTALLDOCDIR)
+	@-rm -rf $(DESTDIR)$(RESDIR)
