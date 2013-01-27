@@ -83,6 +83,10 @@ $(shell [ $(APIVERSNUM) -gt 10733 ] && FLAG_NEWSTYLE=true)
 # do some adaptions and defaults for old vdr versions
 ifeq ($(FLAG_NEWSTYLE),false)
   CXXFLAGS += $(call PKGCFG,plugincflags)
+  # ensure -fPIC
+  ifeq ($(findstring -fPIC,$(CXXFLAGS)),)
+    CXXFLAGS += -fPIC
+  endif
   export CXXFLAGS
 
   ifeq ($(LOCDIR),)
@@ -91,6 +95,7 @@ ifeq ($(FLAG_NEWSTYLE),false)
       LOCDIR = $(TEMP_VDRDIR)/locale
     endif
   endif
+  # avoid relative locale path
   ifeq ($(LOCDIR),./locale)
     LOCDIR = $(TEMP_VDRDIR)/locale
   endif
@@ -261,6 +266,7 @@ install: install-lib install-i18n resources $(INS_TARGET_TTF) $(INS_TARGET_DOCS)
 
 docs:
 	@install -d $(DESTDIR)$(INSTALLDOCDIR)
+	@install -m 644 COPYING $(DESTDIR)$(INSTALLDOCDIR)
 	@install -m 644 README $(DESTDIR)$(INSTALLDOCDIR)
 	@install -m 644 HISTORY $(DESTDIR)$(INSTALLDOCDIR)
 
@@ -290,3 +296,6 @@ clean:
 uninstall:
 	@-rm -rf $(DESTDIR)$(INSTALLDOCDIR)
 	@-rm -rf $(DESTDIR)$(RESDIR)
+	@-rm -f  $(DESTDIR)$(LOCDIR)/*/LC_MESSAGES/vdr-$(PLUGIN).mo
+	@-rm -f  $(DESTDIR)$(LIBDIR)/$(SOFILE).$(APIVERSION)
+
