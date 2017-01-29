@@ -675,8 +675,12 @@ void cGraphLCDState::UpdateChannelInfo(void)
     }
 
     mutex.Lock();
-
+#if APIVERSNUM < 20301
     cChannel * ch = Channels.GetByNumber(mChannel.number);
+#else
+    LOCK_CHANNELS_READ;
+    const cChannel * ch = Channels->GetByNumber(mChannel.number);
+#endif
     if (ch)
     {
         mChannel.id = ch->GetChannelID();
@@ -713,8 +717,11 @@ void cGraphLCDState::UpdateEventInfo(void)
 {
     mutex.Lock();
     const cEvent * present = NULL, * following = NULL;
+#if APIVERSNUM < 20301
     cSchedulesLock schedulesLock;
-
+#else
+    LOCK_SCHEDULES_READ;
+#endif
     // backup current values
     std::string currTitle       = mPresent.title;
     std::string currShortText   = mPresent.shortText;
@@ -737,8 +744,11 @@ void cGraphLCDState::UpdateEventInfo(void)
     mFollowing.title = "";
     mFollowing.shortText = "";
     mFollowing.description = "";
-
+#if APIVERSNUM < 20301
     const cSchedules * schedules = cSchedules::Schedules(schedulesLock);
+#else
+    const cSchedules * schedules = Schedules;
+#endif
     if (mChannel.id.Valid())
     {
         if (schedules)
