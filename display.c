@@ -492,7 +492,7 @@ void cGraphLCDDisplay::SetMenuCurrent()
 
 void cGraphLCDDisplay::SetBrightness()
 {
-    //mutex.Lock();
+    mMutex.Lock();
     bool bActive = bBrightnessActive
                    || (mState == StateMenu)
                    || (GraphLCDSetup.ShowVolume && mShowVolume)
@@ -521,7 +521,7 @@ void cGraphLCDDisplay::SetBrightness()
             }
         }
     }
-    //mutex.Unlock();
+    mMutex.Unlock();
 }
 
 void cGraphLCDDisplay::ForceUpdateBrightness() {
