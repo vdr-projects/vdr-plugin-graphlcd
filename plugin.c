@@ -39,7 +39,7 @@
 
 
 static const char * kPluginName = "graphlcd";
-static const char *VERSION        = "0.3.0";
+static const char *VERSION        = "1.0.0";
 static const char *DESCRIPTION    = trNOOP("Output to graphic LCD");
 static const char *MAINMENUENTRY  = NULL;
 

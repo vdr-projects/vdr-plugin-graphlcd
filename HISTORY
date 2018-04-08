@@ -1,7 +1,13 @@
 VDR Plugin 'graphlcd' Revision History
 -------------------------------------
 
-2010-03-01: Version 0.1.6 
+2018-04-08: Version 1.0.0
+- Skin support
+- Support for current VDR versions
+- Makefile adapted to match the new "standard" with current VDR versions
+- Many other fixes and new features, not listed here :P
+
+2010-03-01: Version 0.1.6
 - added UTF8 support (vdr-graphlcd-0.1.5-utf8_i18n.diff)
 - added include path graphlcd-base/ in Makefile
 - added -L./graphlcd-base/glcddrivers/ & glcdgraphics/ in Makefile if graphlcd-base is not installed system-wide
