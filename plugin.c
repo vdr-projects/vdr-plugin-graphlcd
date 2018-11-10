@@ -9,7 +9,7 @@
  * (c) 2001-2004 Carsten Siebholz <c.siebholz AT t-online.de>
  * (c) 2004-2010 Andreas Regel <andreas.regel AT powarman.de>
  * (c) 2010-2012 Wolfgang Astleitner <mrwastl AT users sourceforge net>
- * 
+ *
  * Contributions:
  * CONNECT / DISCONNect, multi-display support:
  * (c) 2011      Lutz Neumann <superelchi AT wolke7.net>
@@ -39,7 +39,7 @@
 
 
 static const char * kPluginName = "graphlcd";
-static const char *VERSION        = "1.0.0";
+static const char *VERSION        = "1.0.1";
 static const char *DESCRIPTION    = trNOOP("Output to graphic LCD");
 static const char *MAINMENUENTRY  = NULL;
 
