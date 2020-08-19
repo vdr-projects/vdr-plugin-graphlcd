@@ -1,6 +1,9 @@
 VDR Plugin 'graphlcd' Revision History
 -------------------------------------
 
+2020-08-19: Version 1.0.2
+- Fixed VDR version detection in Makefile
+
 2018-11-10: Version 1.0.1
 - Improved "trim" function which doesn't cause negative size_type values
 
