@@ -77,8 +77,7 @@ else
 endif
 
 # post 1.7.33 vdr?
-FLAG_NEWSTYLE=false
-$(shell [ $(APIVERSNUM) -gt 10733 ] && FLAG_NEWSTYLE=true)
+FLAG_NEWSTYLE = $(shell [ $(APIVERSNUM) -gt 10733 ] && echo true || echo false)
 
 # do some adaptions and defaults for old vdr versions
 ifeq ($(FLAG_NEWSTYLE),false)
