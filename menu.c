@@ -87,7 +87,7 @@ void cGraphLCDMenuSetup::Store()
 	SetupStore("ShowVolume",  GraphLCDSetup.ShowVolume = newGraphLCDSetup.ShowVolume);
 	SetupStore("ShowNotRecording", GraphLCDSetup.ShowNotRecording = newGraphLCDSetup.ShowNotRecording);
 	SetupStore("IdentifyReplayType", GraphLCDSetup.IdentifyReplayType = newGraphLCDSetup.IdentifyReplayType);
-	SetupStore("ReplayLogo", GraphLCDSetup.ShowReplayLogo = newGraphLCDSetup.ShowReplayLogo);
+	SetupStore("ShowReplayLogo", GraphLCDSetup.ShowReplayLogo = newGraphLCDSetup.ShowReplayLogo);
 	SetupStore("ModifyReplayString", GraphLCDSetup.ModifyReplayString = newGraphLCDSetup.ModifyReplayString);
 	SetupStore("ScrollMode", GraphLCDSetup.ScrollMode = newGraphLCDSetup.ScrollMode);
 	SetupStore("ScrollSpeed", GraphLCDSetup.ScrollSpeed = newGraphLCDSetup.ScrollSpeed);
