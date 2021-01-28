@@ -674,7 +674,9 @@ void cGraphLCDState::UpdateChannelInfo(void)
       mutex.Unlock();
     }
 
+#if APIVERSNUM < 20404
     mutex.Lock();
+#endif
 #if APIVERSNUM < 20301
     cChannel * ch = Channels.GetByNumber(mChannel.number);
 #else
@@ -710,7 +712,9 @@ void cGraphLCDState::UpdateChannelInfo(void)
         mChannel.isRadio = false;
     }
 
+#if APIVERSNUM < 20404
     mutex.Unlock();
+#endif
 }
 
 void cGraphLCDState::UpdateEventInfo(void)
