@@ -1,6 +1,6 @@
 VDR Plugin 'graphlcd' Revision History
 -------------------------------------
-2021-01-24
+2021-01-24: Version 1.0.3
 - [pbiering] fix deadlock for vdr >= 2.4.4 (at least found here) in case of deleting a channel
 
 2021-01-28
