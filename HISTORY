@@ -1,6 +1,9 @@
 VDR Plugin 'graphlcd' Revision History
 -------------------------------------
 
+2021-01-28
+- Import reviewed 'ReelBox' frontpanel skin
+
 2021-01-17
 - Fix name inconsistency between read and write of setup config value "ShowReplayLogo"
 
