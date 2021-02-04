@@ -2,8 +2,8 @@ VDR Plugin 'graphlcd' Revision History
 -------------------------------------
 
 2021-02-04:
-- [pbiering] add support for new feature: IsRecording1/2/3 and Recording1/2/3
-- [pbiering] add support for 3 dedicated recording lines and symbols: IsRecording1/2/3 and Recording1/2/3
+- [pbiering] add support for new feature: NumRecordings and ArrayRecordings
+- [pbiering] extend reelbox.skin for using NumRecordings and ArrayRecordings (up to 3)
 - [pbiering] fix Wformat-truncation Wliteral-suffix. log levels
 
 2021-01-24: Version 1.0.3
