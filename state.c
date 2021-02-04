@@ -951,6 +951,28 @@ std::string cGraphLCDState::Recordings(int CardNumber, int selector)
     return ret;
 }
 
+int cGraphLCDState::NumRecordings(int CardNumber)
+{
+    std::string ret = "";
+    std::vector <tRecording>::iterator it;
+    int count = 0;
+
+    mutex.Lock();
+    // dsyslog("%s/%s: called CardNumber=%d", PLUGIN_NAME_I18N, __FUNCTION__, CardNumber);
+    it = mRecordings.begin();
+    while (it != mRecordings.end())
+    {
+        if (CardNumber == -1 || it->deviceNumber == CardNumber)
+        {
+          count++;
+        }
+        it++;
+    }
+    mutex.Unlock();
+
+    return count;
+}
+
 tOsdState cGraphLCDState::GetOsdState()
 {
     tOsdState ret;

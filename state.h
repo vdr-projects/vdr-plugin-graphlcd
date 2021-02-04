@@ -160,6 +160,7 @@ public:
     tReplayState GetReplayState();
     bool IsRecording(int CardNumber, int selector);
     std::string Recordings(int CardNumber, int selector);
+    int NumRecordings(int CardNumber);
     tOsdState GetOsdState();
     void ResetOsdStateScroll();
     tVolumeState GetVolumeState();
