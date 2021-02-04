@@ -872,15 +872,24 @@ tReplayState cGraphLCDState::GetReplayState()
     return ret;
 }
 
-bool cGraphLCDState::IsRecording(int CardNumber)
+bool cGraphLCDState::IsRecording(int CardNumber, int selector)
 {
     bool ret = false;
     std::vector <tRecording>::iterator it;
+    int count = 0;
 
     mutex.Lock();
+    // dsyslog("%s/%s: called CardNumber=%d selector=%d mRecordings.size=%lu", PLUGIN_NAME_I18N, __FUNCTION__, CardNumber, selector, mRecordings.size());
     if (CardNumber == -1 && mRecordings.size() > 0)
     {
+      if (selector > 0) {
+        if (mRecordings.size() >= (long unsigned int) selector) {
+          // dsyslog("%s/%s: selector hit CardNumber=%d selector=%d mRecordings.size=%lu", PLUGIN_NAME_I18N, __FUNCTION__, CardNumber, selector, mRecordings.size());
+          ret = true;
+        }
+      } else {
         ret = true;
+      }
     }
     else
     {
@@ -889,8 +898,17 @@ bool cGraphLCDState::IsRecording(int CardNumber)
         {
             if (it->deviceNumber == CardNumber)
             {
+	      count++;
+	      if (selector > 0) {
+                if (count == selector) {
+                  // dsyslog("%s/%s: selector hit CardNumber=%d selector=%d count=%d", PLUGIN_NAME_I18N, __FUNCTION__, CardNumber, selector, count);
+                  ret = true;
+                  break;
+	        }
+	      } else {
                 ret = true;
                 break;
+	      }
             }
             it++;
         }
@@ -900,20 +918,31 @@ bool cGraphLCDState::IsRecording(int CardNumber)
     return ret;
 }
 
-std::string cGraphLCDState::Recordings(int CardNumber)
+std::string cGraphLCDState::Recordings(int CardNumber, int selector)
 {
     std::string ret = "";
     std::vector <tRecording>::iterator it;
+    int count = 0;
 
     mutex.Lock();
+    // dsyslog("%s/%s: called CardNumber=%d selector=%d", PLUGIN_NAME_I18N, __FUNCTION__, CardNumber, selector);
     it = mRecordings.begin();
     while (it != mRecordings.end())
     {
         if (CardNumber == -1 || it->deviceNumber == CardNumber)
         {
+          count++;
+          if (selector > 0) {
+            if (count == selector) {
+              // dsyslog("%s/%s: selector hit CardNumber=%d selector=%d count=%d", PLUGIN_NAME_I18N, __FUNCTION__, CardNumber, selector, count);
+              ret += it->name;
+              break;
+            }
+          } else {
             if (ret.length() > 0)
                 ret += "\n";
             ret += it->name;
+          }
         }
         it++;
     }

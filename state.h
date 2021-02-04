@@ -158,8 +158,8 @@ public:
     tEvent GetPresentEvent();
     tEvent GetFollowingEvent();
     tReplayState GetReplayState();
-    bool IsRecording(int CardNumber);
-    std::string Recordings(int CardNumber);
+    bool IsRecording(int CardNumber, int selector);
+    std::string Recordings(int CardNumber, int selector);
     tOsdState GetOsdState();
     void ResetOsdStateScroll();
     tVolumeState GetVolumeState();

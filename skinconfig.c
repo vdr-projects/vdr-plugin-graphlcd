@@ -55,7 +55,13 @@ typedef enum _eTokenId
 
     tokPrivateRecordingStart,
     tokIsRecording,
+    tokIsRecording1,
+    tokIsRecording2,
+    tokIsRecording3,
     tokRecordings,
+    tokRecording1,
+    tokRecording2,
+    tokRecording3,
     tokPrivateRecordingEnd,
 
     // present event
@@ -208,7 +214,13 @@ static const std::string Tokens[tokCountToken] =
 
     "privateRecordingStart",
     "IsRecording",
+    "IsRecording1",
+    "IsRecording2",
+    "IsRecording3",
     "Recordings",
+    "Recording1",
+    "Recording2",
+    "Recording3",
     "privateRecordingEnd",
 
     "privatePresentStart",
@@ -466,14 +478,50 @@ GLCD::cType cGraphLCDSkinConfig::GetToken(const GLCD::tSkinToken & Token)
             case tokIsRecording:
             {
                 if (Token.Attrib.Type == GLCD::aNumber)
-                    return mState->IsRecording(Token.Attrib.Number);
-                return mState->IsRecording(-1);
+                    return mState->IsRecording(Token.Attrib.Number, 0);
+                return mState->IsRecording(-1, 0);
+            }
+            case tokIsRecording1:
+            {
+                if (Token.Attrib.Type == GLCD::aNumber)
+                    return mState->IsRecording(Token.Attrib.Number, 1);
+                return mState->IsRecording(-1, 1);
+            }
+            case tokIsRecording2:
+            {
+                if (Token.Attrib.Type == GLCD::aNumber)
+                    return mState->IsRecording(Token.Attrib.Number, 2);
+                return mState->IsRecording(-1, 2);
+            }
+            case tokIsRecording3:
+            {
+                if (Token.Attrib.Type == GLCD::aNumber)
+                    return mState->IsRecording(Token.Attrib.Number, 3);
+                return mState->IsRecording(-1, 3);
             }
             case tokRecordings:
             {
                 if (Token.Attrib.Type == GLCD::aNumber)
-                    return mState->Recordings(Token.Attrib.Number);
-                return mState->Recordings(-1);
+                    return mState->Recordings(Token.Attrib.Number, 0);
+                return mState->Recordings(-1, 0);
+            }
+            case tokRecording1:
+            {
+                if (Token.Attrib.Type == GLCD::aNumber)
+                    return mState->Recordings(Token.Attrib.Number, 1);
+                return mState->Recordings(-1, 1);
+            }
+            case tokRecording2:
+            {
+                if (Token.Attrib.Type == GLCD::aNumber)
+                    return mState->Recordings(Token.Attrib.Number, 2);
+                return mState->Recordings(-1, 2);
+            }
+            case tokRecording3:
+            {
+                if (Token.Attrib.Type == GLCD::aNumber)
+                    return mState->Recordings(Token.Attrib.Number, 3);
+                return mState->Recordings(-1, 3);
             }
             default:
                 break;
