@@ -1,5 +1,11 @@
 VDR Plugin 'graphlcd' Revision History
 -------------------------------------
+
+2021-02-04:
+- [pbiering] add support for new feature: IsRecording1/2/3 and Recording1/2/3
+- [pbiering] add support for 3 dedicated recording lines and symbols: IsRecording1/2/3 and Recording1/2/3
+- [pbiering] fix Wformat-truncation Wliteral-suffix. log levels
+
 2021-01-24: Version 1.0.3
 - [pbiering] fix deadlock for vdr >= 2.4.4 (at least found here) in case of deleting a channel
 
