@@ -128,7 +128,7 @@ cPluginGraphLCD::~cPluginGraphLCD()
 
 const char * cPluginGraphLCD::CommandLineHelp()
 {
-    return "  -c, --config=CFG             use CFG as driver config file (default is \""PLUGIN_GRAPHLCDCONF"\")\n"
+    return "  -c, --config=CFG             use CFG as driver config file (default is \"" PLUGIN_GRAPHLCDCONF "\")\n"
            "  -d, --display=DISP[,DISP]... use display DISP for output or if DISP=none: start w/o any display\n"
            "  -s, --skin=SKIN[,SKIN]...    use skin SKIN (default is \"default\")\n"
            "  -p, --skinspath=PATH         use path PATH for skins (default is \"<plugin_config>/skins/\")\n";
