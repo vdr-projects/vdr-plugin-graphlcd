@@ -253,7 +253,7 @@
     <text x="0" y="#PresentShortTextY" condition="gt(#ProginfoLines,2)" width="#PresentShortTextW" height="FontLineHeight('FontTitleSmall')" color="#ColPresentTitle" align="left" font="FontTitleSmall">
       {PresentShortText}
     </text>
-    <block condition="{FollowingValid}">
+    <block condition="and({FollowingValid},not({IsRecording}))">
       <text x="0" y="#FollowingTitleY" condition="or(gt(#ProginfoLines,3),and(ge(#ProginfoLines,2),not({IsRecording})))" height="FontLineHeight('FontInfoSmall')" color="#ColPresentTitle" align="left" font="FontInfoSmall">
         {FollowingStartDateTime:%H\:%M}
       </text>
@@ -265,11 +265,20 @@
       </text>
     </block>
 
-    <rectangle x1="0" x2="-1" y="#RecordingsLineY" height="#LineThickness" condition="{IsRecording}" color="#ColBorder" filled="yes"/>
-    <image x="0" y="#RecordingsSymbolY" color="#ColSymbol" path="#SymbolRecording" condition="{IsRecording}"/>
-    <text x1="add(#SymbolW,2)" x2="-1" y="#RecordingsTextY" height="FontLineHeight('FontInfoSmall2')" color="#ColRecText" align="left" font="FontInfoSmall2">
-      {Recordings}
-    </text>
+    <block condition="{IsRecording1}">
+      <image x="0" y="#FollowingTitleY" color="#ColSymbol" path="#SymbolRecording"/>
+      <text x1="add(#SymbolW,2)" x2="-1" y="add(#FollowingTitleY,1)" height="FontLineHeight('FontInfoSmall2')" color="#ColRecText" align="left" font="FontInfoSmall2">{Recording1}</text>
+    </block>
+
+    <block condition="{IsRecording2}">
+      <image x="0" y="add(#FollowingTitleY,FontLineHeight('FontInfoSmall2'),1)" color="#ColSymbol" path="#SymbolRecording"/>
+      <text x1="add(#SymbolW,2)" x2="-1" y="add(#FollowingTitleY,FontLineHeight('FontInfoSmall2'),2)" height="FontLineHeight('FontInfoSmall2')" color="#ColRecText" align="left" font="FontInfoSmall2">{Recording2}</text>
+    </block>
+
+    <block condition="{IsRecording3}">
+      <image x="0" y="add(#FollowingTitleY,mul(FontLineHeight('FontInfoSmall2'),2),2)" color="#ColSymbol" path="#SymbolRecording"/>
+      <text x1="add(#SymbolW,2)" x2="-1" y="add(#FollowingTitleY,mul(FontLineHeight('FontInfoSmall2'),2),3)" height="FontLineHeight('FontInfoSmall2')" color="#ColRecText" align="left" font="FontInfoSmall2">{Recording3}</text>
+    </block>
   </display>
 
   <display id="volume">
