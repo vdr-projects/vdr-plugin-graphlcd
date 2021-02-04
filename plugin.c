@@ -341,14 +341,14 @@ void cPluginGraphLCD::MainThreadHook()
         {
             if (mDisplay[index].Disp->Active())
             {
-                dsyslog("graphlcd plugin: DEBUG: Display thread for %s is ready", mDisplay[index].Name.c_str());
+                isyslog("graphlcd plugin: INFO: Display thread for %s is ready", mDisplay[index].Name.c_str());
                 mDisplay[index].Status = CONNECTED;
             }
             else
             {
                 if ( (cTimeMs::Now() - mDisplay[index].to_timestamp) > (uint64_t) 10000)
                 {
-                    dsyslog ("graphlcd plugin: DEBUG: Timeout while waiting for display thread %s", mDisplay[index].Name.c_str());
+                    esyslog ("graphlcd plugin: ERROR: Timeout while waiting for display thread %s", mDisplay[index].Name.c_str());
                     /* no activity after 10 secs: display is unusable */
                     //GraphLCDSetup.PluginActive = 0;
                     DisconnectDisplay(index);
