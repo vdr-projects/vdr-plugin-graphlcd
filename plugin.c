@@ -510,9 +510,9 @@ cString cPluginGraphLCD::SVDRPCommand(const char *Command, const char *Option, i
                     }     
                 }
             }
-            char buf[25];
+            char buf[64];
             std::string retval = "RECONNECT status: ";
-            snprintf(buf, 24, "OK = %1d, FAILED = %1d", count_ok, count_fail);
+            snprintf(buf, sizeof(buf), "OK = %1d, FAILED = %1d", count_ok, count_fail);
             retval += buf;
             return retval.c_str();
         }
