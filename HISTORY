@@ -1,5 +1,11 @@
 VDR Plugin 'graphlcd' Revision History
 -------------------------------------
+
+2021-02-04:
+- [pbiering] add support for new feature: NumRecordings and ListRecordings
+- [pbiering] extend reelbox.skin for using NumRecordings and ListRecordings (up to 3)
+- [pbiering] fix Wformat-truncation Wliteral-suffix. log levels
+
 2021-01-24: Version 1.0.3
 - [pbiering] fix deadlock for vdr >= 2.4.4 (at least found here) in case of deleting a channel
 

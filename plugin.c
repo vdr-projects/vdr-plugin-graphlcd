@@ -128,7 +128,7 @@ cPluginGraphLCD::~cPluginGraphLCD()
 
 const char * cPluginGraphLCD::CommandLineHelp()
 {
-    return "  -c, --config=CFG             use CFG as driver config file (default is \""PLUGIN_GRAPHLCDCONF"\")\n"
+    return "  -c, --config=CFG             use CFG as driver config file (default is \"" PLUGIN_GRAPHLCDCONF "\")\n"
            "  -d, --display=DISP[,DISP]... use display DISP for output or if DISP=none: start w/o any display\n"
            "  -s, --skin=SKIN[,SKIN]...    use skin SKIN (default is \"default\")\n"
            "  -p, --skinspath=PATH         use path PATH for skins (default is \"<plugin_config>/skins/\")\n";
@@ -341,14 +341,14 @@ void cPluginGraphLCD::MainThreadHook()
         {
             if (mDisplay[index].Disp->Active())
             {
-                dsyslog("graphlcd plugin: DEBUG: Display thread for %s is ready", mDisplay[index].Name.c_str());
+                isyslog("graphlcd plugin: INFO: Display thread for %s is ready", mDisplay[index].Name.c_str());
                 mDisplay[index].Status = CONNECTED;
             }
             else
             {
                 if ( (cTimeMs::Now() - mDisplay[index].to_timestamp) > (uint64_t) 10000)
                 {
-                    dsyslog ("graphlcd plugin: DEBUG: Timeout while waiting for display thread %s", mDisplay[index].Name.c_str());
+                    esyslog ("graphlcd plugin: ERROR: Timeout while waiting for display thread %s", mDisplay[index].Name.c_str());
                     /* no activity after 10 secs: display is unusable */
                     //GraphLCDSetup.PluginActive = 0;
                     DisconnectDisplay(index);
@@ -510,9 +510,9 @@ cString cPluginGraphLCD::SVDRPCommand(const char *Command, const char *Option, i
                     }     
                 }
             }
-            char buf[25];
+            char buf[64];
             std::string retval = "RECONNECT status: ";
-            snprintf(buf, 24, "OK = %1d, FAILED = %1d", count_ok, count_fail);
+            snprintf(buf, sizeof(buf), "OK = %1d, FAILED = %1d", count_ok, count_fail);
             retval += buf;
             return retval.c_str();
         }

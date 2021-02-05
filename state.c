@@ -900,26 +900,59 @@ bool cGraphLCDState::IsRecording(int CardNumber)
     return ret;
 }
 
-std::string cGraphLCDState::Recordings(int CardNumber)
+std::string cGraphLCDState::Recordings(int CardNumber, int selector)
 {
     std::string ret = "";
     std::vector <tRecording>::iterator it;
+    int count = 0;
 
     mutex.Lock();
+    // dsyslog("%s/%s: called CardNumber=%d selector=%d", PLUGIN_NAME_I18N, __FUNCTION__, CardNumber, selector);
     it = mRecordings.begin();
     while (it != mRecordings.end())
     {
         if (CardNumber == -1 || it->deviceNumber == CardNumber)
         {
+          count++;
+          if (selector > 0) {
+            if (count == selector) {
+              // dsyslog("%s/%s: selector hit CardNumber=%d selector=%d count=%d", PLUGIN_NAME_I18N, __FUNCTION__, CardNumber, selector, count);
+              ret += it->name;
+              break;
+            }
+          } else {
             if (ret.length() > 0)
                 ret += "\n";
             ret += it->name;
+          }
         }
         it++;
     }
     mutex.Unlock();
 
     return ret;
+}
+
+int cGraphLCDState::NumRecordings(int CardNumber)
+{
+    std::string ret = "";
+    std::vector <tRecording>::iterator it;
+    int count = 0;
+
+    mutex.Lock();
+    // dsyslog("%s/%s: called CardNumber=%d", PLUGIN_NAME_I18N, __FUNCTION__, CardNumber);
+    it = mRecordings.begin();
+    while (it != mRecordings.end())
+    {
+        if (CardNumber == -1 || it->deviceNumber == CardNumber)
+        {
+          count++;
+        }
+        it++;
+    }
+    mutex.Unlock();
+
+    return count;
 }
 
 tOsdState cGraphLCDState::GetOsdState()
