@@ -267,17 +267,17 @@
 
     <block condition="ge({NumRecordings},1)">
       <image x="0" y="#FollowingTitleY" color="#ColSymbol" path="#SymbolRecording"/>
-      <text x1="add(#SymbolW,2)" x2="-1" y="add(#FollowingTitleY,1)" height="FontLineHeight('FontInfoSmall2')" color="#ColRecText" align="left" font="FontInfoSmall2">{ArrayRecordings:1}</text>
+      <text x1="add(#SymbolW,2)" x2="-1" y="add(#FollowingTitleY,1)" height="FontLineHeight('FontInfoSmall2')" color="#ColRecText" align="left" font="FontInfoSmall2">{ListRecordings:1}</text>
     </block>
 
     <block condition="ge({NumRecordings},2)">
       <image x="0" y="add(#FollowingTitleY,FontLineHeight('FontInfoSmall2'),1)" color="#ColSymbol" path="#SymbolRecording"/>
-      <text x1="add(#SymbolW,2)" x2="-1" y="add(#FollowingTitleY,FontLineHeight('FontInfoSmall2'),2)" height="FontLineHeight('FontInfoSmall2')" color="#ColRecText" align="left" font="FontInfoSmall2">{ArrayRecordings:2}</text>
+      <text x1="add(#SymbolW,2)" x2="-1" y="add(#FollowingTitleY,FontLineHeight('FontInfoSmall2'),2)" height="FontLineHeight('FontInfoSmall2')" color="#ColRecText" align="left" font="FontInfoSmall2">{ListRecordings:2}</text>
     </block>
 
     <block condition="ge({NumRecordings},3)">
       <image x="0" y="add(#FollowingTitleY,mul(FontLineHeight('FontInfoSmall2'),2),2)" color="#ColSymbol" path="#SymbolRecording"/>
-      <text x1="add(#SymbolW,2)" x2="-1" y="add(#FollowingTitleY,mul(FontLineHeight('FontInfoSmall2'),2),3)" height="FontLineHeight('FontInfoSmall2')" color="#ColRecText" align="left" font="FontInfoSmall2">{ArrayRecordings:3}</text>
+      <text x1="add(#SymbolW,2)" x2="-1" y="add(#FollowingTitleY,mul(FontLineHeight('FontInfoSmall2'),2),3)" height="FontLineHeight('FontInfoSmall2')" color="#ColRecText" align="left" font="FontInfoSmall2">{ListRecordings:3}</text>
     </block>
   </display>
 

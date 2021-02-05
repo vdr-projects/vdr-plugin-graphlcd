@@ -56,7 +56,7 @@ typedef enum _eTokenId
     tokPrivateRecordingStart,
     tokIsRecording,
     tokRecordings,
-    tokArrayRecordings,
+    tokListRecordings,
     tokNumRecordings,
     tokPrivateRecordingEnd,
 
@@ -211,7 +211,7 @@ static const std::string Tokens[tokCountToken] =
     "privateRecordingStart",
     "IsRecording",
     "Recordings",
-    "ArrayRecordings",
+    "ListRecordings",
     "NumRecordings",
     "privateRecordingEnd",
 
@@ -479,7 +479,7 @@ GLCD::cType cGraphLCDSkinConfig::GetToken(const GLCD::tSkinToken & Token)
                     return mState->Recordings(Token.Attrib.Number, 0);
                 return mState->Recordings(-1, 0);
             }
-            case tokArrayRecordings:
+            case tokListRecordings:
             {
                 if (Token.Attrib.Type == GLCD::aNumber)
                     return mState->Recordings(-1, Token.Attrib.Number);
