@@ -470,8 +470,8 @@ GLCD::cType cGraphLCDSkinConfig::GetToken(const GLCD::tSkinToken & Token)
             case tokIsRecording:
             {
                 if (Token.Attrib.Type == GLCD::aNumber)
-                    return mState->IsRecording(Token.Attrib.Number, 0);
-                return mState->IsRecording(-1, 0);
+                    return mState->IsRecording(Token.Attrib.Number);
+                return mState->IsRecording(-1);
             }
             case tokRecordings:
             {

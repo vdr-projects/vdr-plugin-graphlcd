@@ -158,7 +158,7 @@ public:
     tEvent GetPresentEvent();
     tEvent GetFollowingEvent();
     tReplayState GetReplayState();
-    bool IsRecording(int CardNumber, int selector);
+    bool IsRecording(int CardNumber);
     std::string Recordings(int CardNumber, int selector);
     int NumRecordings(int CardNumber);
     tOsdState GetOsdState();
