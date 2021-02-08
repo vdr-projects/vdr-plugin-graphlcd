@@ -1,7 +1,7 @@
 VDR Plugin 'graphlcd' Revision History
 -------------------------------------
 
-2021-02-04:
+2021-02-08: Version 1.0.4
 - [pbiering] add support for new feature: NumRecordings and ListRecordings
 - [pbiering] extend reelbox.skin for using NumRecordings and ListRecordings (up to 3)
 - [pbiering] fix Wformat-truncation Wliteral-suffix. log levels
