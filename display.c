@@ -31,7 +31,7 @@
 #include <vdr/remote.h>
 
 cGraphLCDDisplay::cGraphLCDDisplay()
-:   cThread("glcd_display"),
+:   cThread("graphlcd_display"),
     mLcd(NULL),
     mScreen(NULL),
     mSkin(NULL),
@@ -60,17 +60,14 @@ cGraphLCDDisplay::cGraphLCDDisplay()
 
 cGraphLCDDisplay::~cGraphLCDDisplay()
 {
+    Cancel(3);
+
     delete mSkin;
     delete mSkinConfig;
     delete mScreen;
     delete mGraphLCDState;
 
     delete mService;
-}
-
-void cGraphLCDDisplay::Stop (void)
-{
-    Cancel(3);
 }
 
 bool cGraphLCDDisplay::Initialise(GLCD::cDriver * Lcd, const std::string & CfgPath, const std::string & SkinsPath, const std::string & SkinName)

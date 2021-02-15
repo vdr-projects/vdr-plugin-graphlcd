@@ -93,6 +93,7 @@ public:
     virtual bool ProcessArgs(int argc, char * argv[]);
     virtual bool Initialize();
     virtual bool Start();
+    virtual void Stop(void);
     virtual void Housekeeping();
     virtual const char **SVDRPHelpPages(void);
     virtual cString SVDRPCommand(const char *Command, const char *Option, int &ReplyCode);
@@ -120,10 +121,16 @@ cPluginGraphLCD::cPluginGraphLCD()
 
 cPluginGraphLCD::~cPluginGraphLCD()
 {
-    for (unsigned int index = 0; index < GRAPHLCD_MAX_DISPLAYS; index++)
-        DisconnectDisplay(index);
     mExtData->ReleaseExtData();
     mExtData = NULL;
+}
+
+void cPluginGraphLCD::Stop(void)
+{
+    for (unsigned int index = 0; index < GRAPHLCD_MAX_DISPLAYS; index++) {
+        dsyslog("graphlcd plugin: DisconnectDisplay %d", index);
+        DisconnectDisplay(index);
+    };
 }
 
 const char * cPluginGraphLCD::CommandLineHelp()
