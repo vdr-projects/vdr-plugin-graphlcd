@@ -60,14 +60,17 @@ cGraphLCDDisplay::cGraphLCDDisplay()
 
 cGraphLCDDisplay::~cGraphLCDDisplay()
 {
-    Cancel(3);
-
     delete mSkin;
     delete mSkinConfig;
     delete mScreen;
     delete mGraphLCDState;
 
     delete mService;
+}
+
+void cGraphLCDDisplay::Stop (void)
+{
+    Cancel(3);
 }
 
 bool cGraphLCDDisplay::Initialise(GLCD::cDriver * Lcd, const std::string & CfgPath, const std::string & SkinsPath, const std::string & SkinName)

@@ -56,6 +56,7 @@ public:
     ~cGraphLCDDisplay(void);
 
     bool Initialise(GLCD::cDriver * Lcd, const std::string & CfgPath, const std::string & SkinsPath, const std::string & SkinName);
+    void Stop(void);
     void Tick();
     void Update();
     void Clear();
