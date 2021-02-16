@@ -121,8 +121,6 @@ cPluginGraphLCD::cPluginGraphLCD()
 
 cPluginGraphLCD::~cPluginGraphLCD()
 {
-    mExtData->ReleaseExtData();
-    mExtData = NULL;
 }
 
 void cPluginGraphLCD::Stop(void)
@@ -131,6 +129,9 @@ void cPluginGraphLCD::Stop(void)
         dsyslog("graphlcd plugin: DisconnectDisplay %d", index);
         DisconnectDisplay(index);
     };
+
+    mExtData->ReleaseExtData();
+    mExtData = NULL;
 }
 
 const char * cPluginGraphLCD::CommandLineHelp()
