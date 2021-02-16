@@ -395,7 +395,7 @@ void cGraphLCDDisplay::Action(void)
                     }
                 }
 #endif
-                cCondWait::SleepMs(101);
+                cCondWait::SleepMs(100);
             }
         }
         else
