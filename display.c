@@ -395,7 +395,7 @@ void cGraphLCDDisplay::Action(void)
                     }
                 }
 #endif
-                cCondWait::SleepMs(101); // TODO: causes crash on stop
+                cCondWait::SleepMs(101);
             }
         }
         else
