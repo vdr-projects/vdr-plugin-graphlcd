@@ -1,5 +1,7 @@
 VDR Plugin 'graphlcd' Revision History
 -------------------------------------
+2021-02-15: Version 1.0.5
+- [pbiering] move thread cancel in new introduced Stop() function (hint by VDR maintainer)
 
 2021-02-08: Version 1.0.4
 - [pbiering] add support for new feature: NumRecordings and ListRecordings

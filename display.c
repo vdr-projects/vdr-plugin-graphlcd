@@ -31,7 +31,7 @@
 #include <vdr/remote.h>
 
 cGraphLCDDisplay::cGraphLCDDisplay()
-:   cThread("glcd_display"),
+:   cThread("graphlcd_display"),
     mLcd(NULL),
     mScreen(NULL),
     mSkin(NULL),
