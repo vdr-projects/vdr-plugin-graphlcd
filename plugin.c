@@ -39,7 +39,7 @@
 
 
 static const char * kPluginName = "graphlcd";
-static const char *VERSION        = "1.0.5";
+static const char *VERSION        = "1.0.6";
 static const char *DESCRIPTION    = trNOOP("Output to graphic LCD");
 static const char *MAINMENUENTRY  = NULL;
 
@@ -108,6 +108,7 @@ cPluginGraphLCD::cPluginGraphLCD()
 :   mConfigName(""),
     mSkinsPath("")
 {
+    dsyslog("graphlcd plugin: %s called", __FUNCTION__);
     for (unsigned int i = 0; i < GRAPHLCD_MAX_DISPLAYS; i++)
     {
         mDisplay[i].Status = EMPTY;
@@ -121,17 +122,21 @@ cPluginGraphLCD::cPluginGraphLCD()
 
 cPluginGraphLCD::~cPluginGraphLCD()
 {
+    dsyslog("graphlcd plugin: %s called", __FUNCTION__);
 }
 
 void cPluginGraphLCD::Stop(void)
 {
+    dsyslog("graphlcd plugin: %s called", __FUNCTION__);
     for (unsigned int index = 0; index < GRAPHLCD_MAX_DISPLAYS; index++) {
         dsyslog("graphlcd plugin: DisconnectDisplay %d", index);
         DisconnectDisplay(index);
     };
 
-    mExtData->ReleaseExtData();
-    mExtData = NULL;
+    if (mExtData != NULL) {
+        mExtData->ReleaseExtData();
+        mExtData = NULL;
+    };
 }
 
 const char * cPluginGraphLCD::CommandLineHelp()
@@ -185,6 +190,7 @@ bool cPluginGraphLCD::ProcessArgs(int argc, char * argv[])
 
 bool cPluginGraphLCD::Initialize()
 {
+    dsyslog("graphlcd plugin: %s called", __FUNCTION__);
 
 #if APIVERSNUM < 10503
     RegisterI18n(Phrases);
@@ -205,6 +211,12 @@ bool cPluginGraphLCD::Initialize()
         esyslog("graphlcd plugin: ERROR: No displays specified in config file!\n");
         return false;
     }
+    return true;
+}
+
+bool cPluginGraphLCD::Start()
+{
+    dsyslog("graphlcd plugin: %s called", __FUNCTION__);
 
     if (mDisplayNames == "none")
     {
@@ -273,11 +285,6 @@ bool cPluginGraphLCD::Initialize()
         }
     }
     return true;
-}   
-
-bool cPluginGraphLCD::Start()
-{
-    return true;
 }
 
 int cPluginGraphLCD::DisplayIndex(std::string displayName)
@@ -293,6 +300,7 @@ int cPluginGraphLCD::DisplayIndex(std::string displayName)
 
 bool cPluginGraphLCD::ConnectDisplay(unsigned int index, unsigned int displayNumber)
 {
+    dsyslog("graphlcd plugin: %s called", __FUNCTION__);
     mDisplay[index].Driver = GLCD::CreateDriver(GLCD::Config.driverConfigs[displayNumber].id, &GLCD::Config.driverConfigs[displayNumber]);
     if (!mDisplay[index].Driver)
     {
@@ -324,6 +332,7 @@ bool cPluginGraphLCD::ConnectDisplay(unsigned int index, unsigned int displayNum
 
 void cPluginGraphLCD::DisconnectDisplay(unsigned int index)
 {
+    dsyslog("graphlcd plugin: DEBUG: %s called with index=%d", __FUNCTION__, index);
     if (mDisplay[index].Disp != NULL)
         delete mDisplay[index].Disp;
     mDisplay[index].Disp = NULL;
@@ -698,3 +707,5 @@ bool cPluginGraphLCD::SetupParse(const char * Name, const char * Value)
 }
 
 VDRPLUGINCREATOR(cPluginGraphLCD); // Don't touch this!
+
+// vim: ts=4 sw=4 et
