@@ -1,5 +1,8 @@
 VDR Plugin 'graphlcd' Revision History
 -------------------------------------
+2021-03-10: Version 1.0.6
+- [pbiering] move display connect related cod into Start() to avoid crash on stop caused by fatal issues in other plugins detected during Inititalize() phase
+
 2021-02-15: Version 1.0.5
 - [pbiering] move thread cancel in new introduced Stop() function (hint by VDR maintainer)
 
