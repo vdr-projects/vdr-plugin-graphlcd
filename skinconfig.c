@@ -625,7 +625,7 @@ GLCD::cType cGraphLCDSkinConfig::GetToken(const GLCD::tSkinToken & Token)
         tReplayState replay = mState->GetReplayState();
         double framesPerSec = 
 #if VDRVERSNUM >= 10701
-          (replay.control) ? replay.control->FramesPerSecond() : (double)DEFAULTFRAMESPERSECOND
+          (replay.control->FramesPerSecond()) ? replay.control->FramesPerSecond() : (double)DEFAULTFRAMESPERSECOND
 #else
           (double)FRAMESPERSEC
 #endif
