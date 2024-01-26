@@ -64,7 +64,7 @@ GLCD::cType TimeType(time_t Time, const std::string &Format)
 GLCD::cType DurationType(int Index, const std::string &Format, double framesPerSecFactor = 1.0)
 {
     static char result[1000];
-    if (Index > 0)
+    if (Index > 0 && framesPerSecFactor > 0.0)
     {
         if (Format.length() > 0)
         {
