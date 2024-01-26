@@ -147,10 +147,10 @@ int ParanoiaStrcmp(const char *s1, const char *s2)
 {
     if (! s1 || ! s2)
         return -1;
-    
+
     // s1 must be under 'our' control (and thus valid), s2 may be a string w/ unexpected content
     size_t n = strlen(s1);
-    
+
     int rv = strncmp(s1, s2, n);
     if (rv == 0)
         return (s2[n] == '\0') ? 0 : -1;
