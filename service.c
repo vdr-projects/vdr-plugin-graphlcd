@@ -583,7 +583,12 @@ bool cGraphLCDService::NeedsUpdate(uint64_t CurrentTime)
         spanActive = false;
         p = cPluginManager::CallFirstService("Span-ClientCheck-v1.0", NULL);
         if (p) {
+#if APIVERSNUM > 20402
+            cMutexLock ControlMutexLock;
+            cControl* c = cControl::Control(ControlMutexLock); // workaround a bug somewhere in music or span-plugin
+#else
             cControl* c = cControl::Control(); // workaround a bug somewhere in music or span-plugin
+#endif
             if (c != NULL && cPluginManager::CallFirstService("Span-GetBarHeights-v1.0", &checkSpanData)) {
                 spanActive = true;
                 bool chg = false;
